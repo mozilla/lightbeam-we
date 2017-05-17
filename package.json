@@ -1,0 +1,22 @@
+{
+  "name": "lightbeam-we",
+  "version": "0.0.1",
+  "description": "Lightbeam web extension",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pauljt/lightbeam-we.git"
+  },
+  "author": "Mozilla",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/pauljt/lightbeam-we/issues"
+  },
+  "homepage": "https://github.com/pauljt/lightbeam-we#readme",
+  "devDependencies": {
+    "eslint": "^3.19.0"
+  }
+}
