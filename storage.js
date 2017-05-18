@@ -1,21 +1,37 @@
-class storage {
-	constructor() {
-		return this.store;
-	}
+const store = {
+	currentStore: null,
 
-	create() {
-		//add to the store object
-	}
+	init() {
+		//get items from storage
+		//add listeners
+	},
 
-	read() {
-		//read from the store	
-	}
+	get(params) {
+		// use async, await here because the below returns a promise
+		// empty params, return all items from storage
+		return browser.storage.local.get();
+	},
 
-	update() {
-		//update the store
-	}
+	add(item) {
+	 	this.set(item);	
+	},
 
-	remove() {
-		//delete from the store
+	update(item) {
+		this.set(item);
+	},
+
+	set(item) {
+		// item ? update : add;
+		browser.storage.local.set({ item });
+	},
+
+	remove(key) {
+		browser.storage.local.remove(key);
+	},
+
+	addListeners() {
+		browser.storage.local.addListener((change) => {
+			//update currentStore
+		});
 	}
 }
