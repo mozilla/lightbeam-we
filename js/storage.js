@@ -6,9 +6,9 @@ const store = {
 		//add listeners
 	},
 
-	get(params) {
+	get(key) {
 		// use async, await here because the below returns a promise
-		// empty params, return all items from storage
+		// empty key, return all items from storage
 		return browser.storage.local.get();
 	},
 
