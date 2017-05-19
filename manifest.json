@@ -14,7 +14,8 @@
   "permissions": [
     "webRequest",
     "<all_urls>",
-    "tabs"
+    "tabs",
+    "storage"
   ],
 
   "browser_action": {
