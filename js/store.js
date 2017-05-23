@@ -3,57 +3,45 @@ const store = {
     this.addListeners();
   },
 
-  getAll() {
-    return this.get();
-  },
-
-  getFirstParties() {
-    /*
-    * similar to getAll() without the thirPartyRequests
-    */
+  async getAll() {
+    return await browser.storage.local.get();
   },
 
   async getFirstParty(hostname) {
     if (!hostname) {
-      return null;
+      throw new Error('getFirstParty requires a valid hostname argument');
     }
 
-    const storage = await this.get();
-    return storage.websites[`${hostname}`];
+    const storage = await this.getAll();
+    return storage.websites[hostname];
   },
 
   async getThirdParties(hostname) {
     if (!hostname) {
-      return null;
+      throw new Error('getThirdParties requires a valid hostname argument');
     }
 
-    const storage = await this.get();
+    const firstParty = await this.getFirstParty(hostname);
+    if ('thirdPartyRequests' in firstParty) {
+      return firstParty.thirdPartyRequests;
+    }
 
-    return storage.websites[`${hostname}`] ?
-      storage.websites[`${hostname}`].thirdPartyRequests :
-      null;
+    return null;
   },
 
   setFirstParty(param) {
     /**
      * @param object with hostname as key
-     * @todo validate the param
+     * @todo validate the param.-
+     * @todo code to be updated in next PR
      */
     return this.set(param);
   },
 
-  async get(params) {
-    /**
-     * @params null, string, object or array of strings
-     * @return websites object
-     */
-    const websites = await browser.storage.local.get(params);
-    return websites || null;
-  },
-
   async set(websites) {
     /**
-      *@todo rewrite this method so that websites object is updated with additional hostnames
+      * @todo rewrite this method so that websites object is updated with additional hostnames
+      * @todo code to be updated in next PR
     */
     return await browser.storage.local.set({ websites });
   },
@@ -74,4 +62,20 @@ const store = {
 store.getAll()
   .then(websites => {
     console.log('get all websites:', websites);
+  });
+
+store.getFirstParty('a4.com')
+  .then(firtParty => {
+    console.log('firtParty:', firtParty);
+  })
+  .catch(error => {
+    console.log('error from getFirstParty:', error.message);
+  });
+
+store.getThirdParties('a4.com')
+  .then(thirdParties => {
+    console.log('thirdParties:', thirdParties);
+  })
+  .catch(error => {
+    console.log('error from getThirdParties:', error.message);
   });
