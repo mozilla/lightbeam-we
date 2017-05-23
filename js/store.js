@@ -52,6 +52,9 @@ const store = {
   },
 
   async set(websites) {
+    /**
+      *@todo rewrite this method so that websites object is updated with additional hostnames
+    */
     return await browser.storage.local.set({ websites });
   },
 
@@ -72,38 +75,3 @@ store.getAll()
   .then(websites => {
     console.log('get all websites:', websites);
   });
-
-const params = {
-  'a4.com': {
-    faviconUrl: '/link/to/url',
-    firstAccess: 123456,
-    lastAccess: 7890123,
-    thirdPartyRequests: {
-      'doubleclick.net': {
-        requestTime: 123456,
-      },
-      '2mdn.net': {
-        requestTime: 123456,
-        loadedBy: 'doubleclick.net'
-      },
-      'b.com': {},
-      'c.com': {}
-    }
-  }
-};
-
-store.setFirstParty(params)
-  .then(() => console.log('store set'))
-  .catch((error) => console.log('error from set:', error));
-
-store.getFirstParty('a1.com')
-  .then(websites => {
-    console.log('get a1.com:', websites);
-  });
-
-store.getThirdParties('a2.com')
-  .then(websites => {
-    console.log('thirdPartyRequests for a2.com:', websites);
-  });
-
-//store.remove();
