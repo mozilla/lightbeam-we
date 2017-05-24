@@ -4,20 +4,42 @@
   "description": "Lightbeam web extension",
   "main": "background.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "npm-run-all lint:*",
+    "lint:eslint": "eslint --ext=.js,.json .",
+    "lint:webext": "web-ext -s add-on lint",
+    "test": "npm-run-all test:*",
+    "test:lint": "npm run lint",
+    "test:karma": "set NODE_ENV=test&& karma start"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pauljt/lightbeam-we.git"
+    "url": "https://github.com/electrolyfish/lightbeam-we.git"
   },
   "author": "Mozilla",
   "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/pauljt/lightbeam-we/issues"
+    "url": "https://github.com/electrolyfish/lightbeam-we/issues"
   },
-  "homepage": "https://github.com/pauljt/lightbeam-we#readme",
+  "homepage": "https://github.com/electrolyfish/lightbeam-we#readme",
+  "dependencies": {},
   "devDependencies": {
+    "chai": "^3.5.0",
     "eslint": "^3.19.0",
-    "eslint-plugin-no-unsanitized": "^2.0.0"
-  }
+    "eslint-plugin-no-unsanitized": "^2.0.0",
+    "karma": "^1.7.0",
+    "karma-chai": "^0.1.0",
+    "karma-firefox-launcher": "^1.0.1",
+    "karma-mocha": "^1.3.0",
+    "mocha": "^3.4.1",
+    "npm-run-all": "^4.0.2"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "webextension",
+    "mozilla",
+    "web",
+    "security"
+  ]
 }
