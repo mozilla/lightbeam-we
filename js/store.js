@@ -3,6 +3,10 @@ const store = {
     this.addListeners();
   },
 
+  getEmptyObject() {
+    return {};
+  },
+
   async getAll() {
     return await browser.storage.local.get();
   },
@@ -59,6 +63,7 @@ const store = {
   }
 };
 
+/*
 store.getAll()
   .then(websites => {
     console.log('get all websites:', websites);
@@ -79,3 +84,4 @@ store.getThirdParties('a4.com')
   .catch(error => {
     console.log('error from getThirdParties:', error.message);
   });
+*/
