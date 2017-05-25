@@ -24,6 +24,9 @@
   },
 
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "capture.js",
+      "background.js"
+    ]
   }
 }
