@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/pauljt/lightbeam-we#readme",
   "devDependencies": {
-    "eslint": "^3.19.0"
+    "eslint": "^3.19.0",
+    "eslint-plugin-no-unsanitized": "^2.0.0"
   }
 }
