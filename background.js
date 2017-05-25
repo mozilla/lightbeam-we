@@ -1,6 +1,6 @@
 'use strict';
 
-// When the user clicks browserAction icon in toolbar, execute runLightbeam function
+// When the user clicks browserAction icon in toolbar, run Lightbeam
 browser.browserAction.onClicked.addListener(runLightbeam);
 
 capture.init();
@@ -16,9 +16,12 @@ async function runLightbeam() {
     return lightbeamTabs[0] || false;
   }
 
-  // Only open a new Lightbeam instance if one isn't already open.
   const lightbeamTab = await isOpen();
   if (!lightbeamTab) {
+    // only open a new Lightbeam instance if one isn't already open.
     browser.tabs.create({url: 'index.html'});
+  } else if (!lightbeamTab.active) {
+     // re-focus Lightbeam if it is already open but lost focus
+    browser.tabs.update(lightbeamTab.id, {active: true});
   }
 }
