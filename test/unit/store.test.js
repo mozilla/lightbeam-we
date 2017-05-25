@@ -7,15 +7,5 @@ describe('store.js', function() {
         expect(result).to.equal({});
       });
     });
-
-    it('should get all websites from store', async function(done) {
-      try {
-        const websites = await store.getAll();
-        expect(websites).to.equal({});
-        done();
-      } catch (err) {
-        done(err);
-      }
-    });
   });
 });
