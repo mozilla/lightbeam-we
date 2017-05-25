@@ -14,9 +14,9 @@ const capture = {
   // capture third party requests
   async sendThirdParty(response) {
     const tab = await browser.tabs.get(response.tabId);
-    let tabUrl = new URL(tab.url);
-    let targetUrl = new URL(response.url);
-    let originUrl = new URL(response.originUrl);
+    const tabUrl = new URL(tab.url);
+    const targetUrl = new URL(response.url);
+    const originUrl = new URL(response.originUrl);
 
     if (targetUrl !== tabUrl) {
       const thirdPartyData = {
