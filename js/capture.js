@@ -18,7 +18,7 @@ const capture = {
     const targetUrl = new URL(response.url);
     const originUrl = new URL(response.originUrl);
 
-    if (targetUrl !== tabUrl) {
+    if (targetUrl.hostname !== tabUrl.hostname) {
       const thirdPartyData = {
         document: tabUrl.hostname,
         target: targetUrl.hostname,
