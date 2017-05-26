@@ -58,25 +58,3 @@ const store = {
 };
 
 store.init();
-/*
-store.getAll()
-  .then(websites => {
-    console.log('get all websites:', websites);
-  });
-
-store.getFirstParty('a4.com')
-  .then(firtParty => {
-    console.log('firtParty:', firtParty);
-  })
-  .catch(error => {
-    console.log('error from getFirstParty:', error.message);
-  });
-
-store.getThirdParties('a4.com')
-  .then(thirdParties => {
-    console.log('thirdParties:', thirdParties);
-  })
-  .catch(error => {
-    console.log('error from getThirdParties:', error.message);
-  });
-*/
