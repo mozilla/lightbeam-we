@@ -3,10 +3,6 @@ const store = {
     this.addListeners();
   },
 
-  getEmptyObject() {
-    return {};
-  },
-
   async getAll() {
     return await browser.storage.local.get();
   },
