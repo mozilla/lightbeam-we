@@ -2,6 +2,7 @@
 
 const capture = {
   init() {
+    console.log('init');
     this.addListeners();
   },
 
@@ -45,5 +46,3 @@ const capture = {
     }
   }
 };
-
-capture.init();
