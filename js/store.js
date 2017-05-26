@@ -51,14 +51,13 @@ const store = {
   },
 
   addListeners() {
-    browser.storage.onChanged.addListener((changes, area) => {
-      /*
-      * @todo update the code
-      */
-    });
+    /*
+    * @todo update the code
+    */
   }
 };
 
+store.init();
 /*
 store.getAll()
   .then(websites => {

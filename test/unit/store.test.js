@@ -1,3 +1,11 @@
+/* eslint no-undef: "off" */
+/* eslint no-console: "off" */
+
+/*
+* @todo resolve 'expect' is undefined and turn 'on' the above eslint rules
+* @todo use eslint-plugin-chai to resolve 'expect'
+*/
+
 'use strict';
 
 describe('store.js', function() {
