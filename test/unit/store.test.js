@@ -13,7 +13,7 @@ describe('store.js', function() {
             return Promise.resolve(this._websites);
           }
         };
-        
+
         const websites = await mockStore.getAll();
         expect(websites).to.deep.equal({ hostname: 'a.com' });
       } catch (err) {
