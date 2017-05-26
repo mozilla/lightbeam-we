@@ -8,8 +8,8 @@
 
 'use strict';
 
-describe('store.js', function() {
-  describe('store get method', function() {
+describe('store.js', () => {
+  describe('store get method', () => {
     const mockStore = {
       _websites: {
         'a1.com': {
@@ -64,26 +64,29 @@ describe('store.js', function() {
       expect(website).to.deep.equal(mockStore._websites['a1.com']);
     });
 
-    it('should throw an error when hostname is not passed for getFirstParty()', async () => {
-      try {
-        await mockStore.getFirstParty();
-      } catch (err) {
-        console.log('error from getFirstParty', err);
-      }
-    });
+    it('error thrown when hostname is not passed for getFirstParty()',
+      async () => {
+        try {
+          await mockStore.getFirstParty();
+        } catch (err) {
+          console.log('error from getFirstParty', err);
+        }
+      });
 
     it('should get thirdPartyRequests for a1.com', async () => {
-      const thirdPartyRequests = await mockStore.getThirdParties('a1.com');
-      expect(thirdPartyRequests).to.deep.equal(mockStore._websites['a1.com'].thirdPartyRequests);
+      const thirdParties = await mockStore.getThirdParties('a1.com');
+      const mockThirdParties = mockStore._websites['a1.com'].thirdPartyRequests;
+      expect(thirdParties).to.deep.equal(mockThirdParties);
     });
 
-    it('should throw an error when hostname is not passed for getThirdParties()', async () => {
-      try {
-        await mockStore.getThirdParties();
-      } catch (err) {
-        console.log('error from getThirdParties', err);
-      }
-    });
+    it('error thrown when hostname is not passed for getThirdParties()',
+      async () => {
+        try {
+          await mockStore.getThirdParties();
+        } catch (err) {
+          console.log('error from getThirdParties', err);
+        }
+      });
 
     it('should return null for getThirdParties()', async () => {
       const thirdPartyRequests = await mockStore.getThirdParties('a2.com');

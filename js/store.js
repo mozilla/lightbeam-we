@@ -40,7 +40,6 @@ const store = {
 
   async set(websites) {
     /**
-      * @todo rewrite this method so that websites object is updated with additional hostnames
       * @todo code to be updated in next PR
     */
     return await browser.storage.local.set({ websites });

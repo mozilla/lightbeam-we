@@ -7,7 +7,11 @@
     "globals": {
         "browser": true
     },
-    "plugins": ["no-unsanitized"],
+    "plugins": [
+        "json",
+        "mocha",
+        "no-unsanitized"
+    ],
     "extends": ["eslint:recommended"],
     "parserOptions": {
          "ecmaVersion": "2017"

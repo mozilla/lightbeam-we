@@ -1,3 +1,5 @@
+/* eslint no-console: "off" */
+
 const capture = {
   init() {
     this.addListeners();
@@ -43,3 +45,5 @@ const capture = {
     }
   }
 };
+
+capture.init();

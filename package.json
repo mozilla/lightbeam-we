@@ -25,9 +25,9 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "eslint": "^3.19.0",
-    "eslint-plugin-no-unsanitized": "^2.0.0",
     "eslint-plugin-json": "^1.2.0",
     "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-no-unsanitized": "^2.0.0",
     "karma": "^1.7.0",
     "karma-chai": "^0.1.0",
     "karma-firefox-launcher": "^1.0.1",
