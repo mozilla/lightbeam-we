@@ -24,7 +24,8 @@ describe('store.js', function() {
             'b.com': {},
             'c.com': {}
           }
-        }
+        },
+        'a2.com': {}
       },
 
       getAll() {
@@ -35,21 +36,21 @@ describe('store.js', function() {
         if (!hostname) {
           throw new Error('getFirstParty requires a valid hostname argument');
         }
-        
-        return Promise.resolve(this._websites[hostname]);  
+
+        return Promise.resolve(this._websites[hostname]);
       },
 
       async getThirdParties(hostname) {
         if (!hostname) {
           throw new Error('getFirstParty requires a valid hostname argument');
         }
-        
+
         const firstParty = await this.getFirstParty(hostname);
         if ('thirdPartyRequests' in firstParty) {
           return Promise.resolve(this._websites[hostname].thirdPartyRequests);
         }
 
-        return Promise.resolve(null);   
+        return Promise.resolve(null);
       }
     };
 
@@ -71,14 +72,14 @@ describe('store.js', function() {
       }
     });
 
-    it('should throw an error when hostname is not passed for getFirstParty()', 
+    it('should throw an error when hostname is not passed for getFirstParty()',
       async () => {
         try {
           await mockStore.getFirstParty();
         } catch (err) {
           console.log('error from getFirstParty', err);
         }
-    });
+      });
 
     it('should get thirdPartyRequests for a1.com', async () => {
       try {
@@ -89,13 +90,21 @@ describe('store.js', function() {
       }
     });
 
-    it('should throw an error when hostname is not passed for getThirdParties()', 
-      async () => {
-        try {
-          await mockStore.getThirdParties();
-        } catch (err) {
-          console.log('error from getThirdParties', err);
-        }
+    it('should throw an error when hostname is not passed for getThirdParties()', async () => {
+      try {
+        await mockStore.getThirdParties();
+      } catch (err) {
+        console.log('error from getThirdParties', err);
+      }
+    });
+
+    it('should return null for getThirdParties()', async () => {
+      try {
+        const thirdPartyRequests = await mockStore.getThirdParties('a2.com');
+        expect(thirdPartyRequests).to.equal(null);
+      } catch (err) {
+        console.log('error from getThirdParties', err);
+      }
     });
   });
 });
