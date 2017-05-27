@@ -40,14 +40,14 @@ describe('store.js', () => {
         return Promise.resolve(this._websites[hostname]);
       },
 
-      getThirdParties: async function(hostname) {
+      getThirdParties: function(hostname) {
         if (!hostname) {
           throw new Error('getFirstParty requires a valid hostname argument');
         }
 
-        const firstParty = await this.getFirstParty(hostname);
+        const firstParty = this._websites[hostname];
         if ('thirdPartyRequests' in firstParty) {
-          return Promise.resolve(this._websites[hostname].thirdPartyRequests);
+          return Promise.resolve(firstParty.thirdPartyRequests);
         }
 
         return Promise.resolve(null);
