@@ -59,7 +59,7 @@ describe('store.js', () => {
       expect(websites).to.deep.equal(mockStore._websites);
     });
 
-    /*it('should get website object for a1.com', async () => {
+    /* it('should get website object for a1.com', async () => {
       const website = await mockStore.getFirstParty('a1.com');
       expect(website).to.deep.equal(mockStore._websites['a1.com']);
     });
@@ -91,6 +91,6 @@ describe('store.js', () => {
     it('should return null for getThirdParties()', async () => {
       const thirdPartyRequests = await mockStore.getThirdParties('a2.com');
       expect(thirdPartyRequests).to.equal(null);
-    });*/
+    }); */
   });
 });
