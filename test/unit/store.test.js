@@ -54,9 +54,11 @@ describe('store.js', () => {
       }
     };
 
-    it('should get all websites from store', async function() {
-      const websites = await mockStore.getAll();
-      expect(websites).to.deep.equal(mockStore._websites);
+    it('should get all websites from store', function(done) {
+      mockStore.getAll().then(function(websites) {
+        expect(websites).to.deep.equal(mockStore._websites);
+        done();
+      });
     });
 
     /* it('should get website object for a1.com', async () => {
