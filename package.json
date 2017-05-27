@@ -9,7 +9,7 @@
     "lint:webext": "web-ext -s js lint",
     "test": "npm-run-all test:*",
     "test:lint": "npm run lint:eslint",
-    "test:karma": "karma start"
+    "test:karma": "karma start --browsers Firefox --single-run"
   },
   "repository": {
     "type": "git",
