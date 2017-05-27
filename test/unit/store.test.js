@@ -28,11 +28,11 @@ describe('store.js', () => {
         'a2.com': {}
       },
 
-      getAll() {
+      getAll: function() {
         return Promise.resolve(this._websites);
       },
 
-      getFirstParty(hostname) {
+      getFirstParty: function(hostname) {
         if (!hostname) {
           throw new Error('getFirstParty requires a valid hostname argument');
         }
@@ -40,7 +40,7 @@ describe('store.js', () => {
         return Promise.resolve(this._websites[hostname]);
       },
 
-      async getThirdParties(hostname) {
+      getThirdParties: async function(hostname) {
         if (!hostname) {
           throw new Error('getFirstParty requires a valid hostname argument');
         }
