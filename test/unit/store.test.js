@@ -28,11 +28,11 @@ describe('store.js', () => {
         'a2.com': {}
       },
 
-      getAll: function() {
+      getAll() {
         return Promise.resolve(this._websites);
       },
 
-      getFirstParty: function(hostname) {
+      getFirstParty(hostname) {
         if (!hostname) {
           throw new Error('getFirstParty requires a valid hostname argument');
         }
@@ -40,7 +40,7 @@ describe('store.js', () => {
         return Promise.resolve(this._websites[hostname]);
       },
 
-      getThirdParties: function(hostname) {
+      getThirdParties(hostname) {
         if (!hostname) {
           throw new Error('getFirstParty requires a valid hostname argument');
         }
@@ -54,19 +54,12 @@ describe('store.js', () => {
       }
     };
 
-    it('should get all websites from store', function(done) {
-      mockStore.getAll().then(function(websites) {
-        expect(websites).to.deep.equal(mockStore._websites);
-        done();
-      });
+    it('should get all websites from store', async () => {
+      const websites = await mockStore.getAll();
+      expect(websites).to.deep.equal(mockStore._websites);
     });
 
     it('should get website object for a1.com', async () => {
-      const website = await mockStore.getFirstParty('a1.com');
-      expect(website).to.deep.equal(mockStore._websites['a1.com']);
-    });
-
-    /* it('should get website object for a1.com', async () => {
       const website = await mockStore.getFirstParty('a1.com');
       expect(website).to.deep.equal(mockStore._websites['a1.com']);
     });
@@ -98,6 +91,6 @@ describe('store.js', () => {
     it('should return null for getThirdParties()', async () => {
       const thirdPartyRequests = await mockStore.getThirdParties('a2.com');
       expect(thirdPartyRequests).to.equal(null);
-    }); */
+    });
   });
 });
