@@ -61,6 +61,11 @@ describe('store.js', () => {
       });
     });
 
+    it('should get website object for a1.com', async () => {
+      const website = await mockStore.getFirstParty('a1.com');
+      expect(website).to.deep.equal(mockStore._websites['a1.com']);
+    });
+
     /* it('should get website object for a1.com', async () => {
       const website = await mockStore.getFirstParty('a1.com');
       expect(website).to.deep.equal(mockStore._websites['a1.com']);
