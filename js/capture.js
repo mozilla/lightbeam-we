@@ -1,3 +1,6 @@
+/* eslint no-console: "off" */
+/* eslint no-unused-vars: "off" */
+
 const capture = {
   init() {
     this.addListeners();

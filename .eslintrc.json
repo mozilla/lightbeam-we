@@ -1,12 +1,17 @@
 {
     "env": {
         "browser": true,
-        "es6": true
+        "es6": true,
+        "mocha": true
     },
     "globals": {
         "browser": true
     },
-    "plugins": ["no-unsanitized"],
+    "plugins": [
+        "json",
+        "mocha",
+        "no-unsanitized"
+    ],
     "extends": ["eslint:recommended"],
     "parserOptions": {
          "ecmaVersion": "2017"
