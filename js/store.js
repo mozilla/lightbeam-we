@@ -1,10 +1,21 @@
 const store = {
-  init() {
-    this.addListeners();
+  async init() {
+    const data = await this._read();
+    this._websites = data || null;
+  },
+
+  async _read() {
+    return await browser.storage.local.get('websites');
+  },
+
+  async _write(websites) {
+    this._websites = websites;
+
+    return await browser.storage.local.set({ websites });
   },
 
   async getAll() {
-    return await browser.storage.local.get();
+    return await this._read();
   },
 
   async getFirstParty(hostname) {
@@ -29,30 +40,23 @@ const store = {
     return null;
   },
 
-  setFirstParty(param) {
-    /**
-     * @param object with hostname as key
-     * @todo validate the param.-
-     * @todo code to be updated in next PR
-     */
-    return this.set(param);
+  async setFirstParty(domain, data) {
+    const websites = await this._read();
+    websites[domain] = data;
+
+    this._write(websites);
   },
 
-  async set(websites) {
-    /**
-      * @todo code to be updated in next PR
-    */
-    return await browser.storage.local.set({ websites });
+  async setThirdParty(parent, domain, data) {
+    const websites = await this._read();
+    const firstParty = websites[parent];
+    firstParty['thirdPartyRequests'][domain] = data;
+
+    this.setFirstParty(parent, firstParty);
   },
 
   async remove() {
     return await browser.storage.local.remove('websites');
-  },
-
-  addListeners() {
-    /*
-    * @todo update the code
-    */
   }
 };
 
