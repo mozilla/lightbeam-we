@@ -2,6 +2,7 @@ const store = {
   async init() {
     const data = await this._read();
     this._websites = data || null;
+    this.addListeners();
   },
 
   async _read() {
@@ -57,6 +58,14 @@ const store = {
 
   async remove() {
     return await browser.storage.local.remove('websites');
+  },
+
+  addListeners() {
+    browser.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.hasOwnProperty('website')) {
+        this._websites = changes['websites'];
+      }
+    });
   }
 };
 
