@@ -1,23 +1,71 @@
 {
     "env": {
         "browser": true,
-        "es6": true
+        "es6": true,
+        "mocha": true
     },
     "globals": {
         "browser": true
     },
-    "extends": "eslint:recommended",
+    "plugins": [
+        "json",
+        "mocha",
+        "no-unsanitized"
+    ],
+    "extends": ["eslint:recommended"],
     "parserOptions": {
          "ecmaVersion": "2017"
     },
     "rules": {
+        "no-unsanitized/method": "error",
+        "no-unsanitized/property": "error",
         "indent": [
             "error",
-            2
+            2,
+            {
+                "CallExpression":
+                    { "arguments": 1 },
+                "FunctionDeclaration": 
+                    { "parameters": 1 }
+            }
         ],
         "linebreak-style": [
             "error",
             "unix"
+        ],
+        "object-property-newline": [
+            "error"
+        ],
+        "no-multi-assign": [
+            "error"
+        ],
+        "no-new-object": [
+            "error"
+        ],
+        "func-call-spacing": [
+            "error",
+            "never"
+        ],
+        "brace-style": [
+            "error",
+            "1tbs"
+        ],
+        "object-curly-newline": [
+            "error",
+            {"multiline": true}
+        ],
+        "no-implied-eval": [
+            "error"
+        ],
+        "operator-linebreak": [
+            "error",
+            "before"
+        ],
+        "no-lonely-if": [
+            "error"
+        ],
+        "no-multi-str": [
+            "error"
         ],
         "prefer-const": [
             "error"
@@ -27,6 +75,17 @@
         ],
         "require-await": [
             "error"
+        ],
+        "spaced-comment": [
+            "error",
+            "always"
+        ],
+        "max-len": [
+            "error", {
+                "code": 80,
+                "tabWidth": 2,
+                "ignoreUrls": true
+            }
         ],
         "semi": [
             "error",

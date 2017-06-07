@@ -1,0 +1,12 @@
+addons:
+  firefox: latest
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3
+language: node_js
+node_js:
+  - '6.1'
+notifications:
+  slack:
+    secure: Y3VDGf3FSYXhgjvE9+RqIi+kMGpRuecp6r8rzFrhV11ktPzhb5aaFs0+qpBIL/Ptz99yTiM2kaRl/DTYqdcBzWD664tZR8g0OEsossvtu/U9ujlOPxz2QVsSbPI+JE21RwvQFq4wmK/2RUzyEjEp0SU9mxGngrBtkqMOHv7cSu5vy4NL8sTzcSTt4rZNAadzQHkhnrPu+dizLYD3a1MReRI2SuQ5qgVz0yuifKa26YXrjqmN+q1weycp8wQX1f0ITeZwCkhSERMOWRCjooGdbYsR6Oe0xQ+E7A1GxXCH5np43JHxKV+Te5YOnAzthiV1rdOnJdqx10+vHdU6NIZhZwER4wy0Tjsz/kiGwnvhWW641qS2NFPRC0aa8URDGBKzt2A9dOwiJYZ/f49dOe3q04cu3q8QH3cwkwHCNqO1f5T5iwldqU4pWRGyhwiiF6P5hVFWiyQ8b5ATG5rBIWFKq2uyD3xe5R4evw5Ay+3JwFG4Ddt2/C4KWv4OldbpT5pbT1WVOAkKKoXf4G/w0j3gDbWbxTqNJMP2L+jFmkYVEVrNd8Xcb/SR7I5398YicKEfJUiz8Y+p+nIvauJ6pdb/Ee6aBECOdhSDkcUwg8bPn7p4cS+wsoEIjz0SQGIe45wJ2Zy5nwMcgG8OPJy6EwuZ0s8eUW6Lbc44al3bOs/MS+k=
