@@ -7,6 +7,8 @@
     "lint": "npm-run-all lint:*",
     "lint:eslint": "eslint --ext=.js,.json .",
     "lint:webext": "web-ext -s js lint",
+    "precommit": "npm run lint:eslint",
+    "prepush": "npm run test",
     "test": "npm-run-all test:*",
     "test:lint": "npm run lint:eslint",
     "test:karma": "karma start --browsers Firefox --single-run"
@@ -28,6 +30,7 @@
     "eslint-plugin-json": "^1.2.0",
     "eslint-plugin-mocha": "^4.9.0",
     "eslint-plugin-no-unsanitized": "^2.0.0",
+    "husky": "^0.13.4",
     "karma": "^1.7.0",
     "karma-chai": "^0.1.0",
     "karma-firefox-launcher": "^1.0.1",
