@@ -1,17 +1,18 @@
 const store = {
-  async init() {
-    const data = await this._read();
-    this._websites = data || null;
+  _websites: null,
+
+  init() {
+    this._read();
     this.addListeners();
   },
 
   async _read() {
-    return await browser.storage.local.get('websites');
+    this._websites = await browser.storage.local.get('websites');
+    return this._websites;
   },
 
   async _write(websites) {
     this._websites = websites;
-
     return await browser.storage.local.set({ websites });
   },
 
