@@ -3,7 +3,6 @@ const store = {
 
   init() {
     this._read();
-    this.addListeners();
   },
 
   async _read() {
@@ -75,17 +74,7 @@ const store = {
 
   async remove() {
     return await browser.storage.local.remove('websites');
-  },
-
-  addListeners() {
-    browser.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local' && changes.hasOwnProperty('websites')) {
-        this._websites = changes['websites'];
-      }
-    });
   }
 };
 
-// store.init();
-store.setFirstParty('a.com', {faviconUrl: '/blah/blah'});
-console.log('getting websites:', this._websites);
+store.init();
