@@ -43,6 +43,10 @@ const store = {
   },
 
   async setFirstParty(domain, data) {
+    if (!domain) {
+      throw new Error('setFirstParty requires a valid domain argument');
+    }
+
     const websites = await this._read();
     websites[domain] = data;
 
@@ -50,8 +54,20 @@ const store = {
   },
 
   async setThirdParty(parent, domain, data) {
+    if (!parent) {
+      throw new Error('setThirdParty requires a valid parent argument');
+    }
+
     const websites = await this._read();
     const firstParty = websites[parent];
+
+    if (!firstParty) {
+      throw new Error('There is no firstParty matching the parent');
+    }
+
+    if (!('thirdPartyRequests' in firstParty)) {
+      firstParty['thirdPartyRequests'] = {};
+    }
     firstParty['thirdPartyRequests'][domain] = data;
 
     this.setFirstParty(parent, firstParty);
@@ -63,11 +79,13 @@ const store = {
 
   addListeners() {
     browser.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local' && changes.hasOwnProperty('website')) {
+      if (area === 'local' && changes.hasOwnProperty('websites')) {
         this._websites = changes['websites'];
       }
     });
   }
 };
 
-store.init();
+// store.init();
+store.setFirstParty('a.com', {faviconUrl: '/blah/blah'});
+console.log('getting websites:', this._websites);
