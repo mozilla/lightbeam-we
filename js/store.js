@@ -44,27 +44,23 @@ const store = {
     return null;
   },
 
-  async setFirstParty(hostname, data) {
+  setFirstParty(hostname, data) {
     if (!hostname) {
       throw new Error('setFirstParty requires a valid domain argument');
     }
 
-    const websites = await this._read();
+    const websites = clone(this._websites);
     websites[hostname] = data;
     this._write(websites);
   },
 
-  async setThirdParty(origin, target, data) {
+  setThirdParty(origin, target, data) {
     if (!origin) {
       throw new Error('setThirdParty requires a valid parent argument');
     }
 
-    const websites = await this._read();
-    const firstParty = websites[origin];
-
-    if (!firstParty) {
-      throw new Error('There is no firstParty matching the parent');
-    }
+    const websites = clone(this._websites);
+    const firstParty = clone(websites[origin]);
 
     if (!('thirdPartyRequests' in firstParty)) {
       firstParty['thirdPartyRequests'] = {};
