@@ -6,12 +6,15 @@ const store = {
   },
 
   async _read() {
-    this._websites = await browser.storage.local.get('websites');
+    const data = await browser.storage.local.get('websites');
+    this._websites = clone(data.websites);
+
     return this._websites;
   },
 
   async _write(websites) {
-    this._websites = websites;
+    this._websites = clone(websites);
+
     return await browser.storage.local.set({ websites });
   },
 
@@ -48,7 +51,6 @@ const store = {
 
     const websites = await this._read();
     websites[hostname] = data;
-
     this._write(websites);
   },
 
@@ -77,6 +79,9 @@ const store = {
   }
 };
 
-// store.init();
-store.setFirstParty('a.com', {faviconUrl: '/blah/blah'});
-console.log('getting websites:', this._websites);
+// @todo move this function to utils
+function clone(obj) {
+  return Object.assign({}, obj);
+}
+
+store.init();
