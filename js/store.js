@@ -59,8 +59,7 @@ const store = {
       throw new Error('setThirdParty requires a valid parent argument');
     }
 
-    const websites = clone(this._websites);
-    const firstParty = clone(websites[origin]);
+    const firstParty = clone(this._websites[origin]);
 
     if (!('thirdPartyRequests' in firstParty)) {
       firstParty['thirdPartyRequests'] = {};
