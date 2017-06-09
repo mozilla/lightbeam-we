@@ -27,8 +27,8 @@ const store = {
       throw new Error('getFirstParty requires a valid hostname argument');
     }
 
-    const storage = await this.getAll();
-    return storage.websites[hostname];
+    const websites = await this.getAll();
+    return websites[hostname];
   },
 
   async getThirdParties(hostname) {
@@ -46,7 +46,7 @@ const store = {
 
   setFirstParty(hostname, data) {
     if (!hostname) {
-      throw new Error('setFirstParty requires a valid domain argument');
+      throw new Error('setFirstParty requires a valid hostname argument');
     }
 
     const websites = clone(this._websites);
@@ -56,7 +56,7 @@ const store = {
 
   setThirdParty(origin, target, data) {
     if (!origin) {
-      throw new Error('setThirdParty requires a valid parent argument');
+      throw new Error('setThirdParty requires a valid origin argument');
     }
 
     const firstParty = clone(this._websites[origin]);
