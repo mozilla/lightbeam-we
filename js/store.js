@@ -1,15 +1,9 @@
 const store = {
   _websites: null,
 
-  init() {
-    this._read();
-  },
-
-  async _read() {
+  async init() {
     const data = await browser.storage.local.get('websites');
     this._websites = clone(data.websites);
-
-    return this._websites;
   },
 
   async _write(websites) {
@@ -18,25 +12,24 @@ const store = {
     return await browser.storage.local.set({ websites });
   },
 
-  async getAll() {
-    return await this._read();
+  getAll() {
+    return clone(this._websites);
   },
 
-  async getFirstParty(hostname) {
+  getFirstParty(hostname) {
     if (!hostname) {
       throw new Error('getFirstParty requires a valid hostname argument');
     }
 
-    const websites = await this.getAll();
-    return websites[hostname];
+    return this._websites[hostname];
   },
 
-  async getThirdParties(hostname) {
+  getThirdParties(hostname) {
     if (!hostname) {
       throw new Error('getThirdParties requires a valid hostname argument');
     }
 
-    const firstParty = await this.getFirstParty(hostname);
+    const firstParty = this.getFirstParty(hostname);
     if ('thirdPartyRequests' in firstParty) {
       return firstParty.thirdPartyRequests;
     }
@@ -59,7 +52,8 @@ const store = {
       throw new Error('setThirdParty requires a valid origin argument');
     }
 
-    const firstParty = clone(this._websites[origin]);
+    const websites = clone(this._websites);
+    const firstParty = clone(websites[origin]);
 
     if (!('thirdPartyRequests' in firstParty)) {
       firstParty['thirdPartyRequests'] = {};
