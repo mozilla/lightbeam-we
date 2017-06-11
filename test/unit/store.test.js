@@ -12,49 +12,50 @@ function clone(obj) {
 }
 
 describe('store.js', () => {
-  const mockStore = {
-    _websites: {
-      'a1.com': {
-        faviconUrl: '/link/to/url',
-        firstAccess: 1234,
-        lastAccess: 5678,
-        thirdPartyRequests: {
-          'a.com': { requestTime: 9012 },
-          'b.com': {},
-          'c.com': {}
-        }
-      },
-      'a2.com': {}
+  const mockWebsites = {
+    'a1.com': {
+      faviconUrl: '/link/to/url',
+      firstAccess: 1234,
+      lastAccess: 5678,
+      thirdPartyRequests: {
+        'a.com': { requestTime: 9012 },
+        'b.com': {},
+        'c.com': {}
+      }
     },
+    'a2.com': {}
+  };
 
-    _read() {
-      return Promise.resolve(this._websites);
+  const mockStore = {
+    _websites: null,
+
+    init() {
+      this._websites = clone(mockWebsites);
     },
 
     _write(websites) {
-      this._websites = websites;
-      return this._read();
+      this._websites = clone(websites);
+      return Promise.resolve();
     },
 
-    async getAll() {
-      return await this._read();
+    getAll() {
+      return clone(this._websites);
     },
 
-    async getFirstParty(hostname) {
+    getFirstParty(hostname) {
       if (!hostname) {
         throw new Error('getFirstParty requires a valid hostname argument');
       }
 
-      const websites = await this.getAll();
-      return websites[hostname];
+      return this._websites[hostname];
     },
 
-    async getThirdParties(hostname) {
+    getThirdParties(hostname) {
       if (!hostname) {
         throw new Error('getFirstParty requires a valid hostname argument');
       }
 
-      const firstParty = await this.getFirstParty(hostname);
+      const firstParty = this.getFirstParty(hostname);
       if ('thirdPartyRequests' in firstParty) {
         return firstParty.thirdPartyRequests;
       }
@@ -77,7 +78,8 @@ describe('store.js', () => {
         throw new Error('setThirdParty requires a valid origin argument');
       }
 
-      const firstParty = clone(this._websites[origin]);
+      const websites = clone(this._websites);
+      const firstParty = clone(websites[origin]);
 
       if (!('thirdPartyRequests' in firstParty)) {
         firstParty['thirdPartyRequests'] = {};
@@ -89,58 +91,71 @@ describe('store.js', () => {
   };
 
   describe('store get method', () => {
-    it('should get all websites from store', async () => {
-      const websites = await mockStore.getAll();
-      assert.deepEqual(websites, mockStore._websites);
+    it('should initialise _websites to mockWebsites', (done) => {
+      mockStore.init();
+      const websites = mockStore.getAll();
+      assert.deepEqual(websites, mockWebsites);
+      done();
     });
 
-    it('should get website object for a1.com', async () => {
-      const website = await mockStore.getFirstParty('a1.com');
-      assert.deepEqual(website, mockStore._websites['a1.com']);
+    it('should get all websites from store', (done) => {
+      const websites = mockStore.getAll();
+      assert.deepEqual(websites, mockWebsites);
+      done();
+    });
+
+    it('should get website object for a1.com', (done) => {
+      const website = mockStore.getFirstParty('a1.com');
+      assert.deepEqual(website, mockWebsites['a1.com']);
+      done();
     });
 
     it('error thrown when hostname is not passed for getFirstParty()',
-      async () => {
+      () => {
         try {
-          await mockStore.getFirstParty();
+          mockStore.getFirstParty();
         } catch (err) {
           console.log('error from getFirstParty', err);
         }
       });
 
-    it('should get thirdPartyRequests for a1.com', async () => {
-      const thirdParties = await mockStore.getThirdParties('a1.com');
-      const mockThirdParties = mockStore._websites['a1.com'].thirdPartyRequests;
+    it('should get thirdPartyRequests for a1.com', (done) => {
+      const thirdParties = mockStore.getThirdParties('a1.com');
+      const mockThirdParties = mockWebsites['a1.com'].thirdPartyRequests;
       assert.deepEqual(thirdParties, mockThirdParties);
+      done();
     });
 
     it('error thrown when hostname is not passed for getThirdParties()',
-      async () => {
+      () => {
         try {
-          await mockStore.getThirdParties();
+          mockStore.getThirdParties();
         } catch (err) {
           console.log('error from getThirdParties', err);
         }
       });
 
-    it('should return null for getThirdParties()', async () => {
-      const thirdPartyRequests = await mockStore.getThirdParties('a2.com');
+    it('should return null for getThirdParties()', (done) => {
+      const thirdPartyRequests = mockStore.getThirdParties('a2.com');
       assert.equal(thirdPartyRequests, null);
+      done();
     });
   });
 
   describe('store set method', () => {
-    it('should set firstParty c1.com', async () => {
+    it('should set firstParty c1.com', (done) => {
       mockStore.setFirstParty('c1.com', { faviconUrl: '/ccc/ccc' });
-      const website = await mockStore.getFirstParty('c1.com');
+      const website = mockStore.getFirstParty('c1.com');
       assert.deepEqual(website, mockStore._websites['c1.com']);
+      done();
     });
 
-    it('should set thirdParty for c1.com', async () => {
+    it('should set thirdParty for c1.com', (done) => {
       mockStore.setThirdParty('c1.com', 'c11.com', { faviconUrl: '/c1/c1' });
-      const thirdParties = await mockStore.getThirdParties('c1.com');
+      const thirdParties = mockStore.getThirdParties('c1.com');
       const mockThirdParties = mockStore._websites['c1.com'].thirdPartyRequests;
       assert.deepEqual(thirdParties, mockThirdParties);
+      done();
     });
   });
 });
