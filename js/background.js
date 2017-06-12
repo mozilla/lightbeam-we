@@ -4,8 +4,6 @@
 // When the user clicks browserAction icon in toolbar, run Lightbeam
 browser.browserAction.onClicked.addListener(runLightbeam);
 
-capture.init();
-
 async function runLightbeam() {
   // Checks to see if Lightbeam is already open.
   // Returns true if it is, false if not.
