@@ -1,5 +1,9 @@
-/* eslint no-unused-vars: "off"*/
-/* eslint no-undef: "off" */
+/*
+* Listens for HTTP request responses, sending first- and
+* third-party requests to storage.
+*/
+
+capture.init();
 
 const capture = {
   init() {

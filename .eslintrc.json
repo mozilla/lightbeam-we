@@ -5,7 +5,8 @@
         "mocha": true
     },
     "globals": {
-        "browser": true
+        "browser": true,
+        "store": true
     },
     "plugins": [
         "json",
