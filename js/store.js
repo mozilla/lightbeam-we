@@ -1,9 +1,13 @@
+/* eslint no-undef: "off" */
+
 const store = {
   _websites: null,
 
   async init() {
     const data = await browser.storage.local.get('websites');
     this._websites = clone(data.websites);
+
+    this.addListeners();
   },
 
   async _write(websites) {
@@ -65,6 +69,14 @@ const store = {
 
   async remove() {
     return await browser.storage.local.remove('websites');
+  },
+
+  addListeners() {
+    browser.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.hasOwnProperty('websites')) {
+        viz.draw(changes['websites']['newValue']);
+      }
+    });
   }
 };
 

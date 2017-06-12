@@ -20,6 +20,7 @@ async function runLightbeam() {
   if (!lightbeamTab) {
     // only open a new Lightbeam instance if one isn't already open.
     browser.tabs.create({url: 'index.html'});
+    capture.init();
   } else if (!lightbeamTab.active) {
      // re-focus Lightbeam if it is already open but lost focus
     browser.tabs.update(lightbeamTab.id, {active: true});
