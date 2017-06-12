@@ -1,27 +1,35 @@
 const store = {
-  init() {
-    this.addListeners();
+  _websites: null,
+
+  async init() {
+    const data = await browser.storage.local.get('websites');
+    this._websites = clone(data.websites);
   },
 
-  async getAll() {
-    return await browser.storage.local.get();
+  async _write(websites) {
+    this._websites = clone(websites);
+
+    return await browser.storage.local.set({ websites });
   },
 
-  async getFirstParty(hostname) {
+  getAll() {
+    return clone(this._websites);
+  },
+
+  getFirstParty(hostname) {
     if (!hostname) {
       throw new Error('getFirstParty requires a valid hostname argument');
     }
 
-    const storage = await this.getAll();
-    return storage.websites[hostname];
+    return this._websites[hostname];
   },
 
-  async getThirdParties(hostname) {
+  getThirdParties(hostname) {
     if (!hostname) {
       throw new Error('getThirdParties requires a valid hostname argument');
     }
 
-    const firstParty = await this.getFirstParty(hostname);
+    const firstParty = this.getFirstParty(hostname);
     if ('thirdPartyRequests' in firstParty) {
       return firstParty.thirdPartyRequests;
     }
@@ -29,31 +37,40 @@ const store = {
     return null;
   },
 
-  setFirstParty(param) {
-    /**
-     * @param object with hostname as key
-     * @todo validate the param.-
-     * @todo code to be updated in next PR
-     */
-    return this.set(param);
+  setFirstParty(hostname, data) {
+    if (!hostname) {
+      throw new Error('setFirstParty requires a valid hostname argument');
+    }
+
+    const websites = clone(this._websites);
+    websites[hostname] = data;
+    this._write(websites);
   },
 
-  async set(websites) {
-    /**
-      * @todo code to be updated in next PR
-    */
-    return await browser.storage.local.set({ websites });
+  setThirdParty(origin, target, data) {
+    if (!origin) {
+      throw new Error('setThirdParty requires a valid origin argument');
+    }
+
+    const websites = clone(this._websites);
+    const firstParty = clone(websites[origin]);
+
+    if (!('thirdPartyRequests' in firstParty)) {
+      firstParty['thirdPartyRequests'] = {};
+    }
+    firstParty['thirdPartyRequests'][target] = data;
+
+    this.setFirstParty(origin, firstParty);
   },
 
   async remove() {
     return await browser.storage.local.remove('websites');
-  },
-
-  addListeners() {
-    /*
-    * @todo update the code
-    */
   }
 };
+
+// @todo move this function to utils
+function clone(obj) {
+  return Object.assign({}, obj);
+}
 
 store.init();
