@@ -25,6 +25,7 @@
 
   "background": {
     "scripts": [
+      "js/store.js",
       "js/capture.js",
       "js/store.js",
       "js/viz.js",

@@ -9,12 +9,130 @@
     <link rel="shortcut icon" href="images/lightbeam-48.png" type="image/x-icon">
     <link rel="icon" href="images/lightbeam-48.png" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <script src="js/store.js" type="text/javascript"></script>
     <script src="js/viz.js" type="text/javascript"></script>
   </head>
   <body>
-    <h1>Lightbeam</h1>
-    <canvas id="canvas" width="300" height="300"></canvas>
+    <aside>
+    <header>
+      <img class="logo" role="banner" src="images/lightbeam_150x45.png
+">
+    </header>
+    <nav role="navigation">
+      <h2>Visualization</h2>
+      <div class="toggle-menu">
+        <!-- @todo add click to toggle view between graph and list, highlighting active view -->
+        <button class="active graph">Graph</button>
+        <button class="list">List</button>
+      </div>
+      <h2>Data</h2>
+      <div>
+        <!-- @todo add click to save data -->
+        <button class="download">Save Data</button>
+        <!-- @todo add click to reset data -->
+        <button class="reset">Reset Data</button>
+      </div>
+      <div class="nav-links">
+        <!-- @todo confirm feedback URL -->
+        <a class="thumbs-up" href="mailto:lightbeam-feedback@mozilla.org">Give Us Feedback</a>
+        <br>
+        <!-- @todo confirm uninstall URL -->
+        <a href="https://support.mozilla.org/en-US/kb/disable-or-remove-add-ons">Uninstall Lightbeam</a>
+      </div>
+    </nav>
+    </aside>
+    <main role="main">
+      <section class="top-bar">
+        <div>
+          <span>
+            <h2>Data Gathered Since</h2>
+            <!-- @todo get date-start from store -->
+            <h3 id="date-start">June 13, 2017</h3>
+          </span>
+          <span>
+            <h2>You Have Visited</h2>
+            <!-- @todo get num-sites-visited from store -->
+            <h3><span id="num-sites-visited">6</span> Sites</h3>
+          </span>
+          <span>
+            <h2>You Have Connected With</h2>
+            <!-- @todo get num-third-parties from store -->
+            <h3><span id="num-third-parties">16</span> Third Party Sites</h3>
+          </span>
+        </div>
+        <!-- @todo add tracking protection and toggle functionality -->
+        <div class="tracking-protection">
+          <h2>Tracking Protection</h2>
+          <div class="toggle-outer">
+            <div class="toggle-inner">
+            </div>
+            <!-- @todo toggle-label to reflect state of tracking protection -->
+            <div class="toggle-label">
+            Off
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="vis">
+        <div>
+          <div>
+            <!-- @todo update filter with current filter state -->
+            <h1 id="filter">Recent Site</h1>
+            <!-- @todo update view with current view state -->
+            <h2><span id="view">Graph</span> View</h2>
+            <!-- @todo display list or graph view, update view based on filter and controls -->
+            <canvas id="canvas" width="300" height="300"></canvas>
+          </div>
+          <div class="info-panel-controls">
+            <!-- @todo check purpose of website icon -->
+            <button class="website"></button>
+            <!-- @todo add help sidebar -->
+            <button class="help"></button>
+            <!-- @todo add about sidebar -->
+            <button class="about"></button>
+          </div>
+        </div>
+        <footer>
+          <div>
+            <h2>Toggle Controls</h2>
+            <!-- @todo highlight active controls, add click to toggle controls -->
+            <div class="controls">
+              <button class="visited-sites active">Visited Sites</button>
+              <button class="third-party-sites active">
+                Third Party Sites
+              </button>
+              <button class="connections active">
+                Connections
+              </button>
+              <button class="watched-sites active">
+                Watched Sites
+              </button>
+              <button class="blocked-sites active">
+                Blocked Sites
+              </button>
+              <button class="cookies active col-3 row-1">
+                Cookies
+              </button>
+            </div>
+          </div>
+          <div>
+            <div class="filter-wrapper">
+              <h2>Filter</h2>
+              <!-- @todo add click for hide to toggle filter menu-->
+              <h2 class="hide">Hide</h2>
+            </div>
+            <div class="toggle-menu">
+            <!-- @todo highlight active filter, add click to toggle filter -->
+              <button class="active">Recent Site</button>
+              <button>Last 10 Sites</button>
+              <button>Daily</button>
+              <button>Weekly</button>
+            </div>
+          </div>
+        </footer>
+      </section>
+    </main>
     <script src="js/lightbeam.js" type="text/javascript"></script>
   </body>
 </html>
