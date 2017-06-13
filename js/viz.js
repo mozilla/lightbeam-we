@@ -1,5 +1,4 @@
-/* eslint no-unused-vars: "off" */
-
+// eslint-disable-next-line no-unused-vars
 const viz = {
   _nodes: [],
 

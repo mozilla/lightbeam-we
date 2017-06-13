@@ -1,5 +1,3 @@
-/* eslint no-undef: "off" */
-
 const store = {
   _websites: null,
 
