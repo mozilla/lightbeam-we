@@ -6,7 +6,8 @@
     },
     "globals": {
         "browser": true,
-        "store": true
+        "store": true,
+        "viz": true
     },
     "plugins": [
         "json",
@@ -26,7 +27,7 @@
             {
                 "CallExpression":
                     { "arguments": 1 },
-                "FunctionDeclaration": 
+                "FunctionDeclaration":
                     { "parameters": 1 }
             }
         ],

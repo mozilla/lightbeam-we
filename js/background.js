@@ -1,4 +1,3 @@
-/* eslint no-undef: "off" */
 'use strict';
 
 // When the user clicks browserAction icon in toolbar, run Lightbeam
