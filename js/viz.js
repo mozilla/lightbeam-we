@@ -1,20 +1,20 @@
 // eslint-disable-next-line no-unused-vars
 const viz = {
-  _nodes: [],
+  draw(context, websites) {
+    const pi = Math.PI * 2;
+    let x = 50, y = 50;
 
-  draw(websites) {
-    const svgElement = document.getElementById('canvas');
+    context.fillStyle = 'red';
+    context.beginPath();
 
-    for(const key in websites){
-      if(this._nodes.indexOf(key) === -1) {
-        this._nodes.push(key);
-        const newDiv = document.createElement('div');
-        const text = document.createTextNode(key);
-
-        newDiv.className = 'circle';
-        newDiv.appendChild(text);
-        svgElement.appendChild(newDiv);
-      }
+    for(const website in websites) {
+      context.moveTo(x, y);
+      context.arc(x, y, 5, 0, pi);
+      context.fillText(website, x, y);
+      x+=20; y+=20;
     }
+
+    context.stroke();
+    context.fill();
   }
 };
