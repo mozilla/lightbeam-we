@@ -6,5 +6,4 @@ async function renderGraph() {
   viz.draw(context, websites);
 }
 
-// setTimeout(renderGraph, 5000);
 renderGraph();

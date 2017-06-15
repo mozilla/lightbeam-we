@@ -46,7 +46,15 @@ const store = {
     }
 
     const websites = clone(this._websites);
-    websites[hostname] = data;
+
+    if(!websites[hostname]) {
+      websites[hostname] = {};
+    }
+
+    for(const key in data) {
+      websites[hostname][key] = data[key];
+    }
+
     this._write(websites);
   },
 
