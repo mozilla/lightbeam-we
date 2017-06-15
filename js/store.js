@@ -2,8 +2,10 @@ const store = {
   _websites: null,
 
   async init() {
-    const data = await browser.storage.local.get('websites');
-    this._websites = clone(data.websites);
+    if(!this._websites) {
+      const data = await browser.storage.local.get('websites');
+      this._websites = clone(data.websites);
+    }
   },
 
   async _write(websites) {
@@ -12,7 +14,8 @@ const store = {
     return await browser.storage.local.set({ websites });
   },
 
-  getAll() {
+  async getAll() {
+    await this.init();
     return clone(this._websites);
   },
 
