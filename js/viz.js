@@ -7,13 +7,13 @@ const viz = {
     context.fillStyle = 'white';
     context.beginPath();
 
-    for(const website in websites) {
+    for (const website in websites) {
       context.moveTo(x, y);
       context.arc(x, y, 10, 0, pi);
       context.fillText(website, x, y);
 
       let x1 = x;
-      for(const thirdParty in websites[website].thirdPartyRequests) {
+      for (const thirdParty in websites[website].thirdPartyRequests) {
         x1+=150;
         context.moveTo(x1, y);
         context.arc(x1, y, 5, 0, pi);

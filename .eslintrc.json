@@ -99,6 +99,11 @@
         ],
         "no-trailing-spaces": [
             "error"
+        ],
+        "keyword-spacing": [
+          "error", {
+            "before": true
+          }
         ]
     }
 }
