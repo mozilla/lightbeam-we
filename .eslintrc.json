@@ -99,6 +99,18 @@
         ],
         "no-trailing-spaces": [
             "error"
+        ],
+        "keyword-spacing": [
+          "error", {
+            "before": true,
+            "after": true
+          }
+        ],
+        "space-before-blocks": [
+          "error", {
+            "functions": "always",
+            "keywords": "always"
+          }
         ]
     }
 }
