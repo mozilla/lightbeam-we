@@ -2,10 +2,10 @@ const store = {
   _websites: null,
 
   async init() {
-    if(!this._websites || isObjectEmpty(this._websites)) {
+    if (!this._websites || isObjectEmpty(this._websites)) {
       const data = await browser.storage.local.get('websites');
 
-      if(!data.websites) {
+      if (!data.websites) {
         await this._write({});
       } else {
         this._websites = clone(data.websites);
@@ -52,11 +52,11 @@ const store = {
 
     const websites = clone(this._websites);
 
-    if(!websites[hostname]) {
+    if (!websites[hostname]) {
       websites[hostname] = {};
     }
 
-    for(const key in data) {
+    for (const key in data) {
       websites[hostname][key] = data[key];
     }
 
