@@ -21,7 +21,7 @@ const store = {
 
   async getAll() {
     await this.init();
-    return clone(this._websites);
+    return this._websites;
   },
 
   getFirstParty(hostname) {
@@ -68,8 +68,10 @@ const store = {
       throw new Error('setThirdParty requires a valid origin argument');
     }
 
-    const firstParty = this.getFirstParty(origin);
-
+    let firstParty = this.getFirstParty(origin);
+    if (!firstParty) {
+      firstParty = {};
+    }
     if (!('thirdPartyRequests' in firstParty)) {
       firstParty['thirdPartyRequests'] = {};
     }
