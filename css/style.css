@@ -28,7 +28,7 @@
 
 body {
   display: grid;
-  grid-template-columns: 170px auto;
+  grid-template-columns: 170px 1fr;
   height: 100vh;
   margin: 0;
   font-family: "Open Sans", sans-serif;
@@ -265,37 +265,32 @@ main {
   margin-top: -30px;
 }
 
-.website {
-  background-color: transparent;
+.info-panel {
   border-radius: 3px 0 0 3px;
-  margin-top: 0;
+  margin-top: 5px;
+}
+
+.info-panel::before {
+  margin-right: 0;
+}
+
+.info-panel:first-child {
+  background-color: transparent;
   box-shadow: none;
+  margin-top: 0;
 }
 
 .website::before {
   background-image: url('../images/lightbeam_icon_website.png');
-  margin-right: 0;
   opacity: .5;
-}
-
-.help {
-  border-radius: 3px 0 0 3px;
-  margin-top: 5px;
 }
 
 .help::before {
   background-image: url('../images/lightbeam_icon_help.png');
-  margin-right: 0;
-}
-
-.about {
-  border-radius: 3px 0 0 3px;
-  margin-top: 5px;
 }
 
 .about::before {
   background-image: url('../images/lightbeam_icon_about.png');
-  margin-right: 0;
 }
 
 /* ----------- UI - vis Controls ----------- */
@@ -340,6 +335,10 @@ footer div:first-child {
   background-image: url('data:image/svg+xml,<svg version="1.1" xmlns="http://www.w3.org/2000/svg"><line x1="14" y1="2" x2="2" y2="14" style="stroke: rgb(234, 234, 234); stroke-width: 2"></line></svg>');
 }
 
+.two-icons::before {
+  width: 30px;
+}
+
 .watched-sites {
   grid-column-start: 2;
   grid-row-start: 1;
@@ -348,7 +347,6 @@ footer div:first-child {
 
 .watched-sites::before {
   background-image: url('data:image/svg+xml,<svg style="fill: rgb(111, 195, 229)" version="1.1" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6"></circle></svg>'), url('data:image/svg+xml,<svg style="margin-left: 15px; fill: rgb(111, 195, 229)" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="0,14 7,2 14,14"></polygon></svg>');
-  width: 30px;
 }
 
 .blocked-sites {
@@ -358,7 +356,6 @@ footer div:first-child {
 
 .blocked-sites::before {
   background-image: url('data:image/svg+xml,<svg style="fill: rgb(224, 42, 97)" version="1.1" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6"></circle></svg>'), url('data:image/svg+xml,<svg style="margin-left: 15px; fill: rgb(224, 42, 97)" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="0,14 7,2 14,14"></polygon></svg>');
-  width: 30px;
 }
 
 .cookies {
