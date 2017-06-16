@@ -63,8 +63,7 @@ const store = {
       throw new Error('setThirdParty requires a valid origin argument');
     }
 
-    const websites = clone(this._websites);
-    const firstParty = clone(websites[origin]);
+    const firstParty = this.getFirstParty(origin);
 
     if (!('thirdPartyRequests' in firstParty)) {
       firstParty['thirdPartyRequests'] = {};
