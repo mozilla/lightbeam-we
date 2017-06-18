@@ -1,29 +1,76 @@
 // eslint-disable-next-line no-unused-vars
+
+// website = {
+//   firstPartyDomain: {
+//     favicon: faviconUrl,
+//     thirdPartyRequests: {
+//       thirdPartySite1: {
+//         document: documentUrl,
+//         origin: originUrl,
+//         requestTime: requestTimeNum,
+//         target: targetUrl
+//       }
+//       thirdPartySite2: {
+//         document: documentUrl,
+//         origin: originUrl,
+//         requestTime: requestTimeNum,
+//         target: targetUrl
+//       }
+//     }
+//   }
+// }
+
 const viz = {
-  draw(context, websites) {
-    const pi = Math.PI * 2;
-    let x = 50, y = 50;
+  draw(nodes_data, links_data, simulation) {
+    // get graph area
+    const svg = d3.select('svg');
 
-    context.fillStyle = 'white';
-    context.beginPath();
+    // draw circles for the nodes
+    const node = svg.append('g')
+      .attr('class', 'nodes')
+      .selectAll('circle')
+      .data(nodes_data)
+      .enter()
+      .append('circle')
+      .attr('r', 5)
+      .attr('fill', 'red');
 
-    for (const website in websites) {
-      context.moveTo(x, y);
-      context.arc(x, y, 10, 0, pi);
-      context.fillText(website, x, y);
+    // draw lines for the links between nodes
+    const link = svg.append('g')
+      .attr('class', 'links')
+      .selectAll('line')
+      .data(links_data)
+      .enter().append('line')
+      .attr('stroke-width', 2);
 
-      let x1 = x;
-      for (const thirdParty in websites[website].thirdPartyRequests) {
-        x1+=150;
-        context.moveTo(x1, y);
-        context.arc(x1, y, 5, 0, pi);
-        context.fillText(thirdParty, x1, y);
-      }
+    // update <circle> (x,y) positions to reflect node updates,
+    // update each <line> endpoint (x, y) position to reflect link updates
+    // on each tick of the simulation
+    function tickActions() {
+      node
+        .attr('cx', function(d) {
+          return d.x;
+        })
+        .attr('cy', function(d) {
+          return d.y;
+        });
 
-      x+=20; y+=20;
+      link
+        .attr('x1', function(d) {
+          return d.source.x;
+        })
+        .attr('y1', function(d) {
+          return d.source.y;
+        })
+        .attr('x2', function(d) {
+          return d.target.x;
+        })
+        .attr('y2', function(d) {
+          return d.target.y;
+        });
     }
 
-    context.stroke();
-    context.fill();
+    // after each tick of the simulation's internal timer, execute tickActions
+    simulation.on('tick', tickActions);
   }
 };

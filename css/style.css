@@ -1,11 +1,13 @@
 /* ----------- VISUALIZATION ----------- */
 
-.circle {
-  display: inline-block;
-  width: 100px;
-  height: 100px;
-  border-radius: 50px;
-  background-color: red;
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+       
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
 }
 
 /* ----------- UI - General ----------- */
