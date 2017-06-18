@@ -1,25 +1,4 @@
 // eslint-disable-next-line no-unused-vars
-
-// website = {
-//   firstPartyDomain: {
-//     favicon: faviconUrl,
-//     thirdPartyRequests: {
-//       thirdPartySite1: {
-//         document: documentUrl,
-//         origin: originUrl,
-//         requestTime: requestTimeNum,
-//         target: targetUrl
-//       }
-//       thirdPartySite2: {
-//         document: documentUrl,
-//         origin: originUrl,
-//         requestTime: requestTimeNum,
-//         target: targetUrl
-//       }
-//     }
-//   }
-// }
-
 const viz = {
   draw(nodes_data, links_data, simulation) {
     // get graph area
@@ -47,7 +26,7 @@ const viz = {
       .attr('r', 5)
       .attr('fill', 'white');
 
-      // draw circles for the thirdParty nodes
+    // draw circles for the thirdParty nodes
     // @todo draw triangles for the thirdParty nodes
     const nodeThirdParty = svg.append('g')
       .attr('class', 'nodes')
