@@ -2,26 +2,29 @@ async function renderGraph() {
   const websites = await store.getAll();
 
   // reformat data for D3
-
-  // nodes data to draw
-  const nodes_data =  [
-      {'name': 'Travis', 'sex': 'M'},
-      {'name': 'Rake', 'sex': 'M'},
-      {'name': 'Diana', 'sex': 'F'},
-      {'name': 'Rachel', 'sex': 'F'},
-      {'name': 'Shawn', 'sex': 'M'},
-      {'name': 'Emerald', 'sex': 'F'}
-  ];
-
-  // links data to draw
-  var links_data = [
-      {'source': 'Travis', 'target': 'Rake'},
-      {'source': 'Diana', 'target': 'Rake'},
-      {'source': 'Diana', 'target': 'Rachel'},
-      {'source': 'Rachel', 'target': 'Rake'},
-      {'source': 'Rachel', 'target': 'Shawn'},
-      {'source': 'Emerald', 'target': 'Rachel'}
-  ];
+  const nodes_data = [];
+  const links_data = [];
+  // make first party nodes
+  for (const firstParty in websites) {
+    const node = {};
+    node.hostname = firstParty;
+    node.favicon = websites[firstParty].faviconUrl || '';
+    node.party = 'first';
+    nodes_data.push(node);
+    // make third party nodes and links
+    for (const thirdParty in websites[firstParty].thirdPartyRequests) {
+      const node = {};
+      const link = {};
+      link.source = firstParty;
+      link.target = thirdParty;
+      node.hostname = thirdParty;
+      // third parties likely don't have favicons
+      node.favicon = '';
+      node.party = 'third';
+      nodes_data.push(node);
+      links_data.push(link);
+    }
+  }
 
   // set up area of the page to put the graph
   const svg = d3.select('svg');
@@ -40,7 +43,7 @@ async function renderGraph() {
     .force('center_force', d3.forceCenter(width/2, height/2))
     // link force constrains the nodes' motion based on how they are linked
     .force('links', d3.forceLink(links_data).id(function(d) {
-      return d.name;
+      return d.hostname;
     }));
 
   // draw the elements onto the page

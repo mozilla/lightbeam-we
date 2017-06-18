@@ -25,11 +25,34 @@ const viz = {
     // get graph area
     const svg = d3.select('svg');
 
-    // draw circles for the nodes
-    const node = svg.append('g')
+    // separate first from third party nodes
+    const nodes_firstParty = [];
+    const nodes_thirdParty = [];
+
+    for (let i = 0; i < nodes_data.length; i++) {
+      if (nodes_data[i].party === 'first') {
+        nodes_firstParty.push(nodes_data[i]);
+      } else {
+        nodes_thirdParty.push(nodes_data[i]);
+      }
+    }
+
+    // draw circles for the firstParty nodes
+    const nodeFirstParty = svg.append('g')
       .attr('class', 'nodes')
       .selectAll('circle')
-      .data(nodes_data)
+      .data(nodes_firstParty)
+      .enter()
+      .append('circle')
+      .attr('r', 5)
+      .attr('fill', 'white');
+
+      // draw circles for the thirdParty nodes
+    // @todo draw triangles for the thirdParty nodes
+    const nodeThirdParty = svg.append('g')
+      .attr('class', 'nodes')
+      .selectAll('circle')
+      .data(nodes_thirdParty)
       .enter()
       .append('circle')
       .attr('r', 5)
@@ -43,11 +66,21 @@ const viz = {
       .enter().append('line')
       .attr('stroke-width', 2);
 
+    // @todo draw text labels for each node
+
     // update <circle> (x,y) positions to reflect node updates,
     // update each <line> endpoint (x, y) position to reflect link updates
     // on each tick of the simulation
     function tickActions() {
-      node
+      nodeFirstParty
+        .attr('cx', function(d) {
+          return d.x;
+        })
+        .attr('cy', function(d) {
+          return d.y;
+        });
+
+      nodeThirdParty
         .attr('cx', function(d) {
           return d.x;
         })
