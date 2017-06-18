@@ -12,6 +12,8 @@ const viz = {
       if (nodes_data[i].party === 'first') {
         nodes_firstParty.push(nodes_data[i]);
       } else {
+        nodes_data[i].type = d3.symbolTriangle;
+        nodes_data[i].size = 100;
         nodes_thirdParty.push(nodes_data[i]);
       }
     }
@@ -26,16 +28,21 @@ const viz = {
       .attr('r', 5)
       .attr('fill', 'white');
 
-    // draw circles for the thirdParty nodes
-    // @todo draw triangles for the thirdParty nodes
+    // draw triangles for the thirdParty nodes
     const nodeThirdParty = svg.append('g')
       .attr('class', 'nodes')
-      .selectAll('circle')
+      .selectAll('path')
       .data(nodes_thirdParty)
       .enter()
-      .append('circle')
-      .attr('r', 5)
-      .attr('fill', 'red');
+      .append('path')
+      .attr('d', d3.symbol()
+        .size(function(d) {
+          return d.size;
+        })
+        .type(function(d) {
+          return d.type;
+        }))
+      .attr('fill', 'white');
 
     // draw lines for the links between nodes
     const link = svg.append('g')
@@ -59,12 +66,11 @@ const viz = {
           return d.y;
         });
 
+      // triangle SVGs have a transform attribute
+      // instead of cx, cy like circles
       nodeThirdParty
-        .attr('cx', function(d) {
-          return d.x;
-        })
-        .attr('cy', function(d) {
-          return d.y;
+        .attr('transform', function(d) {
+          return `translate(${d.x}, ${d.y})`;
         });
 
       link
