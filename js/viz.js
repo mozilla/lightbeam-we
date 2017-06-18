@@ -1,29 +1,101 @@
 // eslint-disable-next-line no-unused-vars
 const viz = {
-  draw(context, websites) {
-    const pi = Math.PI * 2;
-    let x = 50, y = 50;
+  init(nodes, links) {
+    const svg = d3.select('svg');
+    const nodesGroup = svg.append('g');
+    nodesGroup.attr('class', 'nodes');
+    const linksGroup = svg.append('g');
+    linksGroup.attr('class', 'links');
+    this.allCircles = nodesGroup.selectAll('.node');
+    this.allLines = linksGroup.selectAll('.link');
 
-    context.fillStyle = 'white';
-    context.beginPath();
+    // D3 needs explicit pixel values for 'center_force'
+    const visualization = document.getElementById('visualization');
+    const width = visualization.getBoundingClientRect().width;
+    const height = visualization.getBoundingClientRect().height;
 
-    for (const website in websites) {
-      context.moveTo(x, y);
-      context.arc(x, y, 10, 0, pi);
-      context.fillText(website, x, y);
+    this.simulation = d3.forceSimulation(nodes);
+    this.simulation.force('charge', d3.forceManyBody());
+    const linkForce = d3.forceLink(links);
+    // link source/target values are uniquely identified by
+    // the hostname property
+    linkForce.id(function (d) {
+      return d.hostname;
+    });
+    linkForce.distance(50);
+    this.simulation.force('link', linkForce);
+    this.simulation.force('center', d3.forceCenter(width/2, height/2));
+    this.simulation.alphaTarget(1);
+    this.simulation.on('tick', () => {
+      this.ticked();
+    });
 
-      let x1 = x;
-      for (const thirdParty in websites[website].thirdPartyRequests) {
-        x1+=150;
-        context.moveTo(x1, y);
-        context.arc(x1, y, 5, 0, pi);
-        context.fillText(thirdParty, x1, y);
-      }
+    // initial render
+    this.update(nodes, links);
+  },
 
-      x+=20; y+=20;
-    }
+  ticked() {
 
-    context.stroke();
-    context.fill();
+    this.allCircles
+      .attr('cx', function(d) {
+        return d.x;
+      })
+      .attr('cy', function(d) {
+        return d.y;
+      });
+
+    this.allLines
+      .attr('x1', function(d) {
+        return d.source.x;
+      })
+      .attr('y1', function(d) {
+        return d.source.y;
+      })
+      .attr('x2', function(d) {
+        return d.target.x;
+      })
+      .attr('y2', function(d) {
+        return d.target.y;
+      });
+  },
+
+  update(nodes, links) {
+    // determine which nodes to keep, remove and add: the update selection
+    this.allCircles = this.allCircles.data(nodes, function(d) {
+      return d.hostname;
+    });
+
+    // remove old nodes: the exit selection
+    const oldNodes = this.allCircles.exit();
+    oldNodes.remove();
+
+    // add new nodes: the enter selection
+    let newNodes = this.allCircles.enter();
+    newNodes = newNodes.append('circle');
+    newNodes.attr('fill', 'red');
+    newNodes.attr('r', 5);
+    this.allCircles = newNodes.merge(this.allCircles);
+
+    // determine which links to keep, remove and add, the update selection
+    this.allLines = this.allLines
+      .data(links, function(d) {
+        return `${d.source.hostname}-${d.target.hostname}`;
+      });
+
+    // remove old links
+    const oldLinks = this.allLines.exit();
+    oldLinks.remove();
+
+    // add new links
+    let newLinks = this.allLines.enter();
+    newLinks = newLinks.append('line');
+    this.allLines = newLinks.merge(this.allLines);
+
+    // Update and restart the simulation.
+    this.simulation.nodes(nodes);
+    const linkForce = this.simulation.force('link');
+    linkForce.links(links);
+    this.simulation = this.simulation.alpha(1);
+    this.simulation.restart();
   }
 };
