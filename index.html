@@ -43,32 +43,38 @@
     </aside>
     <main role="main">
       <section class="top-bar">
-        <div>
-          <span>
-            <h2>Data Gathered Since</h2>
-            <!-- @todo get date-start from store -->
-            <h3 id="date-start">June 13, 2017</h3>
-          </span>
-          <span>
-            <h2>You Have Visited</h2>
+        <dl class="info-headings">
+          <div>
+            <dt>Data Gathered Since</dt>
+              <!-- @todo get date-start from store -->
+            <dd id="date-start">
+              <time datetime="2017-06-13T11:00">June 13, 2017</time>
+            </dd>
+          </div>
+          <div>
+            <dt>You Have Visited</dt>
             <!-- @todo get num-sites-visited from store -->
-            <h3><span id="num-sites-visited">6</span> Sites</h3>
-          </span>
-          <span>
-            <h2>You Have Connected With</h2>
+            <dd>
+              <var id="num-sites-visited">6</var> Sites
+            </dd>
+          </div>
+          <div>
+            <dt>You Have Connected With</dt>
             <!-- @todo get num-third-parties from store -->
-            <h3><span id="num-third-parties">16</span> Third Party Sites</h3>
-          </span>
-        </div>
+            <dd>
+              <var id="num-third-parties">16</var> Third Party Sites
+            </dd>
+          </div>
+        </dl>
         <!-- @todo add tracking protection and toggle functionality -->
         <div class="tracking-protection">
-          <h2>Tracking Protection</h2>
-          <div class="toggle-outer">
-            <div class="toggle-inner">
-            </div>
-            <!-- @todo toggle-label to reflect state of tracking protection -->
-            <div class="toggle-label">
-            Off
+          <label for="tracking-protection-control">Tracking Protection</label>
+          <div class="toggle-switch">
+          <!-- @todo couple checkbox status (checked/unchecked) with toggle status -->
+            <input type="checkbox" id="tracking-protection-control">
+            <span class="toggle"></span>
+            <!-- @todo toggle-switch text (off/on) to reflect state of tracking protection -->
+            <span class="toggle-status">Off</span>
             </div>
           </div>
         </div>

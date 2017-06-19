@@ -35,7 +35,7 @@ body {
   font-weight: normal; 
 }
 
-h1, h2, h3 {
+h1, h2, h3, dt, dd, label {
   margin: 0;
   font-weight: 400;
 }
@@ -44,16 +44,20 @@ h1 {
   font-size: 1.75em;
 }
 
-h2 {
+h2, dt, label {
   font-size: .75em;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-h3 {
+h3, dd {
   font-size: 1.2em;
   color: var(--secondary-text-color);
   text-transform: uppercase;
+}
+
+var {
+  font-style: normal;
 }
 
 button {
@@ -183,6 +187,7 @@ aside h2 {
 /* ----------- UI - Top Bar ----------- */
 
 main {
+  min-width: 780px;
   display: grid;
   grid-template-rows: 10% 90%;
   background-color: var(--primary-color);
@@ -196,11 +201,11 @@ main {
   padding: 20px;
 }
 
-.top-bar > div {
+.top-bar > dl {
   display: flex;
 }
 
-.top-bar > div > span {
+.top-bar > dl > div {
   margin-right: 15px;
 }
 
@@ -209,7 +214,7 @@ main {
   align-items: center;
 }
 
-.toggle-outer {
+.toggle-switch {
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -220,14 +225,19 @@ main {
   border-radius: 2px;
 }
 
-.toggle-inner {
+input[type="checkbox"] {
+  -moz-appearance: none;
+  margin: 0;
+}
+
+.toggle {
   height: 20px;
   width: 30px;
   background-color: var(--primary-color);
   border-radius: 5px;
 }
 
-.toggle-label {
+.toggle-status {
   width: 40%;
   font-size: .75em;
   font-weight: 700;
