@@ -10,10 +10,25 @@ const capture = {
   addListeners() {
     // listen for each HTTP response
     browser.webRequest.onResponseStarted.addListener(
-      this.sendThirdParty,
+      (response) => this.sendThirdParty(response),
       {urls: ['<all_urls>']});
     // listen for tab updates
-    browser.tabs.onUpdated.addListener(this.sendFirstParty);
+    browser.tabs.onUpdated.addListener(
+      (tabId, changeInfo, tab) => {
+        this.sendFirstParty(tabId, changeInfo, tab);
+      });
+  },
+
+  // Returns true if the request should be stored, otherwise false.
+  shouldStore(tab) {
+    const documentUrl = new URL(tab.url);
+    // ignore about:*, moz-extension:* & non-visible tabs (like dev tools)
+    if (documentUrl.protocol !== 'about:'
+      && documentUrl.protocol !== 'moz-extension:'
+      && tab.id !== browser.tabs.TAB_ID_NONE) {
+      return true;
+    }
+    return false;
   },
 
   // capture third party requests
@@ -23,7 +38,8 @@ const capture = {
     const targetUrl = new URL(response.url);
     const originUrl = new URL(response.originUrl);
 
-    if (targetUrl.hostname !== documentUrl.hostname) {
+    if (targetUrl.hostname !== documentUrl.hostname
+      && this.shouldStore(tab)) {
       const data = {
         document: documentUrl.hostname,
         target: targetUrl.hostname,
@@ -41,10 +57,7 @@ const capture = {
   // capture first party requests
   sendFirstParty(tabId, changeInfo, tab) {
     const documentUrl = new URL(tab.url);
-    // ignore about:* pages and non-visible tabs
-    if (tab.status === 'complete'
-      && documentUrl.protocol !== 'about:'
-      && tabId !== browser.tabs.TAB_ID_NONE) {
+    if (tab.status === 'complete' && this.shouldStore(tab)) {
       const data = { faviconUrl: tab.favIconUrl };
       store.setFirstParty(documentUrl.hostname, data);
     }
