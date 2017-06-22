@@ -14,6 +14,18 @@ const store = {
     }
   },
 
+  messageHandler(m) {
+    if (m.type !== 'storeCall') {
+      return;
+    }
+
+    const publicMethods = ['getAll'];
+
+    if (publicMethods.includes(m['method'])) {
+      return this[m['method']](...m.arguments);
+    }
+  },
+
   async _write(websites) {
     this._websites = clone(websites);
 
@@ -88,8 +100,6 @@ const store = {
   }
 };
 
-store.init();
-
 // @todo move this function to utils
 function clone(obj) {
   return Object.assign({}, obj);
@@ -100,16 +110,5 @@ function isObjectEmpty(obj) {
 }
 // @todo end
 
-browser.runtime.onMessage.addListener(messageHandler);
-
-function messageHandler(m) {
-  if (m.type !== 'storeCall') {
-    return;
-  }
-
-  const publicMethods = ['getAll'];
-
-  if (publicMethods.includes(m['method'])) {
-    return store[m['method']](...m.arguments);
-  }
-}
+store.init();
+browser.runtime.onMessage.addListener(store.messageHandler.bind(store));
