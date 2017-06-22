@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const store = {
   _websites: null,
 
@@ -81,9 +82,13 @@ const store = {
   },
 
   async remove() {
+    this._websites = null;
+
     return await browser.storage.local.remove('websites');
   }
 };
+
+store.init();
 
 // @todo move this function to utils
 function clone(obj) {
@@ -93,5 +98,18 @@ function clone(obj) {
 function isObjectEmpty(obj) {
   return Object.keys(obj).length === 0;
 }
+// @todo end
 
-store.init();
+browser.runtime.onMessage.addListener(messageHandler);
+
+function messageHandler(m) {
+  if (m.type !== 'storeCall') {
+    return;
+  }
+
+  const publicMethods = ['getAll'];
+
+  if (publicMethods.includes(m['method'])) {
+    return store[m['method']](...m.arguments);
+  }
+}
