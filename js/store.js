@@ -111,4 +111,4 @@ function isObjectEmpty(obj) {
 // @todo end
 
 store.init();
-browser.runtime.onMessage.addListener(store.messageHandler.bind(store));
+browser.runtime.onMessage.addListener((m) => store.messageHandler(m));
