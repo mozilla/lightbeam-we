@@ -1,15 +1,26 @@
+// eslint-disable-next-line no-unused-vars
 const store = {
   _websites: null,
 
   async init() {
-    if (!this._websites || isObjectEmpty(this._websites)) {
+    if (!this._websites) {
       const data = await browser.storage.local.get('websites');
 
-      if (!data.websites) {
-        await this._write({});
-      } else {
+      if (data.websites) {
         this._websites = clone(data.websites);
       }
+    }
+  },
+
+  messageHandler(m) {
+    if (m.type !== 'storeCall') {
+      return;
+    }
+
+    const publicMethods = ['getAll'];
+
+    if (publicMethods.includes(m['method'])) {
+      return this[m['method']](...m.arguments);
     }
   },
 
@@ -81,6 +92,8 @@ const store = {
   },
 
   async remove() {
+    this._websites = null;
+
     return await browser.storage.local.remove('websites');
   }
 };
@@ -89,9 +102,7 @@ const store = {
 function clone(obj) {
   return Object.assign({}, obj);
 }
-
-function isObjectEmpty(obj) {
-  return Object.keys(obj).length === 0;
-}
+// @todo end
 
 store.init();
+browser.runtime.onMessage.addListener((m) => store.messageHandler(m));

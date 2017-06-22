@@ -27,7 +27,6 @@
     "scripts": [
       "js/capture.js",
       "js/store.js",
-      "js/viz.js",
       "js/background.js"
     ]
   }
