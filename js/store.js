@@ -3,12 +3,10 @@ const store = {
   _websites: null,
 
   async init() {
-    if (!this._websites || isObjectEmpty(this._websites)) {
+    if (!this._websites) {
       const data = await browser.storage.local.get('websites');
 
-      if (!data.websites) {
-        await this._write({});
-      } else {
+      if (data.websites) {
         this._websites = clone(data.websites);
       }
     }
@@ -103,10 +101,6 @@ const store = {
 // @todo move this function to utils
 function clone(obj) {
   return Object.assign({}, obj);
-}
-
-function isObjectEmpty(obj) {
-  return Object.keys(obj).length === 0;
 }
 // @todo end
 
