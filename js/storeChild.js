@@ -4,11 +4,11 @@ const storeChild = {
     return await this.parentMessage('getAll');
   },
 
-  parentMessage(method, ...arguments) {
+  parentMessage(method, ...args) {
     return browser.runtime.sendMessage({
       type: 'storeCall',
       method,
-      arguments
+      args
     });
   }
 };
