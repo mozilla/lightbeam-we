@@ -20,7 +20,8 @@ const store = {
     const publicMethods = ['getAll'];
 
     if (publicMethods.includes(m['method'])) {
-      return this[m['method']](...m.arguments);
+      const args = m.args;
+      return this[m['method']](...args);
     }
   },
 
