@@ -23,7 +23,9 @@
     "url": "https://github.com/electrolyfish/lightbeam-we/issues"
   },
   "homepage": "https://github.com/electrolyfish/lightbeam-we#readme",
-  "dependencies": {},
+  "dependencies": {
+    "d3": "4.9.1"
+  },
   "devDependencies": {
     "chai": "^3.5.0",
     "eslint": "^3.19.0",
