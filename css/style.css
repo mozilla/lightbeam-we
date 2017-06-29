@@ -4,7 +4,7 @@
   stroke: #999;
   stroke-opacity: 0.6;
 }
-       
+
 .nodes circle {
   stroke: #fff;
   stroke-width: 1.5px;
@@ -34,7 +34,7 @@ body {
   height: 100vh;
   margin: 0;
   font-family: "Open Sans", sans-serif;
-  font-weight: normal; 
+  font-weight: normal;
 }
 
 h1, h2, h3, dt, dd, label {
