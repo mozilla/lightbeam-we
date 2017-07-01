@@ -10,6 +10,16 @@ const store = {
         this._websites = clone(data.websites);
       }
     }
+    browser.runtime.onMessage.addListener((m) => store.messageHandler(m));
+  },
+
+  // send message to storeChild when data in store is changed
+  childMessage(method, ...args) {
+    return browser.runtime.sendMessage({
+      type: 'storeChildCall',
+      method,
+      args
+    });
   },
 
   messageHandler(m) {
@@ -32,7 +42,6 @@ const store = {
   },
 
   async getAll() {
-    await this.init();
     return this._websites;
   },
 
@@ -73,6 +82,15 @@ const store = {
     }
 
     this._write(websites);
+
+    // update visualization with changes
+    // @todo: update only when new sites or links are added to the store
+    const updatedData = {
+      hostname: hostname,
+      data: data,
+      party: 'first'
+    };
+    this.childMessage('update', updatedData);
   },
 
   setThirdParty(origin, target, data) {
@@ -90,6 +108,15 @@ const store = {
     firstParty['thirdPartyRequests'][target] = data;
 
     this.setFirstParty(origin, firstParty);
+
+    // update visualization with changes
+    // @todo update only when new sites or links are added to the store
+    const updatedData = {
+      hostname: target,
+      data: data,
+      party: 'third'
+    };
+    this.childMessage('update', updatedData);
   },
 
   async remove() {
@@ -106,4 +133,3 @@ function clone(obj) {
 // @todo end
 
 store.init();
-browser.runtime.onMessage.addListener((m) => store.messageHandler(m));
