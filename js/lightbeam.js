@@ -50,3 +50,6 @@ async function renderGraph() {
 
 window.onload = renderGraph;
 
+storeChild.register((data) => {
+  console.log(data);
+});
