@@ -14,10 +14,9 @@ const store = {
   },
 
   // send message to storeChild when data in store is changed
-  childMessage(method, ...args) {
+  updateChild(...args) {
     return browser.runtime.sendMessage({
       type: 'storeChildCall',
-      method,
       args
     });
   },
@@ -27,11 +26,16 @@ const store = {
       return;
     }
 
-    const publicMethods = ['getAll'];
+    const publicMethods = [
+      'getAll',
+      'reset',
+    ];
 
     if (publicMethods.includes(m['method'])) {
       const args = m.args;
       return this[m['method']](...args);
+    } else {
+      return new Error(`Unsupported method ${m.method}`);
     }
   },
 
@@ -41,8 +45,38 @@ const store = {
     return await browser.storage.local.set({ websites });
   },
 
-  async getAll() {
-    return this._websites;
+  outputWebsite(hostname, website, firstPartyHostname) {
+    const output = {
+      hostname: hostname,
+      favicon: website.faviconUrl || '',
+      firstPartyHostname: firstPartyHostname || false,
+      firstParty: false
+    };
+    if (firstPartyHostname === undefined) {
+      output.firstParty = true;
+      if ('thirdPartyRequests' in website) {
+        output.thirdParties = Object.keys(website.thirdPartyRequests);
+      } else {
+        output.thirdParties = [];
+      }
+    }
+    return output;
+  },
+
+  getAll() {
+    const output = {};
+    for (const firstParty in this._websites) {
+      const website = this._websites[firstParty];
+      output[firstParty] = this.outputWebsite(firstParty, website);
+      if (website.thirdPartyRequests) {
+        for (const thirdParty in website.thirdPartyRequests) {
+          output[thirdParty] = this.outputWebsite(thirdParty,
+            website.thirdPartyRequests[thirdParty],
+            firstParty);
+        }
+      }
+    }
+    return Promise.resolve(output);
   },
 
   getFirstParty(hostname) {
@@ -67,6 +101,7 @@ const store = {
   },
 
   setFirstParty(hostname, data) {
+    let newSite = false;
     if (!hostname) {
       throw new Error('setFirstParty requires a valid hostname argument');
     }
@@ -74,6 +109,7 @@ const store = {
     const websites = clone(this._websites);
 
     if (!websites[hostname]) {
+      newSite = true;
       websites[hostname] = {};
     }
 
@@ -83,17 +119,13 @@ const store = {
 
     this._write(websites);
 
-    // update visualization with changes
-    // @todo: update only when new sites or links are added to the store
-    const updatedData = {
-      hostname: hostname,
-      data: data,
-      party: 'first'
-    };
-    this.childMessage('update', updatedData);
+    if (newSite) {
+      this.updateChild(this.outputWebsite(hostname, websites[hostname]));
+    }
   },
 
   setThirdParty(origin, target, data) {
+    let newThirdParty = false;
     if (!origin) {
       throw new Error('setThirdParty requires a valid origin argument');
     }
@@ -105,21 +137,19 @@ const store = {
     if (!('thirdPartyRequests' in firstParty)) {
       firstParty['thirdPartyRequests'] = {};
     }
+    if (!(target in firstParty['thirdPartyRequests'])) {
+      newThirdParty = true;
+    }
     firstParty['thirdPartyRequests'][target] = data;
 
     this.setFirstParty(origin, firstParty);
 
-    // update visualization with changes
-    // @todo update only when new sites or links are added to the store
-    const updatedData = {
-      hostname: target,
-      data: data,
-      party: 'third'
-    };
-    this.childMessage('update', updatedData);
+    if (newThirdParty) {
+      this.updateChild(this.outputWebsite(target, data, origin));
+    }
   },
 
-  async remove() {
+  async reset() {
     this._websites = null;
 
     return await browser.storage.local.remove('websites');

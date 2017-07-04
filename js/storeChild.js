@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-const storeChild = {
+const storeChildObject = {
   callbacks: new Set(),
 
   init() {
@@ -14,7 +13,7 @@ const storeChild = {
     });
   },
 
-  register(callback) {
+  onUpdate(callback) {
     this.callbacks.add(callback);
   },
 
@@ -23,16 +22,8 @@ const storeChild = {
       return;
     }
 
-    const publicMethods = ['update'];
-
-    if (publicMethods.includes(m['method'])) {
-      const args = m.args;
-      return this[m['method']](...args);
-    }
-  },
-
-  async getAll() {
-    return await this.parentMessage('getAll');
+    const args = m.args;
+    return this.update(...args);
   },
 
   parentMessage(method, ...args) {
@@ -43,5 +34,17 @@ const storeChild = {
     });
   }
 };
+
+const storeChild = new Proxy(storeChildObject, {
+  get(target, prop) {
+    if (target[prop] === undefined) {
+      return async function(...args)  {
+        return await this.parentMessage(prop, ...args);
+      };
+    } else {
+      return target[prop];
+    }
+  }
+});
 
 storeChild.init();
