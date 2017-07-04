@@ -52,7 +52,7 @@ storeChild.onUpdate((data) => {
     // if we have the first party make the link
     if (websites[data.firstPartyHostname]) {
       const firstPartyWebsite = websites[data.firstPartyHostname];
-      if (!('firstParties' in firstPartyWebsite)) {
+      if (!('thirdParties' in firstPartyWebsite)) {
         firstPartyWebsite.thirdParties = [];
         firstPartyWebsite.firstParty = true;
       }
