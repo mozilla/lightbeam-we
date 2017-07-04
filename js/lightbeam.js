@@ -2,54 +2,65 @@
 // usable format for d3
 function transformData(websites) {
   const nodes = [];
-  const links = [];
-  const firstParties = new Set();
-  const thirdParties = new Set();
-  // make first party nodes
-  for (const firstParty in websites) {
-    const firstPartyNode = createWebsite(firstParty);
-    firstParties.add(firstPartyNode);
-    nodes.push(firstPartyNode);
-    // make third party nodes and links
-    if (websites[firstParty].thirdPartyRequests) {
-      for (const thirdParty in websites[firstParty].thirdPartyRequests) {
-        const thirdPartyNode = createWebsite(thirdParty);
-        thirdParties.add(thirdPartyNode);
-        if (!firstParties.has(thirdPartyNode)) {
-          nodes.push(thirdPartyNode);
-        }
-        const link = {};
-        link.source = firstParty;
-        link.target = thirdParty;
-        links.push(link);
-      }
-
+  let links = [];
+  for (const website in websites) {
+    const site = websites[website];
+    if (site.firstParty) {
+      const thirdPartyLinks = site.thirdParties.map((thirdParty) => {
+        return {
+          source: website,
+          target: thirdParty
+        };
+      });
+      links = links.concat(thirdPartyLinks);
     }
-  }
-
-  function createWebsite(website) {
-    const websiteOutput = {
-      hostname: website,
-      favicon: websites[website] ? websites[website].faviconUrl : '',
-      party: websites[website] ? 'first' : 'third'
-    };
-    return websiteOutput;
+    nodes.push(websites[website]);
   }
 
   return {
-    nodes: nodes,
-    links: links
+    nodes,
+    links
   };
 }
 
-async function renderGraph() {
-  const websites = await storeChild.getAll();
+function renderGraph(websites) {
   const transformedData = transformData(websites);
   viz.init(transformedData.nodes, transformedData.links);
 }
 
-window.onload = renderGraph;
+let websites;
 
-storeChild.register((data) => {
-  console.log(data);
+async function initLightBeam() {
+  websites = await storeChild.getAll();
+  renderGraph(websites);
+
+  const resetData = document.getElementById('reset-data-button');
+  resetData.addEventListener('click', () => {
+    storeChild.reset().then(() => {
+      window.location.reload();
+    });
+  });
+}
+
+window.onload = initLightBeam;
+
+storeChild.onUpdate((data) => {
+  if (!(data.hostname in websites)) {
+    websites[data.hostname] = data;
+  }
+  if (!data.firstParty) {
+    // if we have the first party make the link
+    if (websites[data.firstPartyHostname]) {
+      const firstPartyWebsite = websites[data.firstPartyHostname];
+      if (!('firstParties' in firstPartyWebsite)) {
+        firstPartyWebsite.thirdParties = [];
+        firstPartyWebsite.firstParty = true;
+      }
+      if (!(firstPartyWebsite.thirdParties.includes(data.hostname))) {
+        firstPartyWebsite.thirdParties.push(data.hostname);
+      }
+    }
+  }
+  const transformedData = transformData(websites);
+  viz.update(transformedData.nodes, transformedData.links);
 });
