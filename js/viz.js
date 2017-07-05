@@ -2,11 +2,15 @@
 const viz = {
   init(nodes, links) {
     const svg = d3.select('svg');
+
     const nodesGroup = svg.append('g');
     nodesGroup.attr('class', 'nodes');
+
     const linksGroup = svg.append('g');
     linksGroup.attr('class', 'links');
+
     this.allCircles = nodesGroup.selectAll('.node');
+    this.allLabels = nodesGroup.selectAll('.textLabel');
     this.allLines = linksGroup.selectAll('.link');
 
     // D3 needs explicit pixel values for 'center_force'
@@ -44,6 +48,14 @@ const viz = {
         return d.y;
       });
 
+    this.allLabels
+      .attr('x', function(d) {
+        return d.x;
+      })
+      .attr('y', function(d) {
+        return d.y;
+      });
+
     this.allLines
       .attr('x1', function(d) {
         return d.source.x;
@@ -72,9 +84,28 @@ const viz = {
     // add new nodes: the enter selection
     let newNodes = this.allCircles.enter();
     newNodes = newNodes.append('circle');
+    newNodes.attr('class', 'node');
     newNodes.attr('fill', 'red');
     newNodes.attr('r', 5);
+
     this.allCircles = newNodes.merge(this.allCircles);
+
+    this.allLabels = this.allLabels.data(nodes, function(d) {
+      return d.hostname;
+    });
+
+    const oldText = this.allLabels.exit();
+    oldText.remove();
+
+    let newText = this.allLabels.enter();
+    newText = newText.append('text');
+    newText.attr('class', 'textLabel')
+    .text( function (d) {
+      return d.hostname;
+    })
+    .attr('fill', 'white');
+
+    this.allLabels = newText.merge(this.allLabels);
 
     // determine which links to keep, remove and add, the update selection
     this.allLines = this.allLines
