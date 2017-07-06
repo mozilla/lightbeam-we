@@ -18,16 +18,19 @@ const viz = {
 
   simulateForce(nodes, links) {
     const { width, height } = this.getDimensions();
-    const simulation = d3.forceSimulation(nodes);
     const linkForce = d3.forceLink(links);
+    let simulation;
 
-    linkForce.id(function (d) {
-      return d.hostname;
-    });
-    linkForce.distance(50);
+    if (!this.simulation) {
+      simulation = d3.forceSimulation(nodes);
+    } else {
+      simulation = this.simulation;
+      simulation.nodes(nodes);
+    }
 
-    simulation.force('charge', d3.forceManyBody());
+    linkForce.id((d) => d.hostname);
     simulation.force('link', linkForce);
+    simulation.force('charge', d3.forceManyBody());
     simulation.force('center', d3.forceCenter(width/2, height/2));
     simulation.alphaTarget(1);
 
@@ -36,8 +39,7 @@ const viz = {
 
   getDimensions() {
     const visualization = document.getElementById('visualization');
-    const width = visualization.getBoundingClientRect().width;
-    const height = visualization.getBoundingClientRect().height;
+    const { width, height } = visualization.getBoundingClientRect();
 
     return {
       width,
@@ -84,6 +86,7 @@ const viz = {
   update(nodes, links) {
     this.simulation = this.simulateForce(nodes, links);
     this.tick();
+
     // determine which nodes to keep, remove and add: the update selection
     this.allCircles = this.allCircles.data(nodes, function(d) {
       return d.hostname;
