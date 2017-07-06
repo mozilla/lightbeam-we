@@ -13,32 +13,40 @@ const viz = {
     this.allLabels = nodesGroup.selectAll('.textLabel');
     this.allLines = linksGroup.selectAll('.link');
 
-    // D3 needs explicit pixel values for 'center_force'
-    const visualization = document.getElementById('visualization');
-    const width = visualization.getBoundingClientRect().width;
-    const height = visualization.getBoundingClientRect().height;
+    this.update(nodes, links);
+  },
 
-    this.simulation = d3.forceSimulation(nodes);
-    this.simulation.force('charge', d3.forceManyBody());
+  simulateForce(nodes, links) {
+    const { width, height } = this.getDimensions();
+    const simulation = d3.forceSimulation(nodes);
     const linkForce = d3.forceLink(links);
-    // link source/target values are uniquely identified by
-    // the hostname property
+
     linkForce.id(function (d) {
       return d.hostname;
     });
     linkForce.distance(50);
-    this.simulation.force('link', linkForce);
-    this.simulation.force('center', d3.forceCenter(width/2, height/2));
-    this.simulation.alphaTarget(1);
-    this.simulation.on('tick', () => {
-      this.ticked();
-    });
 
-    // initial render
-    this.update(nodes, links);
+    simulation.force('charge', d3.forceManyBody());
+    simulation.force('link', linkForce);
+    simulation.force('center', d3.forceCenter(width/2, height/2));
+    simulation.alphaTarget(1);
+
+    return simulation;
   },
 
-  ticked() {
+  getDimensions() {
+    const visualization = document.getElementById('visualization');
+    const width = visualization.getBoundingClientRect().width;
+    const height = visualization.getBoundingClientRect().height;
+
+    return {
+      width,
+      height
+    };
+  },
+
+  tick() {
+    this.simulation.stop();
 
     this.allCircles
       .attr('cx', function(d) {
@@ -69,9 +77,13 @@ const viz = {
       .attr('y2', function(d) {
         return d.target.y;
       });
+
+    this.simulation.tick();
   },
 
   update(nodes, links) {
+    this.simulation = this.simulateForce(nodes, links);
+    this.tick();
     // determine which nodes to keep, remove and add: the update selection
     this.allCircles = this.allCircles.data(nodes, function(d) {
       return d.hostname;
@@ -123,10 +135,7 @@ const viz = {
     this.allLines = newLinks.merge(this.allLines);
 
     // Update and restart the simulation.
-    this.simulation.nodes(nodes);
-    const linkForce = this.simulation.force('link');
-    linkForce.links(links);
-    this.simulation = this.simulation.alpha(1);
-    this.simulation.restart();
+    this.simulation = this.simulateForce(nodes, links);
+    this.tick();
   }
 };
