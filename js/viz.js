@@ -49,37 +49,17 @@ const viz = {
 
   tick() {
     this.simulation.stop();
-
     this.allCircles
-      .attr('cx', function(d) {
-        return d.x;
-      })
-      .attr('cy', function(d) {
-        return d.y;
-      });
-
+      .attr('cx', (d) => d.x)
+      .attr('cy', (d) => d.y);
     this.allLabels
-      .attr('x', function(d) {
-        return d.x;
-      })
-      .attr('y', function(d) {
-        return d.y;
-      });
-
+      .attr('x', (d) => d.x)
+      .attr('y', (d) => d.y);
     this.allLines
-      .attr('x1', function(d) {
-        return d.source.x;
-      })
-      .attr('y1', function(d) {
-        return d.source.y;
-      })
-      .attr('x2', function(d) {
-        return d.target.x;
-      })
-      .attr('y2', function(d) {
-        return d.target.y;
-      });
-
+      .attr('x1', (d) => d.source.x)
+      .attr('y1', (d) => d.source.y)
+      .attr('x2', (d) => d.target.x)
+      .attr('y2', (d) => d.target.y);
     this.simulation.tick();
   },
 
@@ -88,9 +68,7 @@ const viz = {
     this.tick();
 
     // determine which nodes to keep, remove and add: the update selection
-    this.allCircles = this.allCircles.data(nodes, function(d) {
-      return d.hostname;
-    });
+    this.allCircles = this.allCircles.data(nodes, (d) => d.hostname);
 
     // remove old nodes: the exit selection
     const oldNodes = this.allCircles.exit();
@@ -105,9 +83,7 @@ const viz = {
 
     this.allCircles = newNodes.merge(this.allCircles);
 
-    this.allLabels = this.allLabels.data(nodes, function(d) {
-      return d.hostname;
-    });
+    this.allLabels = this.allLabels.data(nodes, (d) => d.hostname);
 
     const oldText = this.allLabels.exit();
     oldText.remove();
@@ -115,18 +91,14 @@ const viz = {
     let newText = this.allLabels.enter();
     newText = newText.append('text');
     newText.attr('class', 'textLabel')
-    .text( function (d) {
-      return d.hostname;
-    })
+    .text((d) => d.hostname)
     .attr('fill', 'white');
 
     this.allLabels = newText.merge(this.allLabels);
 
     // determine which links to keep, remove and add, the update selection
     this.allLines = this.allLines
-      .data(links, function(d) {
-        return `${d.source.hostname}-${d.target.hostname}`;
-      });
+      .data(links, (d) => `${d.source.hostname}-${d.target.hostname}`);
 
     // remove old links
     const oldLinks = this.allLines.exit();
