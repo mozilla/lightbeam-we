@@ -3,25 +3,26 @@ const viz = {
   radius: 5,
 
   init(nodes, links) {
+    const { width, height } = this.getDimensions();
     const svg = d3.select('svg');
     const nodesGroup = svg.append('g');
     const linksGroup = svg.append('g');
-
     nodesGroup.attr('class', 'nodes');
     linksGroup.attr('class', 'links');
 
+    this.width = width;
+    this.height = height;
     this.allCircles = nodesGroup.selectAll('circle');
     this.allLabels = nodesGroup.selectAll('text');
     this.allLines = linksGroup.selectAll('line');
     this.simulation = this.simulationStart(nodes, links);
 
-    this.draw(nodes, links);
     this.updatePositions();
     this.simulation.tick();
+    this.draw(nodes, links);
   },
 
   simulationStart(nodes, links) {
-    const { width, height } = this.getDimensions();
     const linkForce = d3.forceLink(links);
     let simulation;
 
@@ -34,27 +35,14 @@ const viz = {
     }
 
     linkForce.id((d) => d.hostname);
-    linkForce.distance(80);
+    linkForce.distance(100);
     simulation.force('charge', d3.forceManyBody());
     simulation.force('link', linkForce);
-    simulation.force('center', d3.forceCenter(width/2, height/2));
+    simulation.force('center', d3.forceCenter(this.width/2, this.height/2));
     simulation.force('collide', d3.forceCollide(5));
     simulation.alphaTarget(1);
 
     return simulation;
-  },
-
-  simulationRestart(nodes, links) {
-    this.simulation.nodes(nodes);
-    const linkForce = this.simulation.force('link');
-    linkForce.id((d) => d.hostname);
-    linkForce.distance(80);
-    linkForce.links(links);
-    this.simulation.force('link', linkForce);
-    this.simulation.alpha(1);
-    this.simulation.restart();
-
-    return this.simulation;
   },
 
   getDimensions() {
@@ -67,18 +55,23 @@ const viz = {
     };
   },
 
+  getX(x) {
+    // forces the nodes to be contained within the bounding box's x coordinate
+    return Math.max(this.radius, Math.min(this.width - this.radius, x));
+  },
+
+  getY(y) {
+    // forces the nodes to be contained within the bounding box's y coordinate
+    return Math.max(this.radius, Math.min(this.height - this.radius, y));
+  },
+
   updatePositions() {
-    const { width, height } = this.getDimensions();
     this.allCircles
-      .attr('cx', (d) => (
-        d.x = Math.max(this.radius, Math.min(width - this.radius, d.x))
-      ))
-      .attr('cy', (d) => (
-        d.y = Math.max(this.radius, Math.min(height - this.radius, d.y))
-      ));
+      .attr('cx', (d) => this.getX(d.x))
+      .attr('cy', (d) => this.getY(d.y));
     this.allLabels
-      .attr('x', (d) => d.x)
-      .attr('y', (d) => d.y);
+      .attr('x', (d) => this.getX(d.x))
+      .attr('y', (d) => this.getY(d.y));
     this.allLines
       .attr('x1', (d) => d.source.x)
       .attr('y1', (d) => d.source.y)
@@ -92,7 +85,12 @@ const viz = {
 
     let newNodes = this.allCircles.enter();
     newNodes = newNodes.append('circle');
-    newNodes.attr('fill', 'red');
+    newNodes.attr('fill', (d) => {
+      if (d.firstParty) {
+        return 'red';
+      }
+      return 'blue';
+    });
     newNodes.attr('r', this.radius);
 
     this.allCircles = newNodes.merge(this.allCircles);
@@ -119,6 +117,7 @@ const viz = {
 
     let newLinks = this.allLines.enter();
     newLinks = newLinks.append('line');
+
     this.allLines = newLinks.merge(this.allLines);
   },
 
@@ -127,7 +126,7 @@ const viz = {
     this.drawLabels(nodes);
     this.drawLinks(links);
 
-    this.simulation = this.simulationRestart(nodes, links);
+    this.simulation = this.simulationStart(nodes, links);
     this.updatePositions();
     this.simulation.tick();
   }
