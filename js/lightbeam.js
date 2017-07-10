@@ -64,5 +64,5 @@ storeChild.onUpdate((data) => {
     });
   }
   const transformedData = transformData(websites);
-  viz.update(transformedData.nodes, transformedData.links);
+  viz.draw(transformedData.nodes, transformedData.links);
 });
