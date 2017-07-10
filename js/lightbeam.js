@@ -49,17 +49,19 @@ storeChild.onUpdate((data) => {
     websites[data.hostname] = data;
   }
   if (!data.firstParty) {
-    // if we have the first party make the link
-    if (websites[data.firstPartyHostname]) {
-      const firstPartyWebsite = websites[data.firstPartyHostname];
-      if (!('thirdParties' in firstPartyWebsite)) {
-        firstPartyWebsite.thirdParties = [];
-        firstPartyWebsite.firstParty = true;
+    // if we have the first parties make the link if they don't exist
+    data.firstPartyHostnames.forEach((firstPartyHostname) => {
+      if (websites[firstPartyHostname]) {
+        const firstPartyWebsite = websites[firstPartyHostname];
+        if (!('thirdParties' in firstPartyWebsite)) {
+          firstPartyWebsite.thirdParties = [];
+          firstPartyWebsite.firstParty = true;
+        }
+        if (!(firstPartyWebsite.thirdParties.includes(data.hostname))) {
+          firstPartyWebsite.thirdParties.push(data.hostname);
+        }
       }
-      if (!(firstPartyWebsite.thirdParties.includes(data.hostname))) {
-        firstPartyWebsite.thirdParties.push(data.hostname);
-      }
-    }
+    });
   }
   const transformedData = transformData(websites);
   viz.update(transformedData.nodes, transformedData.links);
