@@ -45,17 +45,18 @@ const store = {
     return await browser.storage.local.set({ websites });
   },
 
-  outputWebsite(hostname, website, firstPartyHostname) {
+  outputWebsite(hostname, website) {
     const output = {
       hostname: hostname,
       favicon: website.faviconUrl || '',
-      firstPartyHostname: firstPartyHostname || false,
-      firstParty: false
+      firstPartyHostnames: website.firstPartyHostnames || false,
+      firstParty: false,
+      thirdParties: []
     };
-    if (firstPartyHostname === undefined) {
+    if (website.firstPartyHostnames === undefined) {
       output.firstParty = true;
-      if ('thirdPartyRequests' in website) {
-        output.thirdParties = Object.keys(website.thirdPartyRequests);
+      if ('thirdPartyHostnames' in website) {
+        output.thirdParties = website.thirdPartyHostnames;
       } else {
         output.thirdParties = [];
       }
@@ -65,23 +66,16 @@ const store = {
 
   getAll() {
     const output = {};
-    for (const firstParty in this._websites) {
-      const website = this._websites[firstParty];
-      output[firstParty] = this.outputWebsite(firstParty, website);
-      if (website.thirdPartyRequests) {
-        for (const thirdParty in website.thirdPartyRequests) {
-          output[thirdParty] = this.outputWebsite(thirdParty,
-            website.thirdPartyRequests[thirdParty],
-            firstParty);
-        }
-      }
+    for (const hostname in this._websites) {
+      const website = this._websites[hostname];
+      output[hostname] = this.outputWebsite(hostname, website);
     }
     return Promise.resolve(output);
   },
 
-  getFirstParty(hostname) {
+  getWebsite(hostname) {
     if (!hostname) {
-      throw new Error('getFirstParty requires a valid hostname argument');
+      throw new Error('getWebsite requires a valid hostname argument');
     }
 
     return this._websites[hostname];
@@ -92,19 +86,16 @@ const store = {
       throw new Error('getThirdParties requires a valid hostname argument');
     }
 
-    const firstParty = this.getFirstParty(hostname);
-    if ('thirdPartyRequests' in firstParty) {
-      return firstParty.thirdPartyRequests;
+    const firstParty = this.getWebsite(hostname);
+    if ('thirdPartyHostnames' in firstParty) {
+      return firstParty.thirdPartyHostnames;
     }
 
     return null;
   },
 
-  setFirstParty(hostname, data) {
+  setWebsite(hostname, data) {
     let newSite = false;
-    if (!hostname) {
-      throw new Error('setFirstParty requires a valid hostname argument');
-    }
 
     const websites = clone(this._websites);
 
@@ -124,25 +115,38 @@ const store = {
     }
   },
 
+  setFirstParty(hostname, data) {
+    if (!hostname) {
+      throw new Error('setFirstParty requires a valid hostname argument');
+    }
+    this.setWebsite(hostname, data);
+  },
+
   setThirdParty(origin, target, data) {
     let newThirdParty = false;
     if (!origin) {
       throw new Error('setThirdParty requires a valid origin argument');
     }
 
-    let firstParty = this.getFirstParty(origin);
-    if (!firstParty) {
-      firstParty = {};
+    const firstParty = this.getWebsite(origin) || {};
+    const thirdParty = this.getWebsite(target) || {};
+    if (!('thirdPartyHostnames' in firstParty)) {
+      firstParty['thirdPartyHostnames'] = [];
     }
-    if (!('thirdPartyRequests' in firstParty)) {
-      firstParty['thirdPartyRequests'] = {};
-    }
-    if (!(target in firstParty['thirdPartyRequests'])) {
+    if (!firstParty['thirdPartyHostnames'].includes(target)) {
+      firstParty['thirdPartyHostnames'].push(target);
       newThirdParty = true;
     }
-    firstParty['thirdPartyRequests'][target] = data;
+    if (!('firstPartyHostnames' in firstParty)) {
+      thirdParty['firstPartyHostnames'] = [];
+    }
+    if (!thirdParty['firstPartyHostnames'].includes(origin)) {
+      thirdParty['firstPartyHostnames'].push(origin);
+      newThirdParty = true;
+    }
 
-    this.setFirstParty(origin, firstParty);
+    this.setWebsite(origin, firstParty);
+    this.setWebsite(target, thirdParty);
 
     if (newThirdParty) {
       this.updateChild(this.outputWebsite(target, data, origin));
