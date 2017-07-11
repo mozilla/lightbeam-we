@@ -15,14 +15,14 @@ const viz = {
     this.allCircles = nodesGroup.selectAll('circle');
     this.allLabels = nodesGroup.selectAll('text');
     this.allLines = linksGroup.selectAll('line');
-    this.simulation = this.simulationStart(nodes, links);
+    this.simulation = this.simulateForce(nodes, links);
 
     this.updatePositions();
     this.simulation.tick();
     this.draw(nodes, links);
   },
 
-  simulationStart(nodes, links) {
+  simulateForce(nodes, links) {
     const linkForce = d3.forceLink(links);
     let simulation;
 
@@ -116,7 +116,7 @@ const viz = {
     this.drawLabels(nodes);
     this.drawLinks(links);
 
-    this.simulation = this.simulationStart(nodes, links);
+    this.simulation = this.simulateForce(nodes, links);
     this.updatePositions();
     this.simulation.tick();
   }
