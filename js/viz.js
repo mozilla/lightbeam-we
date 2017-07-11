@@ -55,23 +55,13 @@ const viz = {
     };
   },
 
-  getX(x) {
-    // forces the nodes to be contained within the bounding box's x coordinate
-    return Math.max(this.radius, Math.min(this.width - this.radius, x));
-  },
-
-  getY(y) {
-    // forces the nodes to be contained within the bounding box's y coordinate
-    return Math.max(this.radius, Math.min(this.height - this.radius, y));
-  },
-
   updatePositions() {
     this.allCircles
-      .attr('cx', (d) => this.getX(d.x))
-      .attr('cy', (d) => this.getY(d.y));
+      .attr('cx', (d) => d.x)
+      .attr('cy', (d) => d.y);
     this.allLabels
-      .attr('x', (d) => this.getX(d.x))
-      .attr('y', (d) => this.getY(d.y));
+      .attr('x', (d) => d.x)
+      .attr('y', (d) => d.y);
     this.allLines
       .attr('x1', (d) => d.source.x)
       .attr('y1', (d) => d.source.y)
