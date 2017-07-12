@@ -12,6 +12,15 @@
 
 .textLabel {
   font-size: 14px;
+  visibility: hidden;
+}
+
+.textLabel.visible {
+  visibility: visible;
+}
+
+.textLabel.invisible {
+  visibility: hidden;
 }
 
 /* ----------- UI - General ----------- */
