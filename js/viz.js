@@ -1,19 +1,22 @@
 // eslint-disable-next-line no-unused-vars
 const viz = {
   radius: 5,
+  textLabelGutter: 5,
 
   init(nodes, links) {
     const { width, height } = this.getDimensions();
     const svg = d3.select('svg');
     const nodesGroup = svg.append('g');
     const linksGroup = svg.append('g');
+    const labelsGroup = svg.append('g');
     nodesGroup.attr('class', 'nodes');
     linksGroup.attr('class', 'links');
+    labelsGroup.attr('class', 'labels');
 
     this.width = width;
     this.height = height;
     this.allCircles = nodesGroup.selectAll('circle');
-    this.allLabels = nodesGroup.selectAll('text');
+    this.allLabels = labelsGroup.selectAll('text');
     this.allLines = linksGroup.selectAll('line');
     this.simulation = this.simulateForce(nodes, links);
 
@@ -60,8 +63,8 @@ const viz = {
       .attr('cx', (d) => d.x)
       .attr('cy', (d) => d.y);
     this.allLabels
-      .attr('x', (d) => d.x)
-      .attr('y', (d) => d.y);
+      .attr('x', (d) => d.x + this.radius + this.textLabelGutter)
+      .attr('y', (d) => d.y + this.radius + this.textLabelGutter);
     this.allLines
       .attr('x1', (d) => d.source.x)
       .attr('y1', (d) => d.source.y)
@@ -75,15 +78,24 @@ const viz = {
 
     let newNodes = this.allCircles.enter();
     newNodes = newNodes.append('circle');
-    newNodes.attr('fill', (d) => {
-      if (d.firstParty) {
-        return 'red';
-      }
-      return 'blue';
-    });
+    newNodes.attr('fill', (d) => (
+      d.firstParty ? 'red' : 'blue'
+    ));
     newNodes.attr('r', this.radius);
+    newNodes.on('mouseenter', (d, i) => this.showLabel(i));
+    newNodes.on('mouseleave', (d, i) => this.hideLabel(i));
 
     this.allCircles = newNodes.merge(this.allCircles);
+  },
+
+  showLabel(index) {
+    const label = d3.select(`text.textLabel.text${index}`);
+    label.attr('class', `textLabel text${index} visible`);
+  },
+
+  hideLabel(index) {
+    const label = d3.select(`text.textLabel.text${index}`);
+    label.attr('class', `textLabel text${index} invisible`);
   },
 
   drawLabels(nodes) {
@@ -92,9 +104,9 @@ const viz = {
 
     let newText = this.allLabels.enter();
     newText = newText.append('text');
-    newText.attr('class', 'textLabel')
-    .text((d) => d.hostname)
-    .attr('fill', 'white');
+    newText.attr('class', (d, i) => `textLabel text${i}`);
+    newText.text((d) => d.hostname);
+    newText.attr('fill', 'white');
 
     this.allLabels = newText.merge(this.allLabels);
   },
@@ -112,9 +124,9 @@ const viz = {
   },
 
   draw(nodes, links) {
-    this.drawNodes(nodes);
     this.drawLabels(nodes);
     this.drawLinks(links);
+    this.drawNodes(nodes);
 
     this.simulation = this.simulateForce(nodes, links);
     this.updatePositions();
