@@ -290,6 +290,11 @@ input[type="checkbox"] {
   color: var(--secondary-text-color);
 }
 
+#visualization {
+  width: 500px;
+  height: 400px;
+}
+
 .info-panel-controls {
   display: flex;
   flex-direction: column;
