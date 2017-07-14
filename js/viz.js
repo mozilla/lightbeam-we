@@ -141,11 +141,7 @@ const viz = {
   },
 
   virtualDom(type, elements) {
-    this[type] = this[type].data(elements, (d) => (
-      type === 'lines'
-      ? `${d.source.hostname}-${d.target.hostname}`
-      : d
-    ));
+    this[type] = this[type].data(elements, (d) => d);
 
     this[type].exit().remove();
 
