@@ -15,7 +15,6 @@ const viz = {
     this.labels = custom.selectAll('custom.label');
     this.lines = custom.selectAll('custom.line');
 
-    this.simulate(nodes, links);
     this.draw(nodes, links);
   },
 
@@ -142,7 +141,11 @@ const viz = {
   },
 
   virtualDom(type, elements) {
-    this[type] = this[type].data(elements, (d) => d);
+    this[type] = this[type].data(elements, (d) => (
+      type === 'lines'
+      ? `${d.source.hostname}-${d.target.hostname}`
+      : d
+    ));
 
     this[type].exit().remove();
 
@@ -160,6 +163,7 @@ const viz = {
   },
 
   draw(nodes, links) {
+    this.simulate(nodes, links);
     this.createVirtualDom(nodes, links);
     this.drawOnCanvas();
     this.simulate(nodes, links);
