@@ -89,8 +89,6 @@ const viz = {
   drawOnCanvas() {
     this.context.clearRect(0, 0, this.width, this.height);
     this.context.save();
-    this.context.strokeStyle = '#ccc';
-    this.context.fillStyle = 'steelblue';
     this.drawNodes();
     this.drawLabels();
     this.drawLinks();
@@ -98,18 +96,28 @@ const viz = {
   },
 
   drawNodes() {
-    this.context.beginPath();
     this.circles.each((d) => {
+      this.context.beginPath();
       this.context.moveTo(d.x, d.y);
       this.context.arc(d.x, d.y, 4.5, 0, 2 * Math.PI);
+      if (d.firstParty) {
+        this.context.fillStyle = 'red';
+      } else {
+        this.context.fillStyle = 'blue';
+      }
+      this.context.closePath();
+      this.context.fill();
     });
-    this.context.fill();
   },
 
   drawLabels() {
+    this.context.fillStyle = 'white';
+    this.context.beginPath();
     this.labels.each((d) => {
       this.context.fillText(d.hostname, d.x, d.y);
     });
+    this.context.closePath();
+    this.context.fill();
   },
 
   showLabel(index) {
@@ -128,6 +136,8 @@ const viz = {
       this.context.moveTo(d.source.x, d.source.y);
       this.context.lineTo(d.target.x, d.target.y);
     });
+    this.context.closePath();
+    this.context.strokeStyle = '#ccc';
     this.context.stroke();
   },
 
