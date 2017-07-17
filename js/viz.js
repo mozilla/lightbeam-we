@@ -5,35 +5,38 @@ const viz = {
 
   init(nodes, links) {
     const { width, height } = this.getDimensions('visualization');
-    const { context, custom } = this.createCanvas(width, height);
 
     this.width = width;
     this.height = height;
-    this.context = context;
-    this.custom = custom;
-    this.circles = custom.selectAll('custom.circle');
-    this.labels = custom.selectAll('custom.label');
-    this.lines = custom.selectAll('custom.line');
+    this.context = this.createCanvas(width, height);
 
     this.draw(nodes, links);
   },
 
-  simulate(nodes, links) {
-    this.simulation = this.simulateForce(nodes, links);
+  draw(nodes, links) {
+    this.nodes = nodes;
+    this.links = links;
+
+    this.simulate();
+    this.drawOnCanvas();
+  },
+
+  simulate() {
+    this.simulation = this.simulateForce();
     this.updatePositions();
     this.simulation.tick();
   },
 
-  simulateForce(nodes, links) {
-    const linkForce = d3.forceLink(links);
+  simulateForce() {
+    const linkForce = d3.forceLink(this.links);
     let simulation;
 
     if (!this.simulation) {
-      simulation = d3.forceSimulation(nodes);
+      simulation = d3.forceSimulation(this.nodes);
     } else {
       simulation = this.simulation;
       this.simulation.stop();
-      simulation.nodes(nodes);
+      simulation.nodes(this.nodes);
     }
 
     linkForce.id((d) => d.hostname);
@@ -53,12 +56,8 @@ const viz = {
     canvas.attr('width', width);
     canvas.attr('height', height);
     const context = canvas.node().getContext('2d');
-    const custom = base.append('custom');
 
-    return {
-      context,
-      custom
-    };
+    return context;
   },
 
   getDimensions(id) {
@@ -72,17 +71,16 @@ const viz = {
   },
 
   updatePositions() {
-    this.circles
-      .attr('x', (d) => d.x)
-      .attr('y', (d) => d.y);
-    this.labels
-      .attr('x', (d) => d.x + this.radius + this.textLabelGutter)
-      .attr('y', (d) => d.y + this.radius + this.textLabelGutter);
-    this.lines
-      .attr('x1', (d) => d.source.x)
-      .attr('y1', (d) => d.source.y)
-      .attr('x2', (d) => d.target.x)
-      .attr('y2', (d) => d.target.y);
+    for (const d of this.nodes) {
+      d.x = d.x + this.radius + this.textLabelGutter;
+      d.y = d.y + this.radius + this.textLabelGutter;
+    }
+    for (const d of this.links) {
+      d.x1 = d.source.x;
+      d.y1 = d.source.y;
+      d.x2 = d.target.x;
+      d.y2 = d.target.y;
+    }
   },
 
   drawOnCanvas() {
@@ -95,7 +93,7 @@ const viz = {
   },
 
   drawNodes() {
-    this.circles.each((d) => {
+    for (const d of this.nodes) {
       this.context.beginPath();
       this.context.moveTo(d.x, d.y);
       this.context.arc(d.x, d.y, 4.5, 0, 2 * Math.PI);
@@ -106,62 +104,27 @@ const viz = {
       }
       this.context.closePath();
       this.context.fill();
-    });
+    }
   },
 
   drawLabels() {
     this.context.fillStyle = 'white';
     this.context.beginPath();
-    this.labels.each((d) => {
+    for (const d of this.nodes) {
       this.context.fillText(d.hostname, d.x, d.y);
-    });
+    }
     this.context.closePath();
     this.context.fill();
   },
 
-  showLabel(index) {
-    const label = d3.select(`text.textLabel.text${index}`);
-    label.attr('class', `textLabel text${index} visible`);
-  },
-
-  hideLabel(index) {
-    const label = d3.select(`text.textLabel.text${index}`);
-    label.attr('class', `textLabel text${index} invisible`);
-  },
-
   drawLinks() {
     this.context.beginPath();
-    this.lines.each((d) => {
+    for (const d of this.links) {
       this.context.moveTo(d.source.x, d.source.y);
       this.context.lineTo(d.target.x, d.target.y);
-    });
+    }
     this.context.closePath();
     this.context.strokeStyle = '#ccc';
     this.context.stroke();
-  },
-
-  virtualDom(type, elements) {
-    this[type] = this[type].data(elements, (d) => d);
-
-    this[type].exit().remove();
-
-    let newNodes = this[type].enter();
-    newNodes = newNodes.append('custom');
-    newNodes.classed(type, true);
-
-    this[type] = newNodes.merge(this[type]);
-  },
-
-  createVirtualDom(nodes, links) {
-    this.virtualDom('labels', nodes);
-    this.virtualDom('lines', links);
-    this.virtualDom('circles', nodes);
-  },
-
-  draw(nodes, links) {
-    this.simulate(nodes, links);
-    this.createVirtualDom(nodes, links);
-    this.drawOnCanvas();
-    this.simulate(nodes, links);
   }
 };
