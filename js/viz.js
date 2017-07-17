@@ -4,25 +4,29 @@ const viz = {
   textLabelGutter: 5,
 
   init(nodes, links) {
-    const { width, height } = this.getDimensions();
-    const svg = d3.select('svg');
-    const nodesGroup = svg.append('g');
-    const linksGroup = svg.append('g');
-    const labelsGroup = svg.append('g');
-    nodesGroup.attr('class', 'nodes');
-    linksGroup.attr('class', 'links');
-    labelsGroup.attr('class', 'labels');
+    const { width, height } = this.getDimensions('visualization');
+    const { context } = this.createCanvas(width, height);
 
     this.width = width;
     this.height = height;
-    this.allCircles = nodesGroup.selectAll('circle');
-    this.allLabels = labelsGroup.selectAll('text');
-    this.allLines = linksGroup.selectAll('line');
-    this.simulation = this.simulateForce(nodes, links);
+    this.context = context;
+   // this.custom = custom;
+    this.circles = {};
+    this.labels = {};
+    this.lines = {};
+/*
+    this.circles = custom.selectAll('custom.circle');
+    this.labels = custom.selectAll('custom.label');
+    this.lines = custom.selectAll('custom.line');
+*/
 
-    this.updatePositions();
-    this.simulation.tick();
     this.draw(nodes, links);
+  },
+
+  simulate(nodes, links) {
+    this.simulation = this.simulateForce(nodes, links);
+    //this.updatePositions();
+    this.simulation.tick();
   },
 
   simulateForce(nodes, links) {
@@ -48,9 +52,23 @@ const viz = {
     return simulation;
   },
 
-  getDimensions() {
-    const visualization = document.getElementById('visualization');
-    const { width, height } = visualization.getBoundingClientRect();
+  createCanvas(width, height) {
+    const base = d3.select('#visualization');
+    const canvas = base.append('canvas');
+    canvas.attr('width', width);
+    canvas.attr('height', height);
+    const context = canvas.node().getContext('2d');
+    //const custom = base.append('custom');
+
+    return {
+      context,
+      //ncustom
+    };
+  },
+
+  getDimensions(id) {
+    const element = document.getElementById(id);
+    const { width, height } = element.getBoundingClientRect();
 
     return {
       width,
@@ -59,33 +77,50 @@ const viz = {
   },
 
   updatePositions() {
-    this.allCircles
-      .attr('cx', (d) => d.x)
-      .attr('cy', (d) => d.y);
-    this.allLabels
-      .attr('x', (d) => d.x + this.radius + this.textLabelGutter)
-      .attr('y', (d) => d.y + this.radius + this.textLabelGutter);
-    this.allLines
-      .attr('x1', (d) => d.source.x)
-      .attr('y1', (d) => d.source.y)
-      .attr('x2', (d) => d.target.x)
-      .attr('y2', (d) => d.target.y);
+    for (let d of this.circles) {
+      d.x = d.x + this.radius + this.textLabelGutter;
+      d.y = d.y + this.radius + this.textLabelGutter;
+    }
+    for (let d of this.lines) {
+      d.x1 = d.source.x;
+      d.y1 = d.source.y;
+      d.x2 = d.target.x;
+      d.y2 = d.target.y;
+    }
   },
 
-  drawNodes(nodes) {
-    this.allCircles = this.allCircles.data(nodes, (d) => d.hostname);
-    this.allCircles.exit().remove();
+  drawOnCanvas() {
+    this.context.clearRect(0, 0, this.width, this.height);
+    this.context.save();
+    this.drawNodes();
+    this.drawLabels();
+    this.drawLinks();
+    this.context.restore();
+  },
 
-    let newNodes = this.allCircles.enter();
-    newNodes = newNodes.append('circle');
-    newNodes.attr('fill', (d) => (
-      d.firstParty ? 'red' : 'blue'
-    ));
-    newNodes.attr('r', this.radius);
-    newNodes.on('mouseenter', (d, i) => this.showLabel(i));
-    newNodes.on('mouseleave', (d, i) => this.hideLabel(i));
+  drawNodes() {
+    for (let d of this.circles) {
+      this.context.beginPath();
+      this.context.moveTo(d.x, d.y);
+      this.context.arc(d.x, d.y, 4.5, 0, 2 * Math.PI);
+      if (d.firstParty) {
+        this.context.fillStyle = 'red';
+      } else {
+        this.context.fillStyle = 'blue';
+      }
+      this.context.closePath();
+      this.context.fill();
+    }
+  },
 
-    this.allCircles = newNodes.merge(this.allCircles);
+  drawLabels() {
+    this.context.fillStyle = 'white';
+    this.context.beginPath();
+    for (let d of this.labels) {
+      this.context.fillText(d.hostname, d.x, d.y);
+    }
+    this.context.closePath();
+    this.context.fill();
   },
 
   showLabel(index) {
@@ -98,38 +133,41 @@ const viz = {
     label.attr('class', `textLabel text${index} invisible`);
   },
 
-  drawLabels(nodes) {
-    this.allLabels = this.allLabels.data(nodes, (d) => d.hostname);
-    this.allLabels.exit().remove();
-
-    let newText = this.allLabels.enter();
-    newText = newText.append('text');
-    newText.attr('class', (d, i) => `textLabel text${i}`);
-    newText.text((d) => d.hostname);
-    newText.attr('fill', 'white');
-
-    this.allLabels = newText.merge(this.allLabels);
+  drawLinks() {
+    this.context.beginPath();
+    for (let d of this.lines) {
+      this.context.moveTo(d.source.x, d.source.y);
+      this.context.lineTo(d.target.x, d.target.y);
+    }
+    this.context.closePath();
+    this.context.strokeStyle = '#ccc';
+    this.context.stroke();
   },
 
-  drawLinks(links) {
-    this.allLines = this.allLines
-      .data(links, (d) => `${d.source.hostname}-${d.target.hostname}`);
+  virtualDom(type, elements) {
+     this[type] = elements;
+   // this[type] = this[type].data(elements, (d) => d);
 
-    this.allLines.exit().remove();
+   // this[type].exit().remove();
+/*
+    let newNodes = this[type].enter();
+    newNodes = newNodes.append('custom');
+    newNodes.classed(type, true);
 
-    let newLinks = this.allLines.enter();
-    newLinks = newLinks.append('line');
+    this[type] = newNodes.merge(this[type]);
+*/
+  },
 
-    this.allLines = newLinks.merge(this.allLines);
+  createVirtualDom(nodes, links) {
+    this.virtualDom('labels', nodes);
+    this.virtualDom('lines', links);
+    this.virtualDom('circles', nodes);
   },
 
   draw(nodes, links) {
-    this.drawLabels(nodes);
-    this.drawLinks(links);
-    this.drawNodes(nodes);
-
-    this.simulation = this.simulateForce(nodes, links);
-    this.updatePositions();
-    this.simulation.tick();
+    this.simulate(nodes, links);
+    this.createVirtualDom(nodes, links);
+    this.drawOnCanvas();
+    this.simulate(nodes, links);
   }
 };
