@@ -75,7 +75,7 @@ const viz = {
     this.context.clearRect(0, 0, this.width, this.height);
     this.context.save();
     this.drawNodes();
-    this.drawLabels();
+    // this.drawLabels();
     this.drawLinks();
     this.context.restore();
   },
@@ -92,15 +92,15 @@ const viz = {
       }
       this.context.closePath();
       this.context.fill();
+
+      this.drawLabel(d.hostname, d.x, d.y);
     }
   },
 
-  drawLabels() {
+  drawLabel(title, x, y) {
     this.context.fillStyle = 'white';
     this.context.beginPath();
-    for (const d of this.nodes) {
-      this.context.fillText(d.hostname, d.x, d.y);
-    }
+    this.context.fillText(title, x, y);
     this.context.closePath();
     this.context.fill();
   },
