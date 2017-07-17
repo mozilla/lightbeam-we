@@ -1,8 +1,5 @@
 // eslint-disable-next-line no-unused-vars
 const viz = {
-  radius: 5,
-  textLabelGutter: 5,
-
   init(nodes, links) {
     const { width, height } = this.getDimensions('visualization');
 
@@ -23,12 +20,10 @@ const viz = {
 
   simulate() {
     this.simulation = this.simulateForce();
-    this.updatePositions();
     this.simulation.tick();
   },
 
   simulateForce() {
-    const linkForce = d3.forceLink(this.links);
     let simulation;
 
     if (!this.simulation) {
@@ -39,11 +34,17 @@ const viz = {
       simulation.nodes(this.nodes);
     }
 
+    const linkForce = d3.forceLink(this.links);
     linkForce.id((d) => d.hostname);
     linkForce.distance(100);
-    simulation.force('charge', d3.forceManyBody());
     simulation.force('link', linkForce);
-    simulation.force('center', d3.forceCenter(this.width/2, this.height/2));
+
+    const centerForce = d3.forceCenter(this.width/2, this.height/2);
+    centerForce.x(this.width/2);
+    centerForce.y(this.height/2);
+    simulation.force('center', centerForce);
+
+    simulation.force('charge', d3.forceManyBody());
     simulation.force('collide', d3.forceCollide(5));
     simulation.alphaTarget(1);
 
@@ -68,19 +69,6 @@ const viz = {
       width,
       height
     };
-  },
-
-  updatePositions() {
-    for (const d of this.nodes) {
-      d.x = d.x + this.radius + this.textLabelGutter;
-      d.y = d.y + this.radius + this.textLabelGutter;
-    }
-    for (const d of this.links) {
-      d.x1 = d.source.x;
-      d.y1 = d.source.y;
-      d.x2 = d.target.x;
-      d.y2 = d.target.y;
-    }
   },
 
   drawOnCanvas() {
