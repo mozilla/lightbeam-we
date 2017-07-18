@@ -77,8 +77,11 @@ const store = {
     if (!hostname) {
       throw new Error('getWebsite requires a valid hostname argument');
     }
-
-    return this._websites[hostname];
+    if (this._websites && this._websites[hostname]) {
+      return this._websites[hostname];
+    } else {
+      return {};
+    }
   },
 
   getThirdParties(hostname) {
@@ -128,8 +131,9 @@ const store = {
       throw new Error('setThirdParty requires a valid origin argument');
     }
 
-    const firstParty = this.getWebsite(origin) || {};
-    const thirdParty = this.getWebsite(target) || {};
+    const firstParty = this.getWebsite(origin);
+    const thirdParty = this.getWebsite(target);
+
     if (!('thirdPartyHostnames' in firstParty)) {
       firstParty['thirdPartyHostnames'] = [];
     }
@@ -164,6 +168,5 @@ const store = {
 function clone(obj) {
   return Object.assign({}, obj);
 }
-// @todo end
 
 store.init();
