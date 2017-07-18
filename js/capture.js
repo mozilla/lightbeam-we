@@ -6,9 +6,17 @@ const capture = {
   async init() {
     this.addListeners();
     // get Disconnect Entity List from shavar-prod-lists submodule
-    let whiteList
-      = await fetch('/shavar-prod-lists/disconnect-entitylist.json');
-    whiteList = await whiteList.json();
+    let whiteList;
+    const whiteListURL = '/shavar-prod-lists/disconnect-entitylist.json';
+    try {
+      whiteList = await fetch(whiteListURL);
+      whiteList = await whiteList.json();
+    } catch (error) {
+      whiteList = {};
+      const explanation = 'See README.md for how to import submodule file';
+      // eslint-disable-next-line no-console
+      console.error(`${error.message} ${explanation} ${whiteListURL}`);
+    }
     const { firstPartyWhiteList, thirdPartyWhiteList }
       = this.reformatList(whiteList);
     this.firstPartyWhiteList = firstPartyWhiteList;
@@ -113,7 +121,7 @@ const capture = {
   // check if third party is on the whitelist (owned by the first party)
   // returns true if it is and false otherwise
   onWhitelist(firstPartyFromRequest, thirdPartyFromRequest) {
-    if (thirdPartyFromRequest) {
+    if (thirdPartyFromRequest && this.firstPartyWhiteList) {
       const hostnameVariantsFirstParty
         = this.getHostnameVariants(firstPartyFromRequest);
       for (let i = 0; i < hostnameVariantsFirstParty.length; i++) {
