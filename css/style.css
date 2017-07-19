@@ -293,6 +293,15 @@ input[type="checkbox"] {
 #visualization {
   width: 500px;
   height: 400px;
+  position: relative;
+}
+
+#tooltip {
+  position: absolute;
+  display: none;
+  background-color: #fff;
+  color: #000;
+  padding: 4px;
 }
 
 .info-panel-controls {

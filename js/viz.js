@@ -13,16 +13,10 @@ const viz = {
     this.height = height;
     this.canvas = canvas;
     this.context = context;
-    /* this.hiddenContext = this.createCanvas({
-      width,
-      height,
-      display: 'none'
-    }); */
-    // colors to node mapping for canvas based mouse interactivity
-    this.colToNode = {};
+    this.tooltip = document.getElementById('tooltip');
 
-    this.addListeners();
     this.draw(nodes, links);
+    this.addListeners();
   },
 
   draw(nodes, links) {
@@ -95,7 +89,6 @@ const viz = {
     this.context.clearRect(0, 0, this.width, this.height);
     this.context.save();
     this.drawNodes();
-    // this.drawLabels();
     this.drawLinks();
     this.context.restore();
   },
@@ -112,17 +105,18 @@ const viz = {
       }
       this.context.closePath();
       this.context.fill();
-
-      // this.drawLabel(d.hostname, d.x, d.y);
     }
   },
 
-  drawLabel(title, x, y) {
-    this.context.fillStyle = 'white';
-    this.context.beginPath();
-    this.context.fillText(title, x, y);
-    this.context.closePath();
-    this.context.fill();
+  showTooltip(title, x, y) {
+    this.tooltip.innerText = title;
+    this.tooltip.style.left = `${x+10}px`;
+    this.tooltip.style.top = `${y+10}px`;
+    this.tooltip.style.display = 'block';
+  },
+
+  hideTooltip() {
+    this.tooltip.style.display = 'none';
   },
 
   drawLinks() {
@@ -155,13 +149,25 @@ const viz = {
   },
 
   addListeners() {
-    this.canvas.on('click', () => {
+    this.addMouseMove();
+    // this.addMouseLeave();
+  },
+
+  addMouseMove() {
+    this.canvas.on('mousemove', () => {
       const coordinates = d3.mouse(this.canvas.node());
       const node = this.getNodeAtCoordinates(coordinates[0], coordinates[1]);
-      if (node && !node.label) {
-        this.drawLabel(node.hostname, coordinates[0], coordinates[1]);
-        node.label = true;
+      if (node) {
+        this.showTooltip(node.hostname, coordinates[0], coordinates[1]);
+      } else if (!node) {
+        this.hideTooltip();
       }
+    });
+  },
+
+  addMouseLeave() {
+    this.canvas.on('mouseleave', () => {
+      this.hideTooltip();
     });
   }
 };
