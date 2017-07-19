@@ -1,5 +1,84 @@
 // transforms the object of nested objects 'websites' into a
 // usable format for d3
+
+/*
+  websites is expected to match this format:
+  {
+    "www.firstpartydomain.com": {
+      favicon: "http://blah...",
+      firstParty: true,
+      firstPartyHostnames: false,
+      hostname: "www.firstpartydomain.com",
+      thirdParties: [
+        "www.thirdpartydomain.com",
+        ...
+      ]
+    },
+    "www.thirdpartydomain.com": {
+      favicon: "",
+      firstParty: false,
+      firstPartyHostnames: [
+        "www.firstpartydomain.com",
+        ...
+      ],
+      hostname: "www.thirdpartydomain.com",
+      thirdParties: []
+    },
+    ...
+  }
+
+  nodes is expected to match this format:
+  [
+    {
+      favicon: "http://blah...",
+      firstParty: true,
+      firstPartyHostnames: false,
+      hostname: "www.firstpartydomain.com",
+      thirdParties: [
+        "www.thirdpartydomain.com",
+        ...
+      ]
+    },
+    {
+      favicon: "",
+      firstParty: false,
+      firstPartyHostnames: [
+        "www.firstpartydomain.com",
+        ...
+      ],
+      hostname: "www.thirdpartydomain.com",
+      thirdParties: []
+    },
+    ...
+  ]
+
+  links is expected to match this format:
+  [
+    {
+      source: {
+        favicon: "http://blah...",
+        firstParty: true,
+        firstPartyHostnames: false,
+        hostname: "www.firstpartydomain.com",
+        thirdParties: [
+          "www.thirdpartydomain.com",
+          ...
+        ]
+      },
+      target: {
+        favicon: "",
+        firstParty: false,
+        firstPartyHostnames: [
+          "www.firstpartydomain.com",
+          ...
+        ],
+        hostname: "www.thirdpartydomain.com",
+        thirdParties: []
+      }
+    },
+    ...
+  ]
+*/
 function transformData(websites) {
   const nodes = [];
   let links = [];

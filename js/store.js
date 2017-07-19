@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 const store = {
   _websites: null,
 
@@ -11,6 +10,91 @@ const store = {
       }
     }
     browser.runtime.onMessage.addListener((m) => store.messageHandler(m));
+
+    // get Disconnect Entity List from shavar-prod-lists submodule
+    let whiteList;
+    const whiteListURL = '/shavar-prod-lists/disconnect-entitylist.json';
+    try {
+      whiteList = await fetch(whiteListURL);
+      whiteList = await whiteList.json();
+    } catch (error) {
+      whiteList = {};
+      const explanation = 'See README.md for how to import submodule file';
+      // eslint-disable-next-line no-console
+      console.error(`${error.message} ${explanation} ${whiteListURL}`);
+    }
+    const { firstPartyWhiteList, thirdPartyWhiteList }
+      = this.reformatList(whiteList);
+    this.firstPartyWhiteList = firstPartyWhiteList;
+    this.thirdPartyWhiteList = thirdPartyWhiteList;
+  },
+
+  /*
+  disconnect-entitylist.json is expected to match this format, where:
+    - 'properties' keys are first parties
+    - 'resources' keys are third parties
+
+  {
+    "Facebook" : {
+      "properties": [
+        "facebook.com",
+        "facebook.de",
+        ...
+        "messenger.com"
+      ],
+      "resources": [
+        "facebook.com",
+        "facebook.de",
+        ...
+        "akamaihd.net"
+      ]
+    }
+
+    "Google" : {
+      ...
+    }
+  }
+
+  this.firstPartyWhiteList is expected to match this format:
+  {
+    "google.com": 1,
+    "abc.xyz": 1
+    ....
+    "facebook.com": 2,
+    ...
+  }
+
+  this.thirdPartyWhiteList is expected to match this format:
+  {
+    1: [
+      "google.com",
+      "googleanalytics.com",
+      "weloveevilstuff.com"
+    ]
+  }
+*/
+
+  reformatList(whiteList) {
+    const firstPartyWhiteList = {};
+    const thirdPartyWhiteList = {};
+    let counter = 0;
+    for (const siteOwner in whiteList) {
+      const firstParties = whiteList[siteOwner].properties;
+      for (let i = 0; i < firstParties.length; i++) {
+        firstPartyWhiteList[firstParties[i]] = counter;
+      }
+      const thirdParties = whiteList[siteOwner].resources;
+      thirdPartyWhiteList[counter] = [];
+      for (let i = 0; i < thirdParties.length; i++) {
+        thirdPartyWhiteList[counter].push(thirdParties[i]);
+      }
+      counter++;
+    }
+
+    return {
+      firstPartyWhiteList,
+      thirdPartyWhiteList
+    };
   },
 
   // send message to storeChild when data in store is changed
@@ -113,9 +197,47 @@ const store = {
 
     this._write(websites);
 
-    if (newSite) {
+    if (newSite && !data['isIgnored']) {
       this.updateChild(this.outputWebsite(hostname, websites[hostname]));
     }
+  },
+
+  getHostnameVariants(hostname) {
+    const hostnameVariants = [hostname];
+    const hostnameArr = hostname.split('.');
+    const numDots = hostnameArr.length - 1;
+    for (let i = 0; i < numDots - 1; i++) {
+      hostnameArr.shift();
+      hostname = hostnameArr.join('.');
+      hostnameVariants.push(hostname);
+    }
+    return hostnameVariants;
+  },
+
+  // check if third party is on the whitelist (owned by the first party)
+  // returns true if it is and false otherwise
+  onWhiteList(firstPartyFromRequest, thirdPartyFromRequest) {
+    if (thirdPartyFromRequest && this.firstPartyWhiteList) {
+      const hostnameVariantsFirstParty
+        = this.getHostnameVariants(firstPartyFromRequest);
+      for (let i = 0; i < hostnameVariantsFirstParty.length; i++) {
+        if (this.firstPartyWhiteList
+          .hasOwnProperty(hostnameVariantsFirstParty[i])) {
+          // first party is in the whitelist
+          const index = this.firstPartyWhiteList[hostnameVariantsFirstParty[i]];
+          const hostnameVariantsThirdParty
+            = this.getHostnameVariants(thirdPartyFromRequest);
+          for (let j = 0; j < hostnameVariantsThirdParty.length; j++) {
+            if (this.thirdPartyWhiteList[index]
+              .includes(hostnameVariantsThirdParty[j])) {
+              return true;
+            }
+          }
+          return false;
+        }
+      }
+    }
+    return false;
   },
 
   setFirstParty(hostname, data) {
@@ -134,19 +256,74 @@ const store = {
     const firstParty = this.getWebsite(origin);
     const thirdParty = this.getWebsite(target);
 
+/*
+  if not {},
+
+  firstParty is expected to match this format:
+  {
+    thirdPartyHostnames: [
+      "www.thirdpartydomain.com",
+      ...
+    ]
+  }
+  thirdParty is expected to match this format:
+  {
+    firstPartyHostnames: [
+      "www.firstpartydomain.com",
+      ...
+    ],
+    isIgnored: true, (optional)
+    whiteListedFirstParty: "www.google.com" (optional)
+  }
+  */
+
+    let whiteListOverride = false;
+    let onWhiteList = false;
+
     if (!('thirdPartyHostnames' in firstParty)) {
       firstParty['thirdPartyHostnames'] = [];
     }
     if (!firstParty['thirdPartyHostnames'].includes(target)) {
-      firstParty['thirdPartyHostnames'].push(target);
-      newThirdParty = true;
+      // third party is not currently linked to first party
+      if (!thirdParty['isIgnored']) {
+        // third party needs a whitelist check
+        onWhiteList = this.onWhiteList(origin, target);
+        if (onWhiteList) {
+          // third party is whitelisted for this first party
+          // ignore the link for now
+          thirdParty['isIgnored'] = true;
+          thirdParty['whiteListedFirstParty'] = origin;
+        } else {
+          // third party is not whitelisted for this first party
+          firstParty['thirdPartyHostnames'].push(target);
+          newThirdParty = true;
+        }
+      } else if (!(this.onWhiteList(origin, target))) {
+        // third party was previously whitelisted, and its
+        // previously ignored link with the owning first party
+        // should be added now that it links to a first party
+        // for which it is not whitelisted
+        thirdParty['isIgnored'] = false;
+        whiteListOverride = true;
+        const whiteListedFirstParty = thirdParty['whiteListedFirstParty'];
+        this._websites[whiteListedFirstParty]['thirdPartyHostnames']
+          .push(target);
+        firstParty['thirdPartyHostnames'].push(target);
+        // take care of updating thirdParty[firstPartyHostnames] further down
+        newThirdParty = true;
+      }
     }
-    if (!('firstPartyHostnames' in firstParty)) {
+    if (!('firstPartyHostnames' in thirdParty)) {
       thirdParty['firstPartyHostnames'] = [];
     }
     if (!thirdParty['firstPartyHostnames'].includes(origin)) {
-      thirdParty['firstPartyHostnames'].push(origin);
-      newThirdParty = true;
+      if (whiteListOverride) {
+        thirdParty['firstPartyHostnames']
+          .push(thirdParty['whiteListedFirstParty']);
+      }
+      if (newThirdParty) {
+        thirdParty['firstPartyHostnames'].push(origin);
+      }
     }
 
     this.setWebsite(origin, firstParty);
