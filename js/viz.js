@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 const viz = {
-  radius: 15,
+  radius: 5,
 
   init(nodes, links) {
     const { width, height } = this.getDimensions('visualization');
@@ -53,8 +53,12 @@ const viz = {
     centerForce.y(this.height/2);
     simulation.force('center', centerForce);
 
-    simulation.force('charge', d3.forceManyBody());
-    simulation.force('collide', d3.forceCollide(5));
+    const manyBody = d3.forceManyBody();
+    // manyBody.strength(-100);
+    // manyBody.distanceMin(50);
+    simulation.force('charge', manyBody);
+
+    simulation.force('collide', d3.forceCollide(50));
     simulation.alphaTarget(1);
 
     return simulation;
@@ -88,8 +92,8 @@ const viz = {
   drawOnCanvas() {
     this.context.clearRect(0, 0, this.width, this.height);
     this.context.save();
-    this.drawNodes();
     this.drawLinks();
+    this.drawNodes();
     this.context.restore();
   },
 
@@ -110,8 +114,8 @@ const viz = {
 
   showTooltip(title, x, y) {
     this.tooltip.innerText = title;
-    this.tooltip.style.left = `${x+10}px`;
-    this.tooltip.style.top = `${y+10}px`;
+    this.tooltip.style.left = `${x + this.radius}px`;
+    this.tooltip.style.top = `${y + this.radius}px`;
     this.tooltip.style.display = 'block';
   },
 
@@ -155,10 +159,12 @@ const viz = {
 
   addMouseMove() {
     this.canvas.on('mousemove', () => {
-      const coordinates = d3.mouse(this.canvas.node());
-      const node = this.getNodeAtCoordinates(coordinates[0], coordinates[1]);
+      const points = d3.mouse(this.canvas.node());
+      // const X = d3.event.layerX || d3.event.offsetX;
+      const node = this.getNodeAtCoordinates(points[0], points[1]);
+      // const node = this.simulation.find(points[0], points[1], this.radius);
       if (node) {
-        this.showTooltip(node.hostname, coordinates[0], coordinates[1]);
+        this.showTooltip(node.hostname, points[0], points[1]);
       } else if (!node) {
         this.hideTooltip();
       }
