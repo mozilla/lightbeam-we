@@ -1,12 +1,27 @@
 // eslint-disable-next-line no-unused-vars
 const viz = {
+  radius: 15,
+
   init(nodes, links) {
     const { width, height } = this.getDimensions('visualization');
+    const { canvas, context } = this.createCanvas({
+      width,
+      height
+    });
 
     this.width = width;
     this.height = height;
-    this.context = this.createCanvas(width, height);
+    this.canvas = canvas;
+    this.context = context;
+    /* this.hiddenContext = this.createCanvas({
+      width,
+      height,
+      display: 'none'
+    }); */
+    // colors to node mapping for canvas based mouse interactivity
+    this.colToNode = {};
 
+    this.addListeners();
     this.draw(nodes, links);
   },
 
@@ -51,14 +66,19 @@ const viz = {
     return simulation;
   },
 
-  createCanvas(width, height) {
+  createCanvas(options) {
+    const { width, height, display } = options;
     const base = d3.select('#visualization');
     const canvas = base.append('canvas');
     canvas.attr('width', width);
     canvas.attr('height', height);
+    canvas.attr('display', display || 'block');
     const context = canvas.node().getContext('2d');
 
-    return context;
+    return {
+      canvas,
+      context
+    };
   },
 
   getDimensions(id) {
@@ -84,7 +104,7 @@ const viz = {
     for (const d of this.nodes) {
       this.context.beginPath();
       this.context.moveTo(d.x, d.y);
-      this.context.arc(d.x, d.y, 4.5, 0, 2 * Math.PI);
+      this.context.arc(d.x, d.y, this.radius, 0, 2 * Math.PI);
       if (d.firstParty) {
         this.context.fillStyle = 'red';
       } else {
@@ -93,7 +113,7 @@ const viz = {
       this.context.closePath();
       this.context.fill();
 
-      this.drawLabel(d.hostname, d.x, d.y);
+      // this.drawLabel(d.hostname, d.x, d.y);
     }
   },
 
@@ -114,5 +134,34 @@ const viz = {
     this.context.closePath();
     this.context.strokeStyle = '#ccc';
     this.context.stroke();
+  },
+
+  isPointInsideCircle(x, y, cx, cy) {
+    const dx = Math.abs(x - cx);
+    const dy = Math.abs(y - cy);
+    const d = dx*dx + dy*dy;
+    const r = this.radius;
+
+    return d <= r*r;
+  },
+
+  getNodeAtCoordinates(x, y) {
+    for (const node of this.nodes) {
+      if (this.isPointInsideCircle(x, y, node.x, node.y)) {
+        return node;
+      }
+    }
+    return null;
+  },
+
+  addListeners() {
+    this.canvas.on('click', () => {
+      const coordinates = d3.mouse(this.canvas.node());
+      const node = this.getNodeAtCoordinates(coordinates[0], coordinates[1]);
+      if (node && !node.label) {
+        this.drawLabel(node.hostname, coordinates[0], coordinates[1]);
+        node.label = true;
+      }
+    });
   }
 };
