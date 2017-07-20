@@ -1,13 +1,10 @@
 // eslint-disable-next-line no-unused-vars
 const viz = {
-  radius: 5,
+  circleRadius: 5,
 
   init(nodes, links) {
     const { width, height } = this.getDimensions('visualization');
-    const { canvas, context } = this.createCanvas({
-      width,
-      height
-    });
+    const { canvas, context } = this.createCanvas(width, height);
 
     this.width = width;
     this.height = height;
@@ -15,8 +12,8 @@ const viz = {
     this.context = context;
     this.tooltip = document.getElementById('tooltip');
 
-    this.draw(nodes, links);
     this.addListeners();
+    this.draw(nodes, links);
   },
 
   draw(nodes, links) {
@@ -39,7 +36,6 @@ const viz = {
       simulation = d3.forceSimulation(this.nodes);
     } else {
       simulation = this.simulation;
-      this.simulation.stop();
       simulation.nodes(this.nodes);
     }
 
@@ -53,24 +49,19 @@ const viz = {
     centerForce.y(this.height/2);
     simulation.force('center', centerForce);
 
-    const manyBody = d3.forceManyBody();
-    // manyBody.strength(-100);
-    // manyBody.distanceMin(50);
-    simulation.force('charge', manyBody);
-
+    simulation.force('charge', d3.forceManyBody());
     simulation.force('collide', d3.forceCollide(50));
     simulation.alphaTarget(1);
+    simulation.stop();
 
     return simulation;
   },
 
-  createCanvas(options) {
-    const { width, height, display } = options;
+  createCanvas(width, height) {
     const base = d3.select('#visualization');
     const canvas = base.append('canvas');
     canvas.attr('width', width);
     canvas.attr('height', height);
-    canvas.attr('display', display || 'block');
     const context = canvas.node().getContext('2d');
 
     return {
@@ -101,7 +92,7 @@ const viz = {
     for (const d of this.nodes) {
       this.context.beginPath();
       this.context.moveTo(d.x, d.y);
-      this.context.arc(d.x, d.y, this.radius, 0, 2 * Math.PI);
+      this.context.arc(d.x, d.y, this.circleRadius, 0, 2 * Math.PI);
       if (d.firstParty) {
         this.context.fillStyle = 'red';
       } else {
@@ -114,8 +105,8 @@ const viz = {
 
   showTooltip(title, x, y) {
     this.tooltip.innerText = title;
-    this.tooltip.style.left = `${x + this.radius}px`;
-    this.tooltip.style.top = `${y + this.radius}px`;
+    this.tooltip.style.left = `${x + this.circleRadius}px`;
+    this.tooltip.style.top = `${y + this.circleRadius}px`;
     this.tooltip.style.display = 'block';
   },
 
@@ -138,7 +129,7 @@ const viz = {
     const dx = Math.abs(x - cx);
     const dy = Math.abs(y - cy);
     const d = dx*dx + dy*dy;
-    const r = this.radius;
+    const r = this.circleRadius;
 
     return d <= r*r;
   },
@@ -154,26 +145,17 @@ const viz = {
 
   addListeners() {
     this.addMouseMove();
-    // this.addMouseLeave();
   },
 
   addMouseMove() {
     this.canvas.on('mousemove', () => {
-      const points = d3.mouse(this.canvas.node());
-      // const X = d3.event.layerX || d3.event.offsetX;
-      const node = this.getNodeAtCoordinates(points[0], points[1]);
-      // const node = this.simulation.find(points[0], points[1], this.radius);
+      const [mouseX, mouseY] = d3.mouse(this.canvas.node());
+      const node = this.getNodeAtCoordinates(mouseX, mouseY);
       if (node) {
-        this.showTooltip(node.hostname, points[0], points[1]);
+        this.showTooltip(node.hostname, mouseX, mouseY);
       } else if (!node) {
         this.hideTooltip();
       }
-    });
-  },
-
-  addMouseLeave() {
-    this.canvas.on('mouseleave', () => {
-      this.hideTooltip();
     });
   }
 };
