@@ -153,7 +153,7 @@ const viz = {
       const node = this.getNodeAtCoordinates(mouseX, mouseY);
       if (node) {
         this.showTooltip(node.hostname, mouseX, mouseY);
-      } else if (!node) {
+      } else {
         this.hideTooltip();
       }
     });
