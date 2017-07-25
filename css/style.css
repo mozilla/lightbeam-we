@@ -263,36 +263,27 @@ input[type="checkbox"] {
 /* ----------- UI - Graph ----------- */
 
 .vis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  width: 100%;
+  height: 90%;
   padding: 30px;
+  position: relative;
 }
 
-.vis > div {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  height: 100%;
+.vis-panel {
+  height: 75%;
 }
 
-.vis > div > div {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.vis h1 {
+.vis-panel > h1 {
   color: var(--primary-text-color);
 }
 
-.vis h2 {
+.vis-panel > h2 {
   color: var(--secondary-text-color);
 }
 
 #visualization {
-  width: 500px;
-  height: 400px;
+  width: 100%;
+  height: 100%;
   position: relative;
 }
 
@@ -306,10 +297,9 @@ input[type="checkbox"] {
 }
 
 .info-panel-controls {
-  display: flex;
-  flex-direction: column;
-  margin-right: -30px;
-  margin-top: -30px;
+  position: absolute;
+  right: 30px;
+  top: 30px;
 }
 
 .info-panel {
