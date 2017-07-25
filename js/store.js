@@ -155,7 +155,8 @@ const store = {
     const output = {};
     for (const hostname in this._websites) {
       const website = this._websites[hostname];
-      if (website['isVisible']) {
+      // if it's a visible third party or a first party
+      if (website['isVisible'] || !('isVisible' in website)) {
         output[hostname] = this.outputWebsite(hostname, website);
       }
     }
@@ -273,80 +274,80 @@ const store = {
     this.setWebsite(hostname, data);
 
     if (isNewWebsite) {
-      this.updateChild(this.outputWebsite(hostname, this._websites[hostname]));
+      this.updateChild(this.outputWebsite(hostname, data));
     }
   },
 
-  // @todo use data from capture to update UI/filter graph
-  // eslint-disable-next-line no-unused-vars
+  // @todo restructure storage to use data from capture for graph filtering
   setThirdParty(origin, target, data) {
-    let isNewWebsite = false;
     if (!origin) {
       throw new Error('setThirdParty requires a valid origin argument');
     }
 
-    let firstParty = this.getWebsite(origin);
-    let thirdParty = this.getWebsite(target);
+    let isNewThirdParty = false;
+    let isNewFirstParty = false;
 
-    if (!('thirdPartyHostnames' in firstParty)) {
-      firstParty['thirdPartyHostnames'] = [];
-    }
-    if (!firstParty['thirdPartyHostnames'].includes(target)) {
-      // third party is not currently linked to first party
-      ({ firstParty, thirdParty, isNewWebsite }
-        = this.whiteListCheck(origin, target, firstParty, thirdParty));
-    }
+    const firstParty = this.getWebsite(origin);
+    const thirdParty = this.getWebsite(target);
+
+    // add link in third party if it doesn't exist yet
     if (!('firstPartyHostnames' in thirdParty)) {
       thirdParty['firstPartyHostnames'] = [];
     }
     if (!thirdParty['firstPartyHostnames'].includes(origin)) {
       thirdParty['firstPartyHostnames'].push(origin);
+      isNewFirstParty = true;
     }
 
-    this.setFirstParty(origin, firstParty);
+    // add link in first party if it doesn't exist yet
+    // and the third party is visible (i.e. not whitelisted)
+    if (!('thirdPartyHostnames' in  firstParty)
+      || !firstParty['thirdPartyHostnames'].includes(target)) {
+      if (!('isVisible' in thirdParty) || !thirdParty['isVisible']) {
+        if (!(this.onWhiteList(origin, target))) {
+          // show third party
+          thirdParty['isVisible'] = true;
+          isNewThirdParty = true;
+        } else {
+          // hide third party
+          thirdParty['isVisible'] = false;
+        }
+      }
+      if (thirdParty['isVisible'] && isNewFirstParty) {
+        // an existing visible third party links to a new first party
+        thirdParty['firstPartyHostnames'].forEach((firstPartyHostname) => {
+          this.addFirstPartyLink(firstPartyHostname, target);
+        });
+      }
+    }
+
+    // merge data with thirdParty website object
+    for (const key in data) {
+      thirdParty[key] = data[key];
+    }
+
     this.setWebsite(target, thirdParty);
 
-    if (isNewWebsite && thirdParty['isVisible']) {
-      this.updateChild(this.outputWebsite(target, this._websites[target]));
+    // should update if:
+    //   - there is a new third party, OR
+    //   - there is a new link between an old third party and a new first party
+    //   AND
+    //   - the third party is visible (i.e. not whitelisted)
+    const shouldUpdate = (isNewThirdParty || isNewFirstParty)
+      && thirdParty['isVisible'];
+
+    if (shouldUpdate) {
+      this.updateChild(this.outputWebsite(target, thirdParty));
     }
   },
 
-  // Checks if third party is on whitelist for first party,
-  // and if the whitelisted third party should be unwhitelisted.
-  whiteListCheck(origin, target, firstParty, thirdParty) {
-    let isNewWebsite = false;
-    if (!('isVisible' in thirdParty)) {
-      if (this.onWhiteList(origin, target)) {
-        // third party is whitelisted for this first party
-        // ignore this third party for now.
-        thirdParty['isVisible'] = false;
-      } else {
-        thirdParty['isVisible'] = true;
-        firstParty['thirdPartyHostnames'].push(target);
-        isNewWebsite = true;
-      }
-    } else if (!(this.onWhiteList(origin, target))) {
-      if (!thirdParty['isVisible']) {
-        // third party was previously whitelisted, and its
-        // previously ignored link with the owning first party
-        // should be added now
-        thirdParty['isVisible'] = true;
-        const whiteListedFirstParty = thirdParty['firstPartyHostnames']
-          .filter((firstPartyHostname) => {
-            return !(this._websites[firstPartyHostname]['thirdPartyHostnames']
-              .includes(target));
-          })[0];
-        this._websites[whiteListedFirstParty]['thirdPartyHostnames']
-          .push(target);
-      }
-      firstParty['thirdPartyHostnames'].push(target);
-      isNewWebsite = true;
+  addFirstPartyLink(firstPartyHostname, thirdPartyHostname) {
+    const firstParty = this.getWebsite(firstPartyHostname);
+    if (!('thirdPartyHostnames' in firstParty)) {
+      firstParty['thirdPartyHostnames'] = [];
     }
-    return {
-      firstParty,
-      thirdParty,
-      isNewWebsite
-    };
+    firstParty['thirdPartyHostnames'].push(thirdPartyHostname);
+    this.setFirstParty(firstPartyHostname, firstParty);
   },
 
   async reset() {
