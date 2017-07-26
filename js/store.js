@@ -205,19 +205,15 @@ const store = {
     return null;
   },
 
-  setWebsite(hostname, partyData, requestData) {
+  setWebsite(hostname, data) {
     const websites = clone(this._websites);
 
     if (this.isNewWebsite(hostname)) {
       websites[hostname] = {};
     }
 
-    for (const key in partyData) {
-      websites[hostname][key] = partyData[key];
-    }
-
-    for (const key in requestData) {
-      websites[hostname][key] = requestData[key];
+    for (const key in data) {
+      websites[hostname][key] = data[key];
     }
 
     this._write(websites);
@@ -282,7 +278,6 @@ const store = {
     }
   },
 
-  // @todo restructure storage to use data from capture for graph filtering
   setThirdParty(origin, target, data) {
     if (!origin) {
       throw new Error('setThirdParty requires a valid origin argument');
@@ -304,13 +299,13 @@ const store = {
 
     // add link in first party if it doesn't exist yet
     // and the third party is visible (i.e. not whitelisted)
-    if (!this.isFirstPartyConnectedToThirdParty(firstParty, target)) {
+    if (!this.isFirstPartyLinkedToThirdParty(firstParty, target)) {
       if (!this.isVisibleThirdParty(thirdParty)) {
         if (this.onWhiteList(origin, target)) {
           // hide third party
           thirdParty['isVisible'] = false;
         } else {
-          // show third party and all its connections
+          // show third party; it either became visible or is brand new
           thirdParty['isVisible'] = true;
           isNewThirdParty = true;
           thirdParty['firstPartyHostnames'].forEach((firstPartyHostname) => {
@@ -326,15 +321,21 @@ const store = {
       }
     }
 
-    this.setWebsite(target, thirdParty, data);
+    // merge data with thirdParty
+    // @todo restructure storage to use data from capture for graph filtering
+    for (const key in data) {
+      thirdParty[key] = data[key];
+    }
+
+    this.setWebsite(target, thirdParty);
 
     if (shouldUpdate) {
       this.updateChild(this.outputWebsite(target, thirdParty));
     }
   },
 
-  isFirstPartyConnectedToThirdParty(firstParty, thirdPartyHostname) {
-    if (!('thirdPartyHostnames' in  firstParty)
+  isFirstPartyLinkedToThirdParty(firstParty, thirdPartyHostname) {
+    if (!('thirdPartyHostnames' in firstParty)
       || !firstParty['thirdPartyHostnames'].includes(thirdPartyHostname)) {
       return false;
     }
@@ -353,8 +354,7 @@ const store = {
     if (!('thirdPartyHostnames' in firstParty)) {
       firstParty['thirdPartyHostnames'] = [];
     }
-    if (!this
-      .isFirstPartyConnectedToThirdParty(firstParty, thirdPartyHostname)) {
+    if (!this.isFirstPartyLinkedToThirdParty(firstParty, thirdPartyHostname)) {
       firstParty['thirdPartyHostnames'].push(thirdPartyHostname);
       this.setFirstParty(firstPartyHostname, firstParty);
     }
