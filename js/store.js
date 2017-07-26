@@ -205,15 +205,19 @@ const store = {
     return null;
   },
 
-  setWebsite(hostname, data) {
+  setWebsite(hostname, partyData, requestData) {
     const websites = clone(this._websites);
 
     if (this.isNewWebsite(hostname)) {
       websites[hostname] = {};
     }
 
-    for (const key in data) {
-      websites[hostname][key] = data[key];
+    for (const key in partyData) {
+      websites[hostname][key] = partyData[key];
+    }
+
+    for (const key in requestData) {
+      websites[hostname][key] = requestData[key];
     }
 
     this._write(websites);
@@ -285,7 +289,7 @@ const store = {
     }
 
     let isNewThirdParty = false;
-    let isNewFirstParty = false;
+    let shouldUpdate = false;
 
     const firstParty = this.getWebsite(origin);
     const thirdParty = this.getWebsite(target);
@@ -296,49 +300,52 @@ const store = {
     }
     if (!thirdParty['firstPartyHostnames'].includes(origin)) {
       thirdParty['firstPartyHostnames'].push(origin);
-      isNewFirstParty = true;
     }
 
     // add link in first party if it doesn't exist yet
     // and the third party is visible (i.e. not whitelisted)
-    if (!('thirdPartyHostnames' in  firstParty)
-      || !firstParty['thirdPartyHostnames'].includes(target)) {
-      if (!('isVisible' in thirdParty) || !thirdParty['isVisible']) {
-        if (!(this.onWhiteList(origin, target))) {
-          // show third party
-          thirdParty['isVisible'] = true;
-          isNewThirdParty = true;
-        } else {
+    if (!this.isFirstPartyConnectedToThirdParty(firstParty, target)) {
+      if (!this.isVisibleThirdParty(thirdParty)) {
+        if (this.onWhiteList(origin, target)) {
           // hide third party
           thirdParty['isVisible'] = false;
+        } else {
+          // show third party and all its connections
+          thirdParty['isVisible'] = true;
+          isNewThirdParty = true;
+          thirdParty['firstPartyHostnames'].forEach((firstPartyHostname) => {
+            this.addFirstPartyLink(firstPartyHostname, target);
+          });
+          shouldUpdate = true;
         }
       }
-      if (thirdParty['isVisible'] && isNewFirstParty) {
+      if (this.isVisibleThirdParty(thirdParty) && !isNewThirdParty) {
         // an existing visible third party links to a new first party
-        thirdParty['firstPartyHostnames'].forEach((firstPartyHostname) => {
-          this.addFirstPartyLink(firstPartyHostname, target);
-        });
+        this.addFirstPartyLink(origin, target);
+        shouldUpdate = true;
       }
     }
 
-    // merge data with thirdParty website object
-    for (const key in data) {
-      thirdParty[key] = data[key];
-    }
-
-    this.setWebsite(target, thirdParty);
-
-    // should update if:
-    //   - there is a new third party, OR
-    //   - there is a new link between an old third party and a new first party
-    //   AND
-    //   - the third party is visible (i.e. not whitelisted)
-    const shouldUpdate = (isNewThirdParty || isNewFirstParty)
-      && thirdParty['isVisible'];
+    this.setWebsite(target, thirdParty, data);
 
     if (shouldUpdate) {
       this.updateChild(this.outputWebsite(target, thirdParty));
     }
+  },
+
+  isFirstPartyConnectedToThirdParty(firstParty, thirdPartyHostname) {
+    if (!('thirdPartyHostnames' in  firstParty)
+      || !firstParty['thirdPartyHostnames'].includes(thirdPartyHostname)) {
+      return false;
+    }
+    return true;
+  },
+
+  isVisibleThirdParty(thirdParty) {
+    if (!('isVisible' in thirdParty) || !thirdParty['isVisible']) {
+      return false;
+    }
+    return true;
   },
 
   addFirstPartyLink(firstPartyHostname, thirdPartyHostname) {
@@ -346,8 +353,11 @@ const store = {
     if (!('thirdPartyHostnames' in firstParty)) {
       firstParty['thirdPartyHostnames'] = [];
     }
-    firstParty['thirdPartyHostnames'].push(thirdPartyHostname);
-    this.setFirstParty(firstPartyHostname, firstParty);
+    if (!this
+      .isFirstPartyConnectedToThirdParty(firstParty, thirdPartyHostname)) {
+      firstParty['thirdPartyHostnames'].push(thirdPartyHostname);
+      this.setFirstParty(firstPartyHostname, firstParty);
+    }
   },
 
   async reset() {
