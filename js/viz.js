@@ -60,9 +60,13 @@ const viz = {
   createCanvas(width, height) {
     const base = d3.select('#visualization');
     const canvas = base.append('canvas');
-    canvas.attr('width', width);
-    canvas.attr('height', height);
     const context = canvas.node().getContext('2d');
+    const scale = window.devicePixelRatio || 1;
+    canvas.attr('width', width * scale);
+    canvas.attr('height', height * scale);
+    canvas.style('width', `${width}px`);
+    canvas.style('height', `${height}px`);
+    context.scale(scale, scale);
 
     return {
       canvas,
