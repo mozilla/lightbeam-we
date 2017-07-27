@@ -62,6 +62,7 @@ const viz = {
     const canvas = base.append('canvas');
     const context = canvas.node().getContext('2d');
     const scale = window.devicePixelRatio || 1;
+
     canvas.attr('width', width * scale);
     canvas.attr('height', height * scale);
     canvas.style('width', `${width}px`);
