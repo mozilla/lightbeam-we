@@ -298,7 +298,7 @@ input[type="checkbox"] {
 
 .info-panel-controls {
   position: absolute;
-  right: 30px;
+  right: 0px;
   top: 30px;
 }
 
