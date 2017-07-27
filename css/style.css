@@ -263,14 +263,14 @@ input[type="checkbox"] {
 /* ----------- UI - Graph ----------- */
 
 .vis {
-  width: 100%;
-  height: 90%;
-  padding: 30px;
+  display: grid;
+  grid-template-rows: 75% 25%;
   position: relative;
 }
 
 .vis-panel {
-  height: 75%;
+  padding: 30px;
+  padding-bottom: 0;
 }
 
 .vis-panel > h1 {
@@ -336,11 +336,14 @@ footer {
   grid-row-start: 2;
   display: grid;
   grid-template-columns: repeat(4, 1fr) 150px;
+  padding: 30px;
+  padding-top: 0;
 }
 
 footer h2 {
   padding-bottom: 5px;
   border-bottom: 1px solid var(--primary-text-color);
+  color: var(--primary-text-color);
 }
 
 footer div:first-child {
