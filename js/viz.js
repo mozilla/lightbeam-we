@@ -1,5 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 const viz = {
+  scalingFactor: 2,
   circleRadius: 5,
 
   init(nodes, links) {
@@ -11,6 +12,7 @@ const viz = {
     this.canvas = canvas;
     this.context = context;
     this.tooltip = document.getElementById('tooltip');
+    this.circleRadius = this.circleRadius * this.scalingFactor;
 
     this.addListeners();
     this.draw(nodes, links);
@@ -58,15 +60,16 @@ const viz = {
   },
 
   createCanvas(width, height) {
-    const base = d3.select('#visualization');
-    const canvas = base.append('canvas');
-    const context = canvas.node().getContext('2d');
-    const scale = window.devicePixelRatio || 1;
+    const base = document.getElementById('visualization');
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const scale = (window.devicePixelRatio || 1) * this.scalingFactor;
 
-    canvas.attr('width', width * scale);
-    canvas.attr('height', height * scale);
-    canvas.style('width', `${width}px`);
-    canvas.style('height', `${height}px`);
+    base.appendChild(canvas);
+    canvas.setAttribute('width', width * scale);
+    canvas.setAttribute('height', height * scale);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
     context.scale(scale, scale);
 
     return {
@@ -148,14 +151,24 @@ const viz = {
     return null;
   },
 
+  getMousePosition(event) {
+    const { left, top } = this.canvas.getBoundingClientRect();
+
+    return {
+      mouseX: event.clientX - left,
+      mouseY: event.clientY - top
+    };
+  },
+
   addListeners() {
     this.addMouseMove();
   },
 
   addMouseMove() {
-    this.canvas.on('mousemove', () => {
-      const [mouseX, mouseY] = d3.mouse(this.canvas.node());
+    this.canvas.addEventListener('mousemove', (event) => {
+      const { mouseX, mouseY } = this.getMousePosition(event);
       const node = this.getNodeAtCoordinates(mouseX, mouseY);
+
       if (node) {
         this.showTooltip(node.hostname, mouseX, mouseY);
       } else {
