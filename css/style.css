@@ -203,9 +203,8 @@ aside h2 {
 
 main {
   display: grid;
-  grid-template-rows: 10% 90%;
+  grid-template-rows: 10% 60% 30%;
   background-color: var(--primary-color);
-  height: 100vh;
 }
 
 .top-bar {
@@ -264,24 +263,23 @@ input[type="checkbox"] {
 
 .vis {
   display: grid;
-  grid-template-rows: 75% 25%;
-  position: relative;
+  grid-template-rows: 10% 90%;
+  grid-template-columns: 1fr 40px;
 }
 
-.vis-panel {
+.vis-header {
   padding: 30px;
-  padding-bottom: 0;
 }
 
-.vis-panel > h1 {
+.vis-header > h1 {
   color: var(--primary-text-color);
 }
 
-.vis-panel > h2 {
+.vis-header > h2 {
   color: var(--secondary-text-color);
 }
 
-#visualization {
+.vis-content {
   width: 100%;
   height: 100%;
   position: relative;
@@ -296,11 +294,12 @@ input[type="checkbox"] {
   padding: 4px;
 }
 
+.vis-controls {
+  grid-row-end: span 3;
+}
+
 .info-panel-controls {
-  position: absolute;
-  right: 0px;
-  top: 30px;
-  display: none;
+
 }
 
 .info-panel {
@@ -334,11 +333,10 @@ input[type="checkbox"] {
 /* ----------- UI - vis Controls ----------- */
 
 footer {
-  grid-row-start: 2;
   display: grid;
   grid-template-columns: repeat(4, 1fr) 150px;
+  grid-row-start: 3;
   padding: 30px;
-  padding-top: 0;
 }
 
 footer h2 {
