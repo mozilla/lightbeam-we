@@ -202,7 +202,6 @@ aside h2 {
 /* ----------- UI - Top Bar ----------- */
 
 main {
-  min-width: 780px;
   display: grid;
   grid-template-rows: 10% 90%;
   background-color: var(--primary-color);
