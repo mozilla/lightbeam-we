@@ -205,6 +205,7 @@ main {
   display: grid;
   grid-template-rows: 10% 60% 30%;
   background-color: var(--primary-color);
+  height: 100vh;
 }
 
 .top-bar {
@@ -336,7 +337,7 @@ footer {
   display: grid;
   grid-template-columns: repeat(4, 1fr) 150px;
   grid-row-start: 3;
-  padding: 30px;
+  padding: 0 30px;
 }
 
 footer h2 {
