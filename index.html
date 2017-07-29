@@ -81,18 +81,15 @@
         </div>
       </section>
       <section class="vis">
-        <div class="vis-panel">
+        <div class="vis-header">
           <!-- @todo update filter with current filter state -->
           <h1 id="filter">Recent Site</h1>
           <!-- @todo update view with current view state -->
           <h2><span id="view">Graph</span> View</h2>
           <!-- @todo display list or graph view, update view based on filter and controls -->
           <!-- @todo remove the hard-coded width, height values -->
-          <div id="visualization">
-            <div id="tooltip"></div>
-          </div>
         </div>
-        <div class="info-panel-controls">
+        <div class="vis-controls info-panel-controls">
           <!-- @todo check purpose of website icon -->
           <button class="info-panel website"></button>
           <!-- @todo add help sidebar -->
@@ -100,6 +97,10 @@
           <!-- @todo add about sidebar -->
           <button class="info-panel about"></button>
         </div>
+        <div class="vis-content" id="visualization">
+          <div id="tooltip"></div>
+        </div>
+      </section>
         <footer>
           <div>
             <h2>Toggle Controls</h2>
@@ -138,7 +139,7 @@
             </div>
           </div>
         </footer>
-      </section>
+
     </main>
   </body>
 </html>
