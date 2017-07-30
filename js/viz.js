@@ -76,11 +76,13 @@ const viz = {
   updateCanvas(width, height) {
     this.width = width;
     this.height = height;
-    this.canvas.setAttribute('width', width * this.scale);
-    this.canvas.setAttribute('height', height * this.scale);
+    // this.canvas.setAttribute('width', width * this.scale);
+    // this.canvas.setAttribute('height', height * this.scale);
+    this.canvas.setAttribute('width', width);
+    this.canvas.setAttribute('height', height);
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
-    this.context.scale(this.scale, this.scale);
+    // this.context.scale(this.scale, this.scale);
   },
 
   getDimensions(id) {
@@ -187,10 +189,18 @@ const viz = {
     window.addEventListener('resize', () => {
       clearTimeout(this.resizeTimer);
       this.resizeTimer = setTimeout(() => {
-        const { width, height } = this.getDimensions('visualization');
-        this.updateCanvas(width, height);
-        this.draw(this.nodes, this.links);
+        this.onResize();
       }, 250);
     });
+  },
+
+  onResize() {
+    this.canvas.style.width = 0;
+    this.canvas.style.height = 0;
+
+    const { width, height } = this.getDimensions('visualization');
+    this.updateCanvas(width, height);
+
+    this.draw(this.nodes, this.links);
   }
 };
