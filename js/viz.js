@@ -2,18 +2,19 @@
 const viz = {
   scalingFactor: 2,
   circleRadius: 5,
+  resizeTimer: null,
 
   init(nodes, links) {
     const { width, height } = this.getDimensions('visualization');
-    const { canvas, context } = this.createCanvas(width, height);
+    const { canvas, context } = this.createCanvas();
 
-    this.width = width;
-    this.height = height;
     this.canvas = canvas;
     this.context = context;
     this.tooltip = document.getElementById('tooltip');
     this.circleRadius = this.circleRadius * this.scalingFactor;
+    this.scale = (window.devicePixelRatio || 1) * this.scalingFactor;
 
+    this.updateCanvas(width, height);
     this.addListeners();
     this.draw(nodes, links);
   },
@@ -59,23 +60,27 @@ const viz = {
     return simulation;
   },
 
-  createCanvas(width, height) {
+  createCanvas() {
     const base = document.getElementById('visualization');
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
-    const scale = (window.devicePixelRatio || 1) * this.scalingFactor;
 
     base.appendChild(canvas);
-    canvas.setAttribute('width', width * scale);
-    canvas.setAttribute('height', height * scale);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    context.scale(scale, scale);
 
     return {
       canvas,
       context
     };
+  },
+
+  updateCanvas(width, height) {
+    this.width = width;
+    this.height = height;
+    this.canvas.setAttribute('width', width * this.scale);
+    this.canvas.setAttribute('height', height * this.scale);
+    this.canvas.style.width = `${width}px`;
+    this.canvas.style.height = `${height}px`;
+    this.context.scale(this.scale, this.scale);
   },
 
   getDimensions(id) {
@@ -162,6 +167,7 @@ const viz = {
 
   addListeners() {
     this.addMouseMove();
+    this.addWindowResize();
   },
 
   addMouseMove() {
@@ -174,6 +180,17 @@ const viz = {
       } else {
         this.hideTooltip();
       }
+    });
+  },
+
+  addWindowResize() {
+    window.addEventListener('resize', () => {
+      clearTimeout(this.resizeTimer);
+      this.resizeTimer = setTimeout(() => {
+        const { width, height } = this.getDimensions('visualization');
+        this.updateCanvas(width, height);
+        this.draw(this.nodes, this.links);
+      }, 250);
     });
   }
 };
