@@ -76,13 +76,11 @@ const viz = {
   updateCanvas(width, height) {
     this.width = width;
     this.height = height;
-    // this.canvas.setAttribute('width', width * this.scale);
-    // this.canvas.setAttribute('height', height * this.scale);
-    this.canvas.setAttribute('width', width);
-    this.canvas.setAttribute('height', height);
+    this.canvas.setAttribute('width', width * this.scale);
+    this.canvas.setAttribute('height', height * this.scale);
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
-    // this.context.scale(this.scale, this.scale);
+    this.context.scale(this.scale, this.scale);
   },
 
   getDimensions(id) {
@@ -199,6 +197,14 @@ const viz = {
     this.canvas.style.height = 0;
 
     const { width, height } = this.getDimensions('visualization');
+
+    /* if (width < 550) {
+      this.scalingFactor = 0.5;
+    } else {
+      this.scalingFactor = 2;
+    }
+    this.scale = (window.devicePixelRatio || 1) * this.scalingFactor; */
+
     this.updateCanvas(width, height);
 
     this.draw(this.nodes, this.links);
