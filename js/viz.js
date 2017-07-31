@@ -197,16 +197,7 @@ const viz = {
     this.canvas.style.height = 0;
 
     const { width, height } = this.getDimensions('visualization');
-
-    /* if (width < 550) {
-      this.scalingFactor = 0.5;
-    } else {
-      this.scalingFactor = 2;
-    }
-    this.scale = (window.devicePixelRatio || 1) * this.scalingFactor; */
-
     this.updateCanvas(width, height);
-
     this.draw(this.nodes, this.links);
   }
 };
