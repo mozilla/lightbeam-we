@@ -206,7 +206,7 @@ main {
   display: grid;
   grid-template-rows: 10% 60% 30%;
   background-color: var(--primary-color);
-  height: 100vh;
+  height: 100%;
 }
 
 .top-bar {
@@ -267,7 +267,7 @@ input[type="checkbox"] {
 
 .vis {
   display: grid;
-  grid-template-rows: 10% 90%;
+  grid-template-rows: 1fr 2fr;
   grid-template-columns: 1fr 40px;
 }
 
@@ -439,7 +439,6 @@ footer {
 @media (max-width: 600px) {
   main {
     display: block;
-    height: 100%;
   }
 
   .vis {
