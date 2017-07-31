@@ -101,45 +101,36 @@
           <div id="tooltip"></div>
         </div>
       </section>
-        <footer>
-          <div>
+      <footer>
+        <div class="footer-toggle">
+          <div class="footer-heading">
             <h2>Toggle Controls</h2>
-            <!-- @todo highlight active controls, add click to toggle controls -->
-            <div class="controls">
-              <button class="visited-sites active">Visited Sites</button>
-              <button class="third-party-sites active">
-                Third Party Sites
-              </button>
-              <button class="connections active">
-                Connections
-              </button>
-              <button class="watched-sites two-icons active">
-                Watched Sites
-              </button>
-              <button class="blocked-sites two-icons active">
-                Blocked Sites
-              </button>
-              <button class="cookies active col-3 row-1">
-                Cookies
-              </button>
-            </div>
           </div>
-          <div>
-            <div class="filter-wrapper">
-              <h2>Filter</h2>
-              <!-- @todo add click for hide to toggle filter menu-->
-              <h2 class="hide">Hide</h2>
-            </div>
-            <div class="toggle-menu">
-            <!-- @todo highlight active filter, add click to toggle filter -->
-              <button class="active">Recent Site</button>
-              <button>Last 10 Sites</button>
-              <button>Daily</button>
-              <button>Weekly</button>
-            </div>
+          <!-- @todo highlight active controls, add click to toggle controls -->
+          <div class="footer-toggle-buttons controls">
+            <button class="visited-sites active">Visited Sites</button>
+            <button class="watched-sites two-icons active">Watched Sites</button>
+            <button class="cookies active">Cookies</button>
+            <button class="third-party-sites active">Third Party Sites</button>
+            <button class="blocked-sites two-icons active">Blocked Sites</button>
+            <button class="connections active">Connections</button>
           </div>
-        </footer>
-
+        </div>
+        <div class="footer-filter">
+          <div class="footer-heading">
+            <h2>Filter</h2>
+            <!-- @todo add click for hide to toggle filter menu-->
+            <h2 class="hide">Hide</h2>
+          </div>
+          <div class="filter-menu">
+          <!-- @todo highlight active filter, add click to toggle filter -->
+            <button class="active">Recent Site</button>
+            <button>Last 10 Sites</button>
+            <button>Daily</button>
+            <button>Weekly</button>
+          </div>
+        </div>
+      </footer>
     </main>
   </body>
 </html>

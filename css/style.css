@@ -124,30 +124,30 @@ a {
   font-size: .75em;
 }
 
-.toggle-menu button:first-child {
+.filter-menu button:first-child {
   margin-top: 10px;
   border-radius: 3px 3px 0 0;
 }
 
-.toggle-menu button:last-child {
+.filter-menu button:last-child {
   border-radius: 0 0 3px 3px;
 }
 
-.toggle-menu button {
+.filter-menu button {
   margin-top: 0;
   border-radius: 0;
   border-top: 2px solid var(--button-border-color);
 }
 
-.toggle-menu button:hover {
+.filter-menu button:hover {
   background-color: var(--button-active-color);
 }
 
-.toggle-menu .active {
+.filter-menu .active {
   border-color: var(--button-active-border-color);
 }
 
-.toggle-menu .active:hover {
+.filter-menu .active:hover {
   border-color: #fff;
 }
 
@@ -219,6 +219,7 @@ main {
 
 .top-bar > dl {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .top-bar > dl > div {
@@ -228,6 +229,7 @@ main {
 .tracking-protection {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .toggle-switch {
@@ -282,8 +284,6 @@ input[type="checkbox"] {
 }
 
 .vis-content {
-  /* width: 100%;
-  height: 100%; */
   position: relative;
 }
 
@@ -333,34 +333,44 @@ input[type="checkbox"] {
 }
 
 /* ----------- UI - vis Controls ----------- */
-
 footer {
   display: grid;
-  grid-template-columns: repeat(4, 1fr) 150px;
-  grid-row-start: 3;
+  grid-template-columns: repeat(4, 1fr) minmax(150px, auto);
   padding: 0 30px;
 }
 
-footer h2 {
-  padding-bottom: 5px;
+.footer-heading {
+  display: flex;
   border-bottom: 1px solid var(--primary-text-color);
+  justify-content: space-between;
+}
+
+.footer-heading h2 {
+  padding-bottom: 5px;
   color: var(--primary-text-color);
 }
 
-footer div:first-child {
-  grid-column-end: span 4;
+.footer-heading .hide {
+  text-transform: none;
+  font-weight: 400;
 }
 
-.controls {
+.footer-toggle {
+  grid-column: 1 / 5;
+}
+
+.footer-filter {
+  grid-column-start: 5;
+}
+
+.footer-toggle-buttons {
   display: grid;
   grid-column-gap: 10px;
-  grid-template-columns: repeat(3, 150px);
+  grid-template-columns: repeat(3, minmax(auto, 150px));
   grid-template-rows: repeat(3, 1fr);
 }
 
-.visited-sites,
-.third-party-sites,
-.connections {
+.footer-toggle-buttons .connections {
   grid-column-start: 1;
 }
 
@@ -380,47 +390,71 @@ footer div:first-child {
   width: 30px;
 }
 
-.watched-sites {
-  grid-column-start: 2;
-  grid-row-start: 1;
-
-}
-
 .watched-sites::before {
   background-image: url('data:image/svg+xml,<svg style="fill: rgb(111, 195, 229)" version="1.1" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6"></circle></svg>'), url('data:image/svg+xml,<svg style="margin-left: 15px; fill: rgb(111, 195, 229)" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="0,14 7,2 14,14"></polygon></svg>');
-}
-
-.blocked-sites {
-  grid-column-start: 2;
-  grid-row-start: 2;
 }
 
 .blocked-sites::before {
   background-image: url('data:image/svg+xml,<svg style="fill: rgb(224, 42, 97)" version="1.1" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6"></circle></svg>'), url('data:image/svg+xml,<svg style="margin-left: 15px; fill: rgb(224, 42, 97)" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="0,14 7,2 14,14"></polygon></svg>');
 }
 
-.cookies {
-  grid-column-start: 3;
-  grid-row-start: 1;
-}
-
 .cookies::before {
   background-image: url('data:image/svg+xml,<svg version="1.1" xmlns="http://www.w3.org/2000/svg"><line x1="14" y1="2" x2="2" y2="14" style="stroke: rgb(108, 10, 170); stroke-width: 2"></line></svg>');
 }
 
-/* ----------- UI - Graph Filter ----------- */
-
-footer div:last-child {
-  grid-column-start: 5;
+.filter-menu {
+  max-width: 150px;
 }
 
-.filter-wrapper {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+@media (max-width: 800px) {
+  footer {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-toggle {
+    grid-column: 1 / 1;
+  }
+
+  .footer-filter {
+    grid-column-start: 2;
+  }
+
+  .footer-toggle-buttons {
+    grid-template-columns: minmax(auto, 150px);
+  }
+
+  .watched-sites {
+    order: 4;
+  }
+
+  .blocked-sites {
+    order: 5;
+  }
+
+  .cookies {
+    order: 6;
+  }
 }
 
-.hide {
-  text-align: right;
-  text-transform: none;
-  font-weight: 400;
+@media (max-width: 600px) {
+  main {
+    display: block;
+    height: 100%;
+  }
+
+  .vis {
+    height: 600px;
+  }
+
+  footer {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-toggle {
+    grid-column: 1;
+  }
+
+  .footer-filter {
+    grid-column-start: 1;
+  }
 }
