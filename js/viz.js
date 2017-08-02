@@ -15,8 +15,8 @@ const viz = {
     this.scale = (window.devicePixelRatio || 1) * this.scalingFactor;
 
     this.updateCanvas(width, height);
-    this.addListeners();
     this.draw(nodes, links);
+    this.addListeners();
   },
 
   draw(nodes, links) {
@@ -181,6 +181,7 @@ const viz = {
   addListeners() {
     this.addMouseMove();
     this.addWindowResize();
+    this.addDrag();
   },
 
   addMouseMove() {
@@ -211,6 +212,42 @@ const viz = {
 
     const { width, height } = this.getDimensions('visualization');
     this.updateCanvas(width, height);
+    this.draw(this.nodes, this.links);
+  },
+
+  addDrag() {
+    const drag = d3.drag();
+    drag.container(this.canvas);
+    drag.subject(() => this.dragSubject());
+    drag.on('start', () => this.dragStarted());
+    drag.on('drag', () => this.dragged());
+    drag.on('end', () => this.dragEnded());
+
+    d3.select(this.canvas)
+      .call(drag);
+  },
+
+  dragSubject() {
+    return this.simulation.find(d3.event.x, d3.event.y);
+  },
+
+  dragStarted() {
+    d3.event.subject.fx = d3.event.subject.x;
+    d3.event.subject.fy = d3.event.subject.y;
+  },
+
+  dragged() {
+    d3.event.subject.fx = d3.event.x;
+    d3.event.subject.fy = d3.event.y;
+  },
+
+  dragEnded() {
+    this.nodes.find((node) => {
+      if (node.hostname === d3.event.subject.hostname) {
+        node.x = d3.event.x;
+        node.y = d3.event.y;
+      }
+    });
     this.draw(this.nodes, this.links);
   }
 };
