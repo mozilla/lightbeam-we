@@ -24,7 +24,8 @@
   },
   "homepage": "https://github.com/electrolyfish/lightbeam-we#readme",
   "dependencies": {
-    "d3": "4.9.1"
+    "d3": "4.9.1",
+    "dexie": "^2.0.0-beta"
   },
   "devDependencies": {
     "chai": "^3.5.0",

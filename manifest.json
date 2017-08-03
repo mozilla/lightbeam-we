@@ -27,6 +27,7 @@
   "background": {
     "scripts": [
       "js/capture.js",
+      "node_modules/dexie/dist/dexie.js",
       "js/store.js",
       "js/background.js"
     ]
