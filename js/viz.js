@@ -242,30 +242,22 @@ const viz = {
   },
 
   addZoom() {
-    const zoom = d3.zoom().scaleExtent([this.minZoom, this.maxZoom]);
-    zoom.on('start', () => this.zoomStarted());
+    const zoom = d3.zoom();// .scaleExtent([this.minZoom, this.maxZoom]);
     zoom.on('zoom', () => this.zoomed());
-    zoom.on('end', () => this.zoomEnded());
-    this.transform = d3.zoomTransform(this);
 
     d3.select(this.canvas)
       .call(zoom);
   },
 
-  zoomStarted() {
-    // console.log('zoom start:', d3.event.transform);
-  },
-
   zoomed() {
     // console.log('zoomed', d3.event.transform);
-    // this.context.translate(this.transform.x, this.transform.y);
-    // this.draw(this.nodes, this.links);
-  },
-
-  zoomEnded() {
-    // console.log('zoom end', d3.event);
-    this.context.translate(d3.event.transform.x, d3.event.transform.y);
-    this.context.scale(d3.event.transform.k, d3.event.transform.k);
-    this.draw(this.nodes, this.links);
+    const canvas = this.context;
+    canvas.save();
+    canvas.clearRect(0, 0, this.width, this.height);
+    canvas.translate(d3.event.transform.x, d3.event.transform.y);
+    canvas.scale(d3.event.transform.k, d3.event.transform.k);
+    this.drawLinks();
+    this.drawNodes();
+    canvas.restore();
   }
 };
