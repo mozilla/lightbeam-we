@@ -1,17 +1,27 @@
 const store = {
   _websites: null,
   ALLOWLIST_URL: '/shavar-prod-lists/disconnect-entitylist.json',
+  db: null,
 
   async init() {
+    if (!this.db) {
+      this.makeNewDatabase();
+    }
     if (!this._websites) {
-      const data = await browser.storage.local.get('websites');
-
-      if (data.websites) {
-        this._websites = clone(data.websites);
-      }
+      this._websites = await this.getAll();
     }
     browser.runtime.onMessage.addListener((m) => store.messageHandler(m));
     await this.getAllowList();
+  },
+
+  makeNewDatabase() {
+    this.db = new Dexie('websites_database');
+    this.db.version(1).stores({
+      // store: 'primaryKey, index1, index2, ...'
+      websites: 'hostname, dateVisited, isVisible'
+      // websites is a table
+    });
+    this.db.open();
   },
 
   // get Disconnect Entity List from shavar-prod-lists submodule
@@ -115,7 +125,7 @@ const store = {
 
     const publicMethods = [
       'getAll',
-      'reset',
+      'reset'
     ];
 
     if (publicMethods.includes(m['method'])) {
@@ -126,10 +136,12 @@ const store = {
     }
   },
 
-  async _write(websites) {
-    this._websites = clone(websites);
-
-    return await browser.storage.local.set({ websites });
+  async _write(website) {
+    if (!this._websites) {
+      this._websites = {};
+    }
+    this._websites[website.hostname] = website;
+    return await this.db.websites.put(website);
   },
 
   outputWebsite(hostname, website) {
@@ -151,13 +163,14 @@ const store = {
     return output;
   },
 
-  getAll() {
+  async getAll() {
+    const websites = await this.db.websites.toArray();
     const output = {};
-    for (const hostname in this._websites) {
-      const website = this._websites[hostname];
+    for (const website of websites) {
       // if it's a visible third party or a first party
       if (website['isVisible'] || !('isVisible' in website)) {
-        output[hostname] = this.outputWebsite(hostname, website);
+        output[website.hostname]
+          = this.outputWebsite(website.hostname, website);
       }
     }
     return Promise.resolve(output);
@@ -192,19 +205,6 @@ const store = {
     }
   },
 
-  getThirdParties(hostname) {
-    if (!hostname) {
-      throw new Error('getThirdParties requires a valid hostname argument');
-    }
-
-    const firstParty = this.getWebsite(hostname);
-    if ('thirdPartyHostnames' in firstParty) {
-      return firstParty.thirdPartyHostnames;
-    }
-
-    return null;
-  },
-
   setWebsite(hostname, data) {
     const websites = clone(this._websites);
 
@@ -212,15 +212,19 @@ const store = {
       websites[hostname] = {};
     }
 
+    if (!('hostname' in websites[hostname])) {
+      websites[hostname]['hostname'] = hostname;
+    }
+
     for (const key in data) {
       websites[hostname][key] = data[key];
     }
 
-    this._write(websites);
+    this._write(websites[hostname]);
   },
 
-  isNewWebsite(hostname) {
 
+  isNewWebsite(hostname) {
     if (!this._websites || !this._websites[hostname]) {
       return true;
     }
@@ -308,9 +312,10 @@ const store = {
           // show third party; it either became visible or is brand new
           thirdParty['isVisible'] = true;
           isNewThirdParty = true;
-          thirdParty['firstPartyHostnames'].forEach((firstPartyHostname) => {
-            this.addFirstPartyLink(firstPartyHostname, target);
-          });
+          thirdParty['firstPartyHostnames']
+            .forEach((firstPartyHostname) => {
+              this.addFirstPartyLink(firstPartyHostname, target);
+            });
           shouldUpdate = true;
         }
       }
@@ -349,21 +354,20 @@ const store = {
     return true;
   },
 
-  addFirstPartyLink(firstPartyHostname, thirdPartyHostname) {
+  async addFirstPartyLink(firstPartyHostname, thirdPartyHostname) {
     const firstParty = this.getWebsite(firstPartyHostname);
     if (!('thirdPartyHostnames' in firstParty)) {
       firstParty['thirdPartyHostnames'] = [];
     }
     if (!this.isFirstPartyLinkedToThirdParty(firstParty, thirdPartyHostname)) {
       firstParty['thirdPartyHostnames'].push(thirdPartyHostname);
-      this.setFirstParty(firstPartyHostname, firstParty);
+      await this.setFirstParty(firstPartyHostname, firstParty);
     }
   },
 
   async reset() {
     this._websites = null;
-
-    return await browser.storage.local.remove('websites');
+    return await this.db.websites.clear();
   }
 };
 
