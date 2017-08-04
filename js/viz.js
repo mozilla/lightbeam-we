@@ -15,6 +15,7 @@ const viz = {
     this.tooltip = document.getElementById('tooltip');
     this.circleRadius = this.circleRadius * this.scalingFactor;
     this.scale = (window.devicePixelRatio || 1) * this.scalingFactor;
+    this.transform = d3.zoomIdentity;
 
     this.updateCanvas(width, height);
     this.draw(nodes, links);
@@ -170,7 +171,7 @@ const viz = {
   addListeners() {
     this.addMouseMove();
     this.addWindowResize();
-    // this.addDrag();
+    this.addDrag();
     this.addZoom();
   },
 
@@ -207,10 +208,7 @@ const viz = {
 
   addDrag() {
     const drag = d3.drag();
-    drag.container(this.canvas);
     drag.subject(() => this.dragSubject());
-    drag.on('start', () => this.dragStarted());
-    drag.on('drag', () => this.dragged());
     drag.on('end', () => this.dragEnded());
 
     d3.select(this.canvas)
@@ -218,27 +216,21 @@ const viz = {
   },
 
   dragSubject() {
-    return this.simulation.find(d3.event.x, d3.event.y);
-  },
+    const x = this.transform.invertX(d3.event.x);
+    const y = this.transform.invertY(d3.event.y);
+    const node = this.getNodeAtCoordinates(x, y);
 
-  dragStarted() {
-    d3.event.subject.fx = d3.event.subject.x;
-    d3.event.subject.fy = d3.event.subject.y;
-  },
-
-  dragged() {
-    d3.event.subject.fx = d3.event.x;
-    d3.event.subject.fy = d3.event.y;
+    return node;
   },
 
   dragEnded() {
     this.nodes.find((node) => {
       if (node.hostname === d3.event.subject.hostname) {
-        node.x = d3.event.x;
-        node.y = d3.event.y;
+        node.x = this.transform.invertX(d3.event.x);
+        node.y = this.transform.invertY(d3.event.y);
       }
     });
-    this.draw(this.nodes, this.links);
+    this.render();
   },
 
   addZoom() {
@@ -250,12 +242,16 @@ const viz = {
   },
 
   zoomed() {
-    // console.log('zoomed', d3.event.transform);
+    this.transform = d3.event.transform;
+    this.render();
+  },
+
+  render() {
     const canvas = this.context;
     canvas.save();
     canvas.clearRect(0, 0, this.width, this.height);
-    canvas.translate(d3.event.transform.x, d3.event.transform.y);
-    canvas.scale(d3.event.transform.k, d3.event.transform.k);
+    canvas.translate(this.transform.x, this.transform.y);
+    canvas.scale(this.transform.k, this.transform.k);
     this.drawLinks();
     this.drawNodes();
     canvas.restore();
