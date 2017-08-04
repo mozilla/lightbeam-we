@@ -18,7 +18,7 @@ const store = {
     this.db = new Dexie('websites_database');
     this.db.version(1).stores({
       // store: 'primaryKey, index1, index2, ...'
-      websites: 'hostname, dateVisited, isVisible'
+      websites: 'hostname, dateVisited, isVisible, firstParty'
       // websites is a table
     });
     this.db.open();
@@ -164,16 +164,15 @@ const store = {
   },
 
   async getAll() {
-    const websites = await this.db.websites.toArray();
+    const websites = await this.db.websites.filter((website) => {
+      return website.isVisible || website.firstParty;
+    }).toArray();
     const output = {};
     for (const website of websites) {
-      // if it's a visible third party or a first party
-      if (website['isVisible'] || !('isVisible' in website)) {
-        output[website.hostname]
-          = this.outputWebsite(website.hostname, website);
-      }
+      output[website.hostname]
+        = this.outputWebsite(website.hostname, website);
     }
-    return Promise.resolve(output);
+    return output;
   },
 
   /*
@@ -194,18 +193,14 @@ const store = {
       isVisible: false,
     }
   */
-  getWebsite(hostname) {
+  async getWebsite(hostname) {
     if (!hostname) {
       throw new Error('getWebsite requires a valid hostname argument');
     }
-    if (this._websites && this._websites[hostname]) {
-      return this._websites[hostname];
-    } else {
-      return {};
-    }
+    return await this.db.websites.get(hostname) || {};
   },
 
-  setWebsite(hostname, data) {
+  async setWebsite(hostname, data) {
     const websites = clone(this._websites);
 
     if (this.isNewWebsite(hostname)) {
@@ -220,7 +215,7 @@ const store = {
       websites[hostname][key] = data[key];
     }
 
-    this._write(websites[hostname]);
+    await this._write(websites[hostname]);
   },
 
 
@@ -269,20 +264,21 @@ const store = {
     return false;
   },
 
-  setFirstParty(hostname, data) {
+  async setFirstParty(hostname, data) {
+
     if (!hostname) {
       throw new Error('setFirstParty requires a valid hostname argument');
     }
     const isNewWebsite = this.isNewWebsite(hostname);
 
-    this.setWebsite(hostname, data);
+    await this.setWebsite(hostname, data);
 
     if (isNewWebsite) {
       this.updateChild(this.outputWebsite(hostname, data));
     }
   },
 
-  setThirdParty(origin, target, data) {
+  async setThirdParty(origin, target, data) {
     if (!origin) {
       throw new Error('setThirdParty requires a valid origin argument');
     }
@@ -290,8 +286,8 @@ const store = {
     let isNewThirdParty = false;
     let shouldUpdate = false;
 
-    const firstParty = this.getWebsite(origin);
-    const thirdParty = this.getWebsite(target);
+    const firstParty = await this.getWebsite(origin);
+    const thirdParty = await this.getWebsite(target);
 
     // add link in third party if it doesn't exist yet
     if (!('firstPartyHostnames' in thirdParty)) {
@@ -312,16 +308,16 @@ const store = {
           // show third party; it either became visible or is brand new
           thirdParty['isVisible'] = true;
           isNewThirdParty = true;
-          thirdParty['firstPartyHostnames']
-            .forEach((firstPartyHostname) => {
-              this.addFirstPartyLink(firstPartyHostname, target);
+          await thirdParty['firstPartyHostnames']
+            .forEach(async (firstPartyHostname) => {
+              await this.addFirstPartyLink(firstPartyHostname, target);
             });
           shouldUpdate = true;
         }
       }
       if (this.isVisibleThirdParty(thirdParty) && !isNewThirdParty) {
         // an existing visible third party links to a new first party
-        this.addFirstPartyLink(origin, target);
+        await this.addFirstPartyLink(origin, target);
         shouldUpdate = true;
       }
     }
@@ -332,7 +328,7 @@ const store = {
       thirdParty[key] = data[key];
     }
 
-    this.setWebsite(target, thirdParty);
+    await this.setWebsite(target, thirdParty);
 
     if (shouldUpdate) {
       this.updateChild(this.outputWebsite(target, thirdParty));
@@ -355,7 +351,8 @@ const store = {
   },
 
   async addFirstPartyLink(firstPartyHostname, thirdPartyHostname) {
-    const firstParty = this.getWebsite(firstPartyHostname);
+    const firstParty = await this.getWebsite(firstPartyHostname);
+    console.log(firstParty, thirdPartyHostname);
     if (!('thirdPartyHostnames' in firstParty)) {
       firstParty['thirdPartyHostnames'] = [];
     }

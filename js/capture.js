@@ -46,7 +46,8 @@ const capture = {
         document: documentUrl.hostname,
         target: targetUrl.hostname,
         origin: originUrl.hostname,
-        requestTime: response.timeStamp
+        requestTime: response.timeStamp,
+        firstParty: false
       };
       store.setThirdParty(
         documentUrl.hostname,
@@ -60,7 +61,10 @@ const capture = {
   sendFirstParty(tabId, changeInfo, tab) {
     const documentUrl = new URL(tab.url);
     if (tab.status === 'complete' && this.shouldStore(tab)) {
-      const data = { faviconUrl: tab.favIconUrl };
+      const data = {
+        faviconUrl: tab.favIconUrl,
+        firstParty: true
+      };
       store.setFirstParty(documentUrl.hostname, data);
     }
   }
