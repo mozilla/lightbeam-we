@@ -105,12 +105,18 @@ const viz = {
     for (const d of this.nodes) {
       this.context.beginPath();
       this.context.moveTo(d.x, d.y);
-      this.context.arc(d.x, d.y, this.circleRadius, 0, 2 * Math.PI);
       if (d.firstParty) {
-        this.context.fillStyle = 'red';
+        this.context.arc(d.x, d.y, this.circleRadius, 0, 2 * Math.PI);
       } else {
-        this.context.fillStyle = 'blue';
+        // draw third party as equilateral triangle
+        const deltaY = this.circleRadius / 2;
+        const deltaX = deltaY * Math.sqrt(3);
+        this.context.moveTo(d.x - deltaX, d.y + deltaY);
+        this.context.lineTo(d.x, d.y - this.circleRadius);
+        this.context.lineTo(d.x + deltaX, d.y + deltaY);
+
       }
+      this.context.fillStyle = 'white';
       this.context.closePath();
       this.context.fill();
     }
