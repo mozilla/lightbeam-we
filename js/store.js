@@ -1,14 +1,10 @@
 const store = {
-  _websites: null,
   ALLOWLIST_URL: '/shavar-prod-lists/disconnect-entitylist.json',
   db: null,
 
   async init() {
     if (!this.db) {
       this.makeNewDatabase();
-    }
-    if (!this._websites) {
-      this._websites = await this.getAll();
     }
     browser.runtime.onMessage.addListener((m) => store.messageHandler(m));
     await this.getAllowList();
@@ -137,10 +133,6 @@ const store = {
   },
 
   async _write(website) {
-    if (!this._websites) {
-      this._websites = {};
-    }
-    this._websites[website.hostname] = website;
     return await this.db.websites.put(website);
   },
 
@@ -197,30 +189,33 @@ const store = {
     if (!hostname) {
       throw new Error('getWebsite requires a valid hostname argument');
     }
-    return await this.db.websites.get(hostname) || {};
+
+    const website = await this.db.websites.get(hostname);
+    if (website) {
+      return website;
+    } else {
+      return {};
+    }
   },
 
   async setWebsite(hostname, data) {
-    const websites = clone(this._websites);
 
-    if (this.isNewWebsite(hostname)) {
-      websites[hostname] = {};
-    }
+    const website = await this.getWebsite(hostname);
 
-    if (!('hostname' in websites[hostname])) {
-      websites[hostname]['hostname'] = hostname;
+    if (!('hostname' in website)) {
+      website['hostname'] = hostname;
     }
 
     for (const key in data) {
-      websites[hostname][key] = data[key];
+      website[key] = data[key];
     }
 
-    await this._write(websites[hostname]);
+    await this._write(website);
   },
 
 
-  isNewWebsite(hostname) {
-    if (!this._websites || !this._websites[hostname]) {
+  async isNewWebsite(hostname) {
+    if (await this.db.websites.get(hostname)) {
       return true;
     }
     return false;
@@ -269,7 +264,7 @@ const store = {
     if (!hostname) {
       throw new Error('setFirstParty requires a valid hostname argument');
     }
-    const isNewWebsite = this.isNewWebsite(hostname);
+    const isNewWebsite = await this.isNewWebsite(hostname);
 
     await this.setWebsite(hostname, data);
 
@@ -308,10 +303,10 @@ const store = {
           // show third party; it either became visible or is brand new
           thirdParty['isVisible'] = true;
           isNewThirdParty = true;
-          await thirdParty['firstPartyHostnames']
-            .forEach(async (firstPartyHostname) => {
-              await this.addFirstPartyLink(firstPartyHostname, target);
-            });
+          for (let i = 0; i < thirdParty['firstPartyHostnames'].length; i++) {
+            const firstPartyHostname = thirdParty['firstPartyHostnames'][i];
+            await this.addFirstPartyLink(firstPartyHostname, target);
+          }
           shouldUpdate = true;
         }
       }
@@ -352,7 +347,6 @@ const store = {
 
   async addFirstPartyLink(firstPartyHostname, thirdPartyHostname) {
     const firstParty = await this.getWebsite(firstPartyHostname);
-    console.log(firstParty, thirdPartyHostname);
     if (!('thirdPartyHostnames' in firstParty)) {
       firstParty['thirdPartyHostnames'] = [];
     }
@@ -363,14 +357,8 @@ const store = {
   },
 
   async reset() {
-    this._websites = null;
     return await this.db.websites.clear();
   }
 };
-
-// @todo move this function to utils
-function clone(obj) {
-  return Object.assign({}, obj);
-}
 
 store.init();
