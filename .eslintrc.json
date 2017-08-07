@@ -31,7 +31,8 @@
                 "CallExpression":
                     { "arguments": 1 },
                 "FunctionDeclaration":
-                    { "parameters": 1 }
+                    { "parameters": 1 },
+                "SwitchCase": 1
             }
         ],
         "linebreak-style": [
