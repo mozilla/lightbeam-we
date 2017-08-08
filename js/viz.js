@@ -240,14 +240,18 @@ const viz = {
     return node;
   },
 
-  drag() {
-    if (d3.event.subject.hostname) {
-      d3.event.subject.x = this.transform.applyX(d3.event.x);
-      d3.event.subject.y = this.transform.applyY(d3.event.y);
+  dragStart() {
+    d3.event.subject.x = d3.event.x;
+    d3.event.subject.y = d3.event.y;
+    this.drawOnCanvas();
+  },
 
-      this.hideTooltip();
-      this.drawOnCanvas();
-    }
+  drag() {
+    d3.event.subject.x = d3.event.x;
+    d3.event.subject.y = d3.event.y;
+
+    this.hideTooltip();
+    this.drawOnCanvas();
   },
 
   addZoom() {
