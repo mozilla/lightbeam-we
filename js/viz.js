@@ -4,7 +4,7 @@ const viz = {
   circleRadius: 5,
   resizeTimer: null,
   minZoom: 0.5,
-  maxZoom: 1,
+  maxZoom: 1.5,
 
   init(nodes, links) {
     const { width, height } = this.getDimensions('visualization');
@@ -180,7 +180,8 @@ const viz = {
   addMouseMove() {
     this.canvas.addEventListener('mousemove', (event) => {
       const { mouseX, mouseY } = this.getMousePosition(event);
-      const node = this.getNodeAtCoordinates(mouseX, mouseY);
+      const [ invertX, invertY ] = this.transform.invert([mouseX, mouseY]);
+      const node = this.getNodeAtCoordinates(invertX, invertY);
 
       if (node) {
         this.showTooltip(node.hostname, mouseX, mouseY);
@@ -194,12 +195,12 @@ const viz = {
     window.addEventListener('resize', () => {
       clearTimeout(this.resizeTimer);
       this.resizeTimer = setTimeout(() => {
-        this.onResize();
+        this.resize();
       }, 250);
     });
   },
 
-  onResize() {
+  resize() {
     this.canvas.style.width = 0;
     this.canvas.style.height = 0;
 
@@ -211,7 +212,8 @@ const viz = {
   addDrag() {
     const drag = d3.drag();
     drag.subject(() => this.dragSubject());
-    drag.on('drag', () => this.dragged());
+    drag.on('drag', () => this.drag());
+    drag.on('end', () => this.endEvent());
 
     d3.select(this.canvas)
       .call(drag);
@@ -225,24 +227,31 @@ const viz = {
     return node;
   },
 
-  dragged() {
+  drag() {
     if (d3.event.subject.hostname) {
-      d3.event.subject.x = this.transform.invertX(d3.event.x);
-      d3.event.subject.y = this.transform.invertY(d3.event.y);
+      d3.event.subject.x = this.transform.applyX(d3.event.x);
+      d3.event.subject.y = this.transform.applyY(d3.event.y);
+
+      this.hideTooltip();
       this.drawOnCanvas();
     }
   },
 
   addZoom() {
     const zoom = d3.zoom().scaleExtent([this.minZoom, this.maxZoom]);
-    zoom.on('zoom', () => this.zoomed());
+    zoom.on('zoom', () => this.zoom());
+    zoom.on('end', () => this.endEvent());
 
     d3.select(this.canvas)
       .call(zoom);
   },
 
-  zoomed() {
+  zoom() {
     this.transform = d3.event.transform;
     this.drawOnCanvas();
+  },
+
+  endEvent() {
+    this.draw(this.nodes, this.links);
   }
 };
