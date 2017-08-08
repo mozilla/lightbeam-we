@@ -102,24 +102,31 @@ const viz = {
   },
 
   drawNodes() {
-    for (const d of this.nodes) {
+    for (const node of this.nodes) {
       this.context.beginPath();
-      this.context.moveTo(d.x, d.y);
-      if (d.firstParty) {
-        this.context.arc(d.x, d.y, this.circleRadius, 0, 2 * Math.PI);
+      this.context.moveTo(node.x, node.y);
+      if (node.firstParty) {
+        this.drawFirstParty(node);
       } else {
-        // draw third party as equilateral triangle
-        const deltaY = this.circleRadius / 2;
-        const deltaX = deltaY * Math.sqrt(3);
-        this.context.moveTo(d.x - deltaX, d.y + deltaY);
-        this.context.lineTo(d.x, d.y - this.circleRadius);
-        this.context.lineTo(d.x + deltaX, d.y + deltaY);
-
+        this.drawThirdParty(node);
       }
       this.context.fillStyle = 'white';
       this.context.closePath();
       this.context.fill();
     }
+  },
+
+  drawFirstParty(node) {
+    this.context.arc(node.x, node.y, this.circleRadius, 0, 2 * Math.PI);
+  },
+
+  drawThirdParty(node) {
+    // draw third party as equilateral triangle
+    const deltaY = this.circleRadius / 2;
+    const deltaX = deltaY * Math.sqrt(3);
+    this.context.moveTo(node.x - deltaX, node.y + deltaY);
+    this.context.lineTo(node.x, node.y - this.circleRadius);
+    this.context.lineTo(node.x + deltaX, node.y + deltaY);
   },
 
   showTooltip(title, x, y) {
