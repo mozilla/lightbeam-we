@@ -99,6 +99,8 @@ const viz = {
   drawOnCanvas() {
     this.context.clearRect(0, 0, this.width, this.height);
     this.context.save();
+    this.context.translate(this.transform.x, this.transform.y);
+    this.context.scale(this.transform.k, this.transform.k);
     this.drawLinks();
     this.drawNodes();
     this.context.restore();
@@ -222,7 +224,7 @@ const viz = {
   addDrag() {
     const drag = d3.drag();
     drag.subject(() => this.dragSubject());
-    drag.on('end', () => this.dragEnded());
+    drag.on('drag', () => this.dragged());
 
     d3.select(this.canvas)
       .call(drag);
@@ -236,18 +238,16 @@ const viz = {
     return node;
   },
 
-  dragEnded() {
-    this.nodes.find((node) => {
-      if (node.hostname === d3.event.subject.hostname) {
-        node.x = this.transform.invertX(d3.event.x);
-        node.y = this.transform.invertY(d3.event.y);
-      }
-    });
-    this.render();
+  dragged() {
+    if (d3.event.subject.hostname) {
+      d3.event.subject.x = this.transform.invertX(d3.event.x);
+      d3.event.subject.y = this.transform.invertY(d3.event.y);
+      this.drawOnCanvas();
+    }
   },
 
   addZoom() {
-    const zoom = d3.zoom();// .scaleExtent([this.minZoom, this.maxZoom]);
+    const zoom = d3.zoom().scaleExtent([this.minZoom, this.maxZoom]);
     zoom.on('zoom', () => this.zoomed());
 
     d3.select(this.canvas)
@@ -256,17 +256,6 @@ const viz = {
 
   zoomed() {
     this.transform = d3.event.transform;
-    this.render();
-  },
-
-  render() {
-    const canvas = this.context;
-    canvas.save();
-    canvas.clearRect(0, 0, this.width, this.height);
-    canvas.translate(this.transform.x, this.transform.y);
-    canvas.scale(this.transform.k, this.transform.k);
-    this.drawLinks();
-    this.drawNodes();
-    canvas.restore();
+    this.drawOnCanvas();
   }
 };
