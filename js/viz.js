@@ -240,12 +240,6 @@ const viz = {
     return node;
   },
 
-  dragStart() {
-    d3.event.subject.x = d3.event.x;
-    d3.event.subject.y = d3.event.y;
-    this.drawOnCanvas();
-  },
-
   drag() {
     d3.event.subject.x = d3.event.x;
     d3.event.subject.y = d3.event.y;
