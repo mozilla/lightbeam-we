@@ -357,6 +357,8 @@ const store = {
   },
 
   async reset() {
+    // empty out request processing queue
+    capture.queue = [];
     return await this.db.websites.clear();
   }
 };

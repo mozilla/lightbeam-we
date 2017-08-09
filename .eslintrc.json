@@ -8,6 +8,7 @@
         "browser": true,
         "store": true,
         "storeChild": true,
+        "capture": true,
         "viz": true,
         "d3": true,
         "Dexie": true
