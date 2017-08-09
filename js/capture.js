@@ -3,6 +3,7 @@
 * third-party requests to storage.
 */
 const capture = {
+
   init() {
     this.addListeners();
   },
@@ -35,11 +36,17 @@ const capture = {
       });
   },
 
+  // Process each HTTP request or tab page load in order,
+  // so that async reads/writes to IndexedDB
+  // (via sendFirstParty and sendThirdParty) won't miss data
+  // The 'ignore' boolean ensures processNextEvent is only
+  // executed when the previous call to processNextEvent
+  // has completed.
   async processNextEvent(ignore = false) {
     if (this.processingQueue && !ignore) {
       return;
     }
-    if (this.queue.length > 1) {
+    if (this.queue.length >= 1) {
       const nextEvent = this.queue.shift();
       this.processingQueue = true;
       switch (nextEvent.type) {
@@ -54,7 +61,9 @@ const capture = {
           await this.sendThirdParty(nextEvent.data);
           break;
         default:
-          break;
+          throw new Error(
+            'An event must be of type sendFirstParty or sendThirdParty.'
+          );
       }
       this.processNextEvent(true);
     } else {
@@ -65,11 +74,10 @@ const capture = {
   // Returns true if the request should be stored, otherwise false.
   shouldStore(tab) {
     const documentUrl = new URL(tab.url);
-    // ignore about:*, moz-extension:* & non-visible tabs (like dev tools)
+    // ignore about:*, moz-extension:*
     // also ignore private browsing tabs
     if (documentUrl.protocol !== 'about:'
       && documentUrl.protocol !== 'moz-extension:'
-      && tab.id !== browser.tabs.TAB_ID_NONE
       && !tab.incognito) {
       return true;
     }
@@ -78,14 +86,19 @@ const capture = {
 
   // capture third party requests
   async sendThirdParty(response) {
+    // browser.tabs.get throws an error for non-visible tabs (like DevTools)
+    if (response.tabId === browser.tabs.TAB_ID_NONE) {
+      return;
+    }
     const tab = await browser.tabs.get(response.tabId);
     const documentUrl = new URL(tab.url);
     const targetUrl = new URL(response.url);
+    // @todo figure out why Web Extensions sometimes gives
+    // undefined for response.originUrl
+    const originUrl = !response.originUrl ? '' : new URL(response.originUrl);
 
     if (targetUrl.hostname !== documentUrl.hostname
       && this.shouldStore(tab)) {
-      // @todo figure out why Web Extensions sometimes gives us undefined URLs
-      const originUrl = new URL(response.originUrl);
       const data = {
         document: documentUrl.hostname,
         target: targetUrl.hostname,
