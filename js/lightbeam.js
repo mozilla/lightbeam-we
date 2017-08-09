@@ -113,6 +113,16 @@ async function initLightBeam() {
   websites = await storeChild.getAll();
   renderGraph(websites);
 
+  const saveData = document.getElementById('save-data-button');
+  saveData.addEventListener('click', () => {
+    storeChild.getAll().then( data => {
+      const blob = new Blob([JSON.stringify(data,' ',2)],
+        {type : 'application/json'});
+      const url = window.URL.createObjectURL(blob);
+      browser.tabs.create({url: url});
+    });
+  });
+
   const resetData = document.getElementById('reset-data-button');
   resetData.addEventListener('click', () => {
     storeChild.reset().then(() => {
