@@ -23,10 +23,11 @@ const capture = {
   shouldStore(tab) {
     const documentUrl = new URL(tab.url);
     // ignore about:*, moz-extension:* & non-visible tabs (like dev tools)
-    // also ignore third parties owned by first parties
+    // also ignore private browsing tabs
     if (documentUrl.protocol !== 'about:'
       && documentUrl.protocol !== 'moz-extension:'
-      && tab.id !== browser.tabs.TAB_ID_NONE) {
+      && tab.id !== browser.tabs.TAB_ID_NONE
+      && !tab.incognito) {
       return true;
     }
     return false;
