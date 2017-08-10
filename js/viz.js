@@ -182,10 +182,44 @@ const viz = {
     this.context.lineTo(node.x + deltaX, node.y + deltaY);
   },
 
+  getTooltipDirection() {
+    // console.log('canvas', this.canvas.getBoundingClientRect());
+    // console.log('tooltip', this.tooltip.getBoundingClientRect());
+    // console.log(`x ${x}, y ${y}`);
+    const {
+      // left: canvasLeft,
+      right: canvasRight
+    } = this.canvas.getBoundingClientRect();
+    const {
+      // left: tooltipLeft,
+      right: tooltipRight,
+      width: tooltipWidth
+    } = this.tooltip.getBoundingClientRect();
+
+    if ((tooltipRight + tooltipWidth) >= canvasRight) {
+      return 'right';
+    }
+    return 'left';
+  },
+
+  getTooltipPosition(y) {
+    const { height: tooltipHeight } = this.tooltip.getBoundingClientRect();
+    return y - tooltipHeight - this.circleRadius - 20; // gutter for the arrow
+  },
+
   showTooltip(title, x, y) {
+    // const direction = this.getTooltipDirection(x, y);
+    // const altDirection = direction === 'right' ? 'left' : 'right';
+    const position = this.getTooltipPosition(y);
+    const { width } = this.tooltip.getBoundingClientRect();
+    // const classList = this.tooltip.classList;
+    // classList.toggle(`tooltip-${altDirection}`);
+    // classList.add(`tooltip-${direction}`);
     this.tooltip.innerText = title;
-    this.tooltip.style.left = `${x + this.circleRadius}px`;
-    this.tooltip.style.top = `${y + this.circleRadius}px`;
+    // this.tooltip.style[altDirection] = null;
+    // this.tooltip.style['right'] = null;
+    this.tooltip.style['left'] = `${x - (width/2)}px`;
+    this.tooltip.style['top'] = `${position}px`;
     this.tooltip.style.display = 'block';
   },
 
