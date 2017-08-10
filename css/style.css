@@ -278,9 +278,23 @@ input[type="checkbox"] {
   position: absolute;
   z-index: 1;
   display: none;
-  background-color: #fff;
-  color: #000;
-  padding: 4px;
+  background-color: #FFF;
+  color: #010203;
+  padding: 5px 10px;
+  box-shadow: 0px 2px #4CC7E6;
+  border-radius: 5px;
+}
+
+#tooltip::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top: 10px solid #FFF;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -10px;
 }
 
 .vis-controls {

@@ -156,7 +156,7 @@ const viz = {
     };
   },
 
-  drawShadow() {
+  drawShadow(x, y) {
     this.context.beginPath();
     this.context.lineWidth = 6;
     this.context.shadowColor = 'white';
@@ -164,8 +164,9 @@ const viz = {
     this.context.shadowBlur = 15;
     this.context.shadowOffsetX = 0;
     this.context.shadowOffsetY = 0;
-    // this.context.arc(x, y, this.circleRadius + 10, 0, 2 * Math.PI);
+    this.context.arc(x, y, this.circleRadius + 5, 0, 2 * Math.PI);
     this.context.stroke();
+    this.context.closePath();
   },
 
   drawFirstParty(node) {
