@@ -297,6 +297,14 @@ input[type="checkbox"] {
   margin-left: -10px;
 }
 
+#tooltip.tooltip-right {
+  right: 0px;
+}
+
+#tooltip.tooltip-left {
+  left: 0px;
+}
+
 .vis-controls {
   grid-row-end: span 3;
 }
