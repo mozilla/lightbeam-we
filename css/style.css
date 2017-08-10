@@ -10,19 +10,6 @@
   stroke-width: 1.5px;
 }
 
-.textLabel {
-  font-size: 14px;
-  visibility: hidden;
-}
-
-.textLabel.visible {
-  visibility: visible;
-}
-
-.textLabel.invisible {
-  visibility: hidden;
-}
-
 /* ----------- UI - General ----------- */
 
 :root {

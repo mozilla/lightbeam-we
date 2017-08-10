@@ -112,18 +112,28 @@ const viz = {
     for (const node of this.nodes) {
       this.context.beginPath();
       this.context.moveTo(node.x, node.y);
+
+      if (node.shadow) {
+        this.drawShadow(node.x, node.y);
+      }
+
       if (node.firstParty) {
         this.drawFirstParty(node);
       } else {
         this.drawThirdParty(node);
       }
+
+      if (node.favicon) {
+        this.drawFavicon(node.favicon, node.x, node.y);
+      }
+
       this.context.fillStyle = 'white';
       this.context.closePath();
       this.context.fill();
     }
   },
 
-  getSquareInCircle() {
+  getSquare() {
     const side = Math.sqrt(this.circleRadius * this.circleRadius * 2);
     const offset = side * 0.5;
 
@@ -134,7 +144,7 @@ const viz = {
   },
 
   drawFavicon(favicon, x, y) {
-    const { side, offset } = this.getSquareInCircle();
+    const { side, offset } = this.getSquare();
     const img = new Image();
     img.src = favicon;
     img.onload = () => {
@@ -146,11 +156,20 @@ const viz = {
     };
   },
 
+  drawShadow() {
+    this.context.beginPath();
+    this.context.lineWidth = 6;
+    this.context.shadowColor = 'white';
+    this.context.strokeStyle = 'rgba(0,0,0,1)';
+    this.context.shadowBlur = 15;
+    this.context.shadowOffsetX = 0;
+    this.context.shadowOffsetY = 0;
+    // this.context.arc(x, y, this.circleRadius + 10, 0, 2 * Math.PI);
+    this.context.stroke();
+  },
+
   drawFirstParty(node) {
     this.context.arc(node.x, node.y, this.circleRadius, 0, 2 * Math.PI);
-    if (node.favicon) {
-      this.drawFavicon(node.favicon, node.x, node.y);
-    }
   },
 
   drawThirdParty(node) {
@@ -253,8 +272,9 @@ const viz = {
   addDrag() {
     const drag = d3.drag();
     drag.subject(() => this.dragSubject());
+    drag.on('start', () => this.dragStart());
     drag.on('drag', () => this.drag());
-    drag.on('end', () => this.endEvent());
+    drag.on('end', () => this.dragEnd());
 
     d3.select(this.canvas)
       .call(drag);
@@ -268,12 +288,21 @@ const viz = {
     return node;
   },
 
+  dragStart() {
+    d3.event.subject.shadow = true;
+  },
+
   drag() {
     d3.event.subject.x = d3.event.x;
     d3.event.subject.y = d3.event.y;
 
     this.hideTooltip();
     this.drawOnCanvas();
+  },
+
+  dragEnd() {
+    d3.event.subject.shadow = false;
+    this.endEvent();
   },
 
   addZoom() {
