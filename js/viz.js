@@ -83,7 +83,9 @@ const viz = {
     this.canvas.setAttribute('height', height * this.scale);
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
-    this.context.scale(this.scale, this.scale);
+
+    const scale = this.scale;
+    this.context.scale(scale, scale);
   },
 
   getDimensions(id) {
@@ -121,14 +123,40 @@ const viz = {
     }
   },
 
+  getSquareInCircle() {
+    const side = Math.sqrt(this.circleRadius * this.circleRadius * 2);
+    const offset = side * 0.5;
+
+    return {
+      side,
+      offset
+    };
+  },
+
+  drawFavicon(favicon, x, y) {
+    const { side, offset } = this.getSquareInCircle();
+    const img = new Image();
+    img.src = favicon;
+    img.onload = () => {
+      this.context.drawImage(img,
+        this.transform.applyX(x) - offset,
+        this.transform.applyY(y) - offset,
+        side,
+        side);
+    };
+  },
+
   drawFirstParty(node) {
     this.context.arc(node.x, node.y, this.circleRadius, 0, 2 * Math.PI);
+    if (node.favicon) {
+      this.drawFavicon(node.favicon, node.x, node.y);
+    }
   },
 
   drawThirdParty(node) {
-    // draw third party as equilateral triangle
     const deltaY = this.circleRadius / 2;
     const deltaX = deltaY * Math.sqrt(3);
+
     this.context.moveTo(node.x - deltaX, node.y + deltaY);
     this.context.lineTo(node.x, node.y - this.circleRadius);
     this.context.lineTo(node.x + deltaX, node.y + deltaY);
