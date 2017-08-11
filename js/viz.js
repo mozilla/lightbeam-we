@@ -83,9 +83,7 @@ const viz = {
     this.canvas.setAttribute('height', height * this.scale);
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
-
-    const scale = this.scale;
-    this.context.scale(scale, scale);
+    this.context.scale(this.scale, this.scale);
   },
 
   getDimensions(id) {
