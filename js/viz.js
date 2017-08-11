@@ -9,9 +9,11 @@ const viz = {
   init(nodes, links) {
     const { width, height } = this.getDimensions('visualization');
     const { canvas, context } = this.createCanvas();
+    const { right: canvasRight } = canvas.getBoundingClientRect();
 
     this.canvas = canvas;
     this.context = context;
+    this.canvasRight = canvasRight;
     this.tooltip = document.getElementById('tooltip');
     this.circleRadius = this.circleRadius * this.scalingFactor;
     this.scale = (window.devicePixelRatio || 1) * this.scalingFactor;
@@ -183,19 +185,19 @@ const viz = {
   },
 
   getTooltipPosition(x, y) {
-    const { right: canvasRight } = this.canvas.getBoundingClientRect();
     const {
       height: tooltipHeight,
-      width: tooltipWidth,
-      right: tooltipRight
+      width: tooltipWidth
     } = this.tooltip.getBoundingClientRect();
     const top = y - tooltipHeight - this.circleRadius - 20;
+
     let left;
-    if ((tooltipRight + tooltipWidth) >= canvasRight) {
+    if ((x + tooltipWidth) >= this.canvasRight) {
       left = x - tooltipWidth - 20;
     } else {
       left = x - (tooltipWidth/2);
     }
+
     return {
       left,
       top
