@@ -1,6 +1,6 @@
 const store = {
   _websites: null,
-  WHITELIST_URL: '/shavar-prod-lists/disconnect-entitylist.json',
+  ALLOWLIST_URL: '/shavar-prod-lists/disconnect-entitylist.json',
 
   async init() {
     if (!this._websites) {
@@ -11,25 +11,25 @@ const store = {
       }
     }
     browser.runtime.onMessage.addListener((m) => store.messageHandler(m));
-    await this.getWhiteList();
+    await this.getAllowList();
   },
 
   // get Disconnect Entity List from shavar-prod-lists submodule
-  async getWhiteList() {
-    let whiteList;
+  async getAllowList() {
+    let allowList;
     try {
-      whiteList = await fetch(this.WHITELIST_URL);
-      whiteList = await whiteList.json();
+      allowList = await fetch(this.ALLOWLIST_URL);
+      allowList = await allowList.json();
     } catch (error) {
-      whiteList = {};
+      allowList = {};
       const explanation = 'See README.md for how to import submodule file';
       // eslint-disable-next-line no-console
-      console.error(`${error.message} ${explanation} ${this.WHITELIST_URL}`);
+      console.error(`${error.message} ${explanation} ${this.ALLOWLIST_URL}`);
     }
-    const { firstPartyWhiteList, thirdPartyWhiteList }
-      = this.reformatList(whiteList);
-    this.firstPartyWhiteList = firstPartyWhiteList;
-    this.thirdPartyWhiteList = thirdPartyWhiteList;
+    const { firstPartyAllowList, thirdPartyAllowList }
+      = this.reformatList(allowList);
+    this.firstPartyAllowList = firstPartyAllowList;
+    this.thirdPartyAllowList = thirdPartyAllowList;
   },
 
   /*
@@ -58,7 +58,7 @@ const store = {
     }
   }
 
-  this.firstPartyWhiteList is expected to match this format:
+  this.firstPartyAllowList is expected to match this format:
   {
     "google.com": 1,
     "abc.xyz": 1
@@ -67,7 +67,7 @@ const store = {
     ...
   }
 
-  this.thirdPartyWhiteList is expected to match this format:
+  this.thirdPartyAllowList is expected to match this format:
   {
     1: [
       "google.com",
@@ -77,26 +77,26 @@ const store = {
   }
 */
 
-  reformatList(whiteList) {
-    const firstPartyWhiteList = {};
-    const thirdPartyWhiteList = {};
+  reformatList(allowList) {
+    const firstPartyAllowList = {};
+    const thirdPartyAllowList = {};
     let counter = 0;
-    for (const siteOwner in whiteList) {
-      const firstParties = whiteList[siteOwner].properties;
+    for (const siteOwner in allowList) {
+      const firstParties = allowList[siteOwner].properties;
       for (let i = 0; i < firstParties.length; i++) {
-        firstPartyWhiteList[firstParties[i]] = counter;
+        firstPartyAllowList[firstParties[i]] = counter;
       }
-      const thirdParties = whiteList[siteOwner].resources;
-      thirdPartyWhiteList[counter] = [];
+      const thirdParties = allowList[siteOwner].resources;
+      thirdPartyAllowList[counter] = [];
       for (let i = 0; i < thirdParties.length; i++) {
-        thirdPartyWhiteList[counter].push(thirdParties[i]);
+        thirdPartyAllowList[counter].push(thirdParties[i]);
       }
       counter++;
     }
 
     return {
-      firstPartyWhiteList,
-      thirdPartyWhiteList
+      firstPartyAllowList,
+      thirdPartyAllowList
     };
   },
 
@@ -239,21 +239,21 @@ const store = {
     return hostnameVariants;
   },
 
-  // check if third party is on the whitelist (owned by the first party)
+  // check if third party is on the allowlist (owned by the first party)
   // returns true if it is and false otherwise
-  onWhiteList(firstPartyFromRequest, thirdPartyFromRequest) {
-    if (thirdPartyFromRequest && this.firstPartyWhiteList) {
+  onAllowList(firstPartyFromRequest, thirdPartyFromRequest) {
+    if (thirdPartyFromRequest && this.firstPartyAllowList) {
       const hostnameVariantsFirstParty
         = this.getHostnameVariants(firstPartyFromRequest);
       for (let i = 0; i < hostnameVariantsFirstParty.length; i++) {
-        if (this.firstPartyWhiteList
+        if (this.firstPartyAllowList
           .hasOwnProperty(hostnameVariantsFirstParty[i])) {
-          // first party is in the whitelist
-          const index = this.firstPartyWhiteList[hostnameVariantsFirstParty[i]];
+          // first party is in the allowlist
+          const index = this.firstPartyAllowList[hostnameVariantsFirstParty[i]];
           const hostnameVariantsThirdParty
             = this.getHostnameVariants(thirdPartyFromRequest);
           for (let j = 0; j < hostnameVariantsThirdParty.length; j++) {
-            if (this.thirdPartyWhiteList[index]
+            if (this.thirdPartyAllowList[index]
               .includes(hostnameVariantsThirdParty[j])) {
               return true;
             }
@@ -298,10 +298,10 @@ const store = {
     }
 
     // add link in first party if it doesn't exist yet
-    // and the third party is visible (i.e. not whitelisted)
+    // and the third party is visible (i.e. not allowlisted)
     if (!this.isFirstPartyLinkedToThirdParty(firstParty, target)) {
       if (!this.isVisibleThirdParty(thirdParty)) {
-        if (this.onWhiteList(origin, target)) {
+        if (this.onAllowList(origin, target)) {
           // hide third party
           thirdParty['isVisible'] = false;
         } else {
