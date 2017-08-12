@@ -181,16 +181,16 @@ const viz = {
   },
 
   getTooltipPosition(x, y) {
+    const tooltipArrowHeight = 20;
     const { right: canvasRight } = this.canvas.getBoundingClientRect();
     const {
       height: tooltipHeight,
       width: tooltipWidth
     } = this.tooltip.getBoundingClientRect();
-    const top = y - tooltipHeight - this.circleRadius - 20;
+    const top = y - tooltipHeight - this.circleRadius - tooltipArrowHeight;
 
     let left;
-    if ((x + tooltipWidth) >= canvasRight
-      || (x + (tooltipWidth/2)) >= canvasRight) {
+    if (x + tooltipWidth >= canvasRight) {
       left = x - tooltipWidth;
     } else {
       left = x - (tooltipWidth/2);
