@@ -8,7 +8,7 @@ The Mozilla Lightbeam extension is a key tool for Mozilla to educate the public 
 ### Clone the repository
 
 **Note** This repository uses a [submodule](https://github.com/mozilla-services/shavar-prod-lists) to allow some third party requests. To ensure the submodule is cloned along with this repository, use a modified `clone` command:
-`git clone --recursive https://github.com/electrolyfish/lightbeam-we.git`
+`git clone --recursive https://github.com/mozilla/lightbeam-we.git`
 
 ### Run the web extension
 
