@@ -457,3 +457,11 @@ footer {
     grid-column-start: 1;
   }
 }
+
+.unimplemented {
+  visibility: hidden;
+}
+
+.unimplemented.list {
+  display: none;
+}
