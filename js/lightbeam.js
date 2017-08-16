@@ -112,12 +112,35 @@ let websites;
 async function initLightBeam() {
   websites = await storeChild.getAll();
   renderGraph(websites);
+  addEventListeners();
+}
 
-  const resetData = document.getElementById('reset-data-button');
-  resetData.addEventListener('click', () => {
-    storeChild.reset().then(() => {
-      window.location.reload();
+function addEventListeners() {
+  downloadData();
+  resetData();
+}
+
+function downloadData() {
+  const saveData = document.getElementById('save-data-button');
+  saveData.addEventListener('click', async () => {
+    const data = await storeChild.getAll();
+    const blob = new Blob([JSON.stringify(data ,' ' , 2)],
+      {type : 'application/json'});
+    const url = window.URL.createObjectURL(blob);
+    const downloading = browser.downloads.download({
+      url : url,
+      filename : 'lightbeamData.json',
+      conflictAction : 'uniquify'
     });
+    await downloading;
+  });
+}
+
+function resetData() {
+  const resetData = document.getElementById('reset-data-button');
+  resetData.addEventListener('click', async () => {
+    await storeChild.reset();
+    window.location.reload();
   });
 }
 
