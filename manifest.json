@@ -15,7 +15,8 @@
     "webRequest",
     "<all_urls>",
     "tabs",
-    "storage"
+    "storage",
+    "downloads"
   ],
 
   "browser_action": {
