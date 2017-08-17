@@ -26,9 +26,9 @@ const capture = {
         const eventDetails = {
           type: 'sendFirstParty',
           data: {
-            tabId: tabId,
-            changeInfo: changeInfo,
-            tab: tab
+            tabId,
+            changeInfo,
+            tab
           }
         };
         this.queue.push(eventDetails);
@@ -72,13 +72,28 @@ const capture = {
   },
 
   // Returns true if the request should be stored, otherwise false.
-  shouldStore(tab) {
-    const documentUrl = new URL(tab.url);
+  // info could be a tab (from setFirstParty) or a
+  // response (from setThirdParty) object
+  async shouldStore(info) {
+    const tabId = info.id || info.tabId;
+    const visibleTab = tabId !== browser.tabs.TAB_ID_NONE;
+    let tab, documentUrl, privateBrowsing;
+    if (visibleTab) {
+      tab = await browser.tabs.get(tabId);
+      documentUrl = new URL(tab.url);
+      privateBrowsing = tab.incognito;
+    } else {
+      // browser.tabs.get throws an error for nonvisible tabs (tabId = -1)
+      // but some non-visible tabs can make third party requests,
+      // ex: Service Workers
+      documentUrl = new URL(info.documentUrl);
+      privateBrowsing = false;
+    }
     // ignore about:*, moz-extension:*
     // also ignore private browsing tabs
     if (documentUrl.protocol !== 'about:'
       && documentUrl.protocol !== 'moz-extension:'
-      && !tab.incognito) {
+      && !privateBrowsing) {
       return true;
     }
     return false;
@@ -86,19 +101,20 @@ const capture = {
 
   // capture third party requests
   async sendThirdParty(response) {
-    // browser.tabs.get throws an error for non-visible tabs (like DevTools)
-    if (response.tabId === browser.tabs.TAB_ID_NONE) {
+    if (!response.documentUrl) {
+      // documentUrl is undefined for the first request from the browser to the
+      // first party site
       return;
     }
-    const tab = await browser.tabs.get(response.tabId);
-    const documentUrl = new URL(tab.url);
-    const targetUrl = new URL(response.url);
+
     // @todo figure out why Web Extensions sometimes gives
     // undefined for response.originUrl
-    const originUrl = !response.originUrl ? '' : new URL(response.originUrl);
+    const originUrl = response.originUrl ? new URL(response.originUrl) : '';
+    const documentUrl = new URL(response.documentUrl);
+    const targetUrl = new URL(response.url);
 
     if (targetUrl.hostname !== documentUrl.hostname
-      && this.shouldStore(tab)) {
+      && await this.shouldStore(response)) {
       const data = {
         document: documentUrl.hostname,
         target: targetUrl.hostname,
@@ -117,7 +133,7 @@ const capture = {
   // capture first party requests
   async sendFirstParty(tabId, changeInfo, tab) {
     const documentUrl = new URL(tab.url);
-    if (tab.status === 'complete' && this.shouldStore(tab)) {
+    if (tab.status === 'complete' && await this.shouldStore(tab)) {
       const data = {
         faviconUrl: tab.favIconUrl,
         firstParty: true
