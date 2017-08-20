@@ -215,7 +215,7 @@ const store = {
 
 
   async isNewWebsite(hostname) {
-    if (await this.db.websites.get(hostname)) {
+    if (!(await this.db.websites.get(hostname))) {
       return true;
     }
     return false;
@@ -260,10 +260,10 @@ const store = {
   },
 
   async setFirstParty(hostname, data) {
-
     if (!hostname) {
       throw new Error('setFirstParty requires a valid hostname argument');
     }
+
     const isNewWebsite = await this.isNewWebsite(hostname);
 
     await this.setWebsite(hostname, data);
