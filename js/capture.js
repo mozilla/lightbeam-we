@@ -76,9 +76,8 @@ const capture = {
   // response (from setThirdParty) object
   async shouldStore(info) {
     const tabId = info.id || info.tabId;
-    const visibleTab = tabId !== browser.tabs.TAB_ID_NONE;
     let tab, documentUrl, privateBrowsing;
-    if (visibleTab) {
+    if (this.isVisibleTab(tabId)) {
       tab = await browser.tabs.get(tabId);
       documentUrl = new URL(tab.url);
       privateBrowsing = tab.incognito;
@@ -86,7 +85,7 @@ const capture = {
       // browser.tabs.get throws an error for nonvisible tabs (tabId = -1)
       // but some non-visible tabs can make third party requests,
       // ex: Service Workers
-      documentUrl = new URL(info.documentUrl);
+      documentUrl = new URL(info.originUrl);
       privateBrowsing = false;
     }
     // ignore about:*, moz-extension:*
@@ -99,10 +98,14 @@ const capture = {
     return false;
   },
 
+  isVisibleTab(tabId) {
+    return tabId !== browser.tabs.TAB_ID_NONE;
+  },
+
   // capture third party requests
   async sendThirdParty(response) {
-    if (!response.documentUrl) {
-      // documentUrl is undefined for the first request from the browser to the
+    if (!response.originUrl) {
+      // originUrl is undefined for the first request from the browser to the
       // first party site
       return;
     }
@@ -110,20 +113,25 @@ const capture = {
     // @todo figure out why Web Extensions sometimes gives
     // undefined for response.originUrl
     const originUrl = response.originUrl ? new URL(response.originUrl) : '';
-    const documentUrl = new URL(response.documentUrl);
     const targetUrl = new URL(response.url);
 
-    if (targetUrl.hostname !== documentUrl.hostname
+    if (targetUrl.hostname !== originUrl.hostname
       && await this.shouldStore(response)) {
+      let firstPartyUrl;
+      if (this.isVisibleTab(response.tabId)) {
+        const tab = await browser.tabs.get(response.tabId);
+        firstPartyUrl = new URL(tab.url);
+      } else {
+        firstPartyUrl = new URL(response.originUrl);
+      }
       const data = {
-        document: documentUrl.hostname,
         target: targetUrl.hostname,
         origin: originUrl.hostname,
         requestTime: response.timeStamp,
         firstParty: false
       };
       await store.setThirdParty(
-        documentUrl.hostname,
+        firstPartyUrl.hostname,
         targetUrl.hostname,
         data
       );
