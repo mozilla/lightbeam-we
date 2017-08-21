@@ -52,7 +52,7 @@ const viz = {
     this.registerSimulationForces(simulation);
 
     simulation.alphaTarget(1);
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       simulation.tick();
     }
     simulation.stop();
@@ -61,8 +61,6 @@ const viz = {
   },
 
   registerSimulationForces(simulation) {
-    // const simulation = this.simulation;
-
     const linkForce = d3.forceLink(this.links);
     linkForce.id((d) => d.hostname);
     linkForce.distance(this.linkDistance);
@@ -359,7 +357,6 @@ const viz = {
   addZoom() {
     const zoom = d3.zoom().scaleExtent([this.minZoom, this.maxZoom]);
     zoom.on('zoom', () => this.zoom());
-    zoom.on('end', () => this.endEvent());
 
     d3.select(this.canvas)
       .call(zoom);
