@@ -129,7 +129,6 @@ const viz = {
     this.context.scale(this.transform.k, this.transform.k);
     this.drawLinks();
     this.drawNodes();
-    // this.simulation.stop();
     this.context.restore();
   },
 
