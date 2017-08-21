@@ -46,8 +46,9 @@ const viz = {
     }
 
     const linkForce = d3.forceLink(this.links);
+    const linkDistance = 50;
     linkForce.id((d) => d.hostname);
-    linkForce.distance(50);
+    linkForce.distance(linkDistance);
     simulation.force('link', linkForce);
 
     const centerForce = d3.forceCenter(this.width/2, this.height/2);
@@ -56,11 +57,11 @@ const viz = {
     simulation.force('center', centerForce);
 
     const forceX = d3.forceX(this.width/2);
-    forceX.strength(0.3);
-    simulation.force('x', forceX);
-
     const forceY = d3.forceY(this.height/2);
-    forceY.strength(0.3);
+    const forceStrength = 0.3;
+    forceX.strength(forceStrength);
+    forceY.strength(forceStrength);
+    simulation.force('x', forceX);
     simulation.force('y', forceY);
 
     simulation.force('charge', d3.forceManyBody());
