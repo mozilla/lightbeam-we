@@ -45,8 +45,7 @@ const viz = {
       simulation.nodes(this.nodes);
     }
 
-    const linkForce = d3.forceLink();
-    linkForce.links(this.links);
+    const linkForce = d3.forceLink(this.links);
     linkForce.id((d) => d.hostname);
     linkForce.distance(50);
     simulation.force('link', linkForce);
