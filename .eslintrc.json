@@ -9,6 +9,7 @@
         "store": true,
         "storeChild": true,
         "capture": true,
+        "lightbeam": true,
         "viz": true,
         "d3": true,
         "Dexie": true
