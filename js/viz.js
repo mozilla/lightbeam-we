@@ -363,7 +363,6 @@ const viz = {
   },
 
   zoom() {
-    this.simulation.stop();
     this.transform = d3.event.transform;
     this.drawOnCanvas();
   }
