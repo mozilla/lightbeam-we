@@ -114,16 +114,16 @@ const capture = {
     // undefined for response.originUrl
     const originUrl = response.originUrl ? new URL(response.originUrl) : '';
     const targetUrl = new URL(response.url);
+    let firstPartyUrl;
+    if (this.isVisibleTab(response.tabId)) {
+      const tab = await browser.tabs.get(response.tabId);
+      firstPartyUrl = new URL(tab.url);
+    } else {
+      firstPartyUrl = new URL(response.originUrl);
+    }
 
-    if (targetUrl.hostname !== originUrl.hostname
+    if (targetUrl.hostname !== firstPartyUrl.hostname
       && await this.shouldStore(response)) {
-      let firstPartyUrl;
-      if (this.isVisibleTab(response.tabId)) {
-        const tab = await browser.tabs.get(response.tabId);
-        firstPartyUrl = new URL(tab.url);
-      } else {
-        firstPartyUrl = new URL(response.originUrl);
-      }
       const data = {
         target: targetUrl.hostname,
         origin: originUrl.hostname,
