@@ -5,6 +5,11 @@ const viz = {
   resizeTimer: null,
   minZoom: 0.5,
   maxZoom: 1.5,
+  linkDistance: 50,
+  positionStrength: 0.3,
+  collisionRadius: 30,
+  collisionStrength: 0.4,
+  chargeStrength: -100,
 
   init(nodes, links) {
     const { width, height } = this.getDimensions();
@@ -32,7 +37,6 @@ const viz = {
 
   simulate() {
     this.simulation = this.simulateForce();
-    this.simulation.tick();
   },
 
   simulateForce() {
@@ -45,10 +49,23 @@ const viz = {
       simulation.nodes(this.nodes);
     }
 
+    this.registerSimulationForces(simulation);
+
+    simulation.alphaTarget(1);
+    for (let i = 0; i < 5; i++) {
+      simulation.tick();
+    }
+    simulation.stop();
+
+    return simulation;
+  },
+
+  registerSimulationForces(simulation) {
+    // const simulation = this.simulation;
+
     const linkForce = d3.forceLink(this.links);
-    const linkDistance = 50;
     linkForce.id((d) => d.hostname);
-    linkForce.distance(linkDistance);
+    linkForce.distance(this.linkDistance);
     simulation.force('link', linkForce);
 
     const centerForce = d3.forceCenter(this.width/2, this.height/2);
@@ -57,20 +74,21 @@ const viz = {
     simulation.force('center', centerForce);
 
     const forceX = d3.forceX(this.width/2);
-    const forceY = d3.forceY(this.height/2);
-    const forceStrength = 0.3;
-    forceX.strength(forceStrength);
-    forceY.strength(forceStrength);
+    forceX.strength(this.positionStrength);
     simulation.force('x', forceX);
+
+    const forceY = d3.forceY(this.height/2);
+    forceY.strength(this.positionStrength);
     simulation.force('y', forceY);
 
-    simulation.force('charge', d3.forceManyBody());
-    simulation.force('collide', d3.forceCollide(50));
+    const chargeForce = d3.forceManyBody();
+    chargeForce.strength(this.chargeStrength);
+    simulation.force('charge', chargeForce);
 
-    simulation.alphaTarget(1);
-    simulation.stop();
-
-    return simulation;
+    const collisionForce = d3.forceCollide(this.collisionRadius);
+    collisionForce.radius(this.collisionRadius + this.collisionRadius);
+    collisionForce.strength(this.collisionStrength);
+    simulation.force('collide', collisionForce);
   },
 
   createCanvas() {
@@ -113,6 +131,7 @@ const viz = {
     this.context.scale(this.transform.k, this.transform.k);
     this.drawLinks();
     this.drawNodes();
+    // this.simulation.stop();
     this.context.restore();
   },
 
@@ -335,7 +354,6 @@ const viz = {
 
   dragEnd() {
     d3.event.subject.shadow = false;
-    this.endEvent();
   },
 
   addZoom() {
@@ -348,11 +366,8 @@ const viz = {
   },
 
   zoom() {
+    this.simulation.stop();
     this.transform = d3.event.transform;
     this.drawOnCanvas();
-  },
-
-  endEvent() {
-    this.draw(this.nodes, this.links);
   }
 };
