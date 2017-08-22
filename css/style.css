@@ -469,7 +469,8 @@ footer {
   visibility: hidden;
 }
 
-.unimplemented.list {
+.unimplemented.list,
+footer.unimplemented {
   display: none;
 }
 
