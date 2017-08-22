@@ -254,12 +254,14 @@ input[type="checkbox"] {
 
 .vis {
   display: grid;
-  grid-template-rows: 1fr 2fr;
+  grid-template-rows: 60px 1fr;
   grid-template-columns: 1fr 40px;
 }
 
 .vis-header {
-  padding: 30px;
+  padding-left: 20px;
+  padding-top: 10px;
+  background-color: var(--primary-color);
 }
 
 .vis-header > h1 {
@@ -271,7 +273,12 @@ input[type="checkbox"] {
 }
 
 .vis-content {
-  position: relative;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
 }
 
 #tooltip {
@@ -463,6 +470,12 @@ footer {
   visibility: hidden;
 }
 
-.unimplemented.list {
+.unimplemented.list,
+footer.unimplemented {
   display: none;
+}
+
+.max-graph {
+  position: relative;
+  z-index: 2;
 }

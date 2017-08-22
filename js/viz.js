@@ -7,7 +7,7 @@ const viz = {
   maxZoom: 1.5,
 
   init(nodes, links) {
-    const { width, height } = this.getDimensions('visualization');
+    const { width, height } = this.getDimensions();
     const { canvas, context } = this.createCanvas();
 
     this.canvas = canvas;
@@ -86,8 +86,8 @@ const viz = {
     this.context.scale(this.scale, this.scale);
   },
 
-  getDimensions(id) {
-    const element = document.getElementById(id);
+  getDimensions() {
+    const element = document.body;
     const { width, height } = element.getBoundingClientRect();
 
     return {
