@@ -63,11 +63,6 @@ const viz = {
     return simulation;
   },
 
-  getComputedStyle(element, property) {
-    const value = window.getComputedStyle(element).getPropertyValue(property);
-    return parseInt(value);
-  },
-
   createCanvas() {
     const base = document.getElementById('visualization');
     const canvas = document.createElement('canvas');
