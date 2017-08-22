@@ -135,7 +135,7 @@ const capture = {
         target: targetUrl.hostname,
         origin: originUrl.hostname,
         requestTime: response.timeStamp,
-        firstParty: false
+        firstParty: 0
       };
       await store.setThirdParty(
         firstPartyUrl.hostname,
@@ -151,7 +151,7 @@ const capture = {
     if (tab.status === 'complete' && await this.shouldStore(tab)) {
       const data = {
         faviconUrl: tab.favIconUrl,
-        firstParty: true
+        firstParty: 1
       };
       await store.setFirstParty(documentUrl.hostname, data);
     }

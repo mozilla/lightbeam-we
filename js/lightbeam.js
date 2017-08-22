@@ -1,10 +1,14 @@
 const lightbeam = {
   websites: {},
+  dataGatheredSince: '',
+  numSitesVisited: 0,
+  numThirdParties: 0,
 
   async init() {
     this.websites = await storeChild.getAll();
     this.renderGraph();
     this.addListeners();
+    this.updateVars();
   },
 
   renderGraph() {
@@ -18,6 +22,54 @@ const lightbeam = {
     storeChild.onUpdate((data) => {
       this.redraw(data);
     });
+  },
+
+  // Called from init() (isFirstParty = undefined)
+  // and redraw() (isFirstParty = 1 or 0).
+  async updateVars(isFirstParty) {
+    const numSitesVisited = document.getElementById('num-sites-visited');
+    const numThirdParties = document.getElementById('num-third-parties');
+
+    // initialize dynamic vars from storage
+    if (!this.dataGatheredSince) {
+      this.dataGatheredSince = await this.getDataGatheredSince();
+      const dataGatheredSince = document.getElementById('data-gathered-since');
+      dataGatheredSince.textContent = this.dataGatheredSince;
+    }
+    if (isFirstParty === undefined) {
+      this.numSitesVisited = await this.getNumSitesVisited();
+      numSitesVisited.textContent = this.numSitesVisited;
+      this.numThirdParties = await this.getNumThirdParties();
+      numThirdParties.textContent = this.numThirdParties;
+      return;
+    }
+
+    // update on redraw
+    if (isFirstParty) {
+      this.numSitesVisited++;
+      numSitesVisited.textContent = this.numSitesVisited;
+    } else {
+      this.numThirdParties++;
+      numThirdParties.textContent = this.numThirdParties;
+    }
+  },
+
+  async getDataGatheredSince() {
+    const oldestDateUnixTime = await storeChild.getOldestDate();
+    if (!oldestDateUnixTime) {
+      return '';
+    }
+    // reformat unix time
+    const fullDateTime = new Date(oldestDateUnixTime);
+    return fullDateTime.toDateString();
+  },
+
+  async getNumSitesVisited() {
+    return await storeChild.getNumSitesVisited();
+  },
+
+  async getNumThirdParties() {
+    return await storeChild.getNumThirdParties();
   },
 
   // transforms the object of nested objects 'websites' into a
@@ -150,6 +202,7 @@ const lightbeam = {
   redraw(data) {
     if (!(data.hostname in this.websites)) {
       this.websites[data.hostname] = data;
+      this.updateVars(data.firstParty);
     }
     if (!data.firstParty) {
       // if we have the first parties make the link if they don't exist
@@ -168,7 +221,7 @@ const lightbeam = {
     }
     const transformedData = this.transformData(this.websites);
     viz.draw(transformedData.nodes, transformedData.links);
-  },
+  }
 };
 
 window.onload = () => {

@@ -14,7 +14,7 @@ const store = {
     this.db = new Dexie('websites_database');
     this.db.version(1).stores({
       // store: 'primaryKey, index1, index2, ...'
-      websites: 'hostname, dateVisited, isVisible, firstParty'
+      websites: 'hostname, requestTime, isVisible, firstParty'
       // websites is a table
     });
     this.db.open();
@@ -121,7 +121,10 @@ const store = {
 
     const publicMethods = [
       'getAll',
-      'reset'
+      'reset',
+      'getOldestDate',
+      'getNumSitesVisited',
+      'getNumThirdParties'
     ];
 
     if (publicMethods.includes(m['method'])) {
@@ -141,11 +144,11 @@ const store = {
       hostname: hostname,
       favicon: website.faviconUrl || '',
       firstPartyHostnames: website.firstPartyHostnames || false,
-      firstParty: false,
+      firstParty: 0,
       thirdParties: []
     };
     if (website.firstPartyHostnames === undefined) {
-      output.firstParty = true;
+      output.firstParty = 1;
       if ('thirdPartyHostnames' in website) {
         output.thirdParties = website.thirdPartyHostnames;
       } else {
@@ -298,10 +301,10 @@ const store = {
       if (!this.isVisibleThirdParty(thirdParty)) {
         if (this.onAllowList(origin, target)) {
           // hide third party
-          thirdParty['isVisible'] = false;
+          thirdParty['isVisible'] = 0;
         } else {
           // show third party; it either became visible or is brand new
-          thirdParty['isVisible'] = true;
+          thirdParty['isVisible'] = 1;
           isNewThirdParty = true;
           for (let i = 0; i < thirdParty['firstPartyHostnames'].length; i++) {
             const firstPartyHostname = thirdParty['firstPartyHostnames'][i];
@@ -360,6 +363,29 @@ const store = {
     // empty out request processing queue
     capture.queue = [];
     return await this.db.websites.clear();
+  },
+
+  async getOldestDate() {
+    const oldestSite = await this.db.websites.orderBy('requestTime').first();
+    if (!oldestSite) {
+      return '';
+    }
+    return oldestSite.requestTime;
+  },
+
+  async getNumSitesVisited() {
+    // Dexie does not accept boolean values; using 0/1 instead
+    // http://dexie.org/docs/WhereClause/WhereClause.equals().html
+    return await this.db.websites.where('firstParty').equals(1).count();
+  },
+
+  async getNumThirdParties() {
+    // Dexie does not accept boolean values; using 0/1 instead
+    // http://dexie.org/docs/WhereClause/WhereClause.equals().html
+    return await this.db.websites
+      .where('firstParty').equals(0).and((website) => {
+        return website.isVisible;
+      }).count();
   }
 };
 
