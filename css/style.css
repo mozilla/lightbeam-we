@@ -224,10 +224,10 @@ main {
   align-items: center;
   justify-content: space-around;
   height: 30px;
-  width: 60px;
+  width: 55px;
   margin-left: 5px;
   background-color: var(--secondary-color);
-  border-radius: 2px;
+  border-radius: 5px;
   position: relative;
 }
 
@@ -243,7 +243,7 @@ main {
   border-radius: 5px;
   transition:all 0.4s;
   position: absolute;
-  left:10%;
+  left:5px;
   top:10%;
 }
 
@@ -259,7 +259,7 @@ main {
 }
 
 input:checked + .toggle::before{
- transform: translateX(22px);
+ transform: translateX(20px);
  right:10%;
  background-color: var(--secondary-text-color);
 }
