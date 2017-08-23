@@ -5,13 +5,8 @@ const viz = {
   resizeTimer: null,
   minZoom: 0.5,
   maxZoom: 1.5,
-  linkDistance: 50,
-  positionStrength: 0.3,
   collisionRadius: 30,
-  collisionStrength: 0.4,
-  chargeStrength: 10,
-  chargeDistanceMax: 100,
-  tickCount: 20,
+  tickCount: 30,
 
   init(nodes, links) {
     const { width, height } = this.getDimensions();
@@ -46,7 +41,6 @@ const viz = {
 
     if (!this.simulation) {
       simulation = d3.forceSimulation(this.nodes);
-      // simulation.on('tick', () => this.drawOnCanvas());
       this.registerSimulationForces(simulation);
     } else {
       simulation = this.simulation;
@@ -74,20 +68,15 @@ const viz = {
 
   registerSimulationForces(simulation) {
     const centerForce = d3.forceCenter(this.width/2, this.height/2);
-    centerForce.x(this.width/2);
-    centerForce.y(this.height/2);
     simulation.force('center', centerForce);
 
     const forceX = d3.forceX(this.width/2);
-    forceX.strength(this.positionStrength);
     simulation.force('x', forceX);
 
     const forceY = d3.forceY(this.height/2);
-    forceY.strength(this.positionStrength);
     simulation.force('y', forceY);
 
     const chargeForce = d3.forceManyBody();
-    chargeForce.distanceMax(this.chargeDistanceMax);
     simulation.force('charge', chargeForce);
 
     const collisionForce = d3.forceCollide(this.collisionRadius);
@@ -368,7 +357,8 @@ const viz = {
 
   dragEnd() {
     if (!d3.event.active) {
-      this.manualTick(this.simulation);
+      this.simulation.alphaTarget(0);
+      this.simulation.stop();
     }
     d3.event.subject.fx = d3.event.x;
     d3.event.subject.fy = d3.event.y;
