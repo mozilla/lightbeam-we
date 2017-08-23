@@ -1,9 +1,12 @@
 {
   "name": "lightbeam-we",
-  "version": "0.0.1",
+  "version": "2.0.0",
   "description": "Lightbeam web extension",
   "main": "background.js",
   "scripts": {
+    "build": "npm install && npm run updatesubmodule && npm run createlib && web-ext build --overwrite-dest",
+    "updatesubmodule": "git submodule init && git submodule update",
+    "createlib": "rm -rf ext-libs/ && mkdir ext-libs && cp node_modules/dexie/dist/dexie.js ext-libs && cp node_modules/d3/build/d3.min.js ext-libs",
     "lint": "npm-run-all lint:*",
     "lint:eslint": "eslint --ext=.js,.json .",
     "lint:webext": "web-ext -s js lint",

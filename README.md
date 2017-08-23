@@ -29,7 +29,7 @@ There are a couple ways to try out this web extension:
 ## Development Guide
 
 ### Download dependencies
-Run `npm install`.
+Run `npm run build`.
 
 ### Update the submodule
 To manually update the submodule at any time during development, run `git submodule update`.
