@@ -16,6 +16,7 @@ const viz = {
     this.context = context;
     this.tooltip = document.getElementById('tooltip');
     this.circleRadius = this.circleRadius * this.scalingFactor;
+    this.collisionRadius = this.collisionRadius * this.scalingFactor;
     this.scale = (window.devicePixelRatio || 1) * this.scalingFactor;
     this.transform = d3.zoomIdentity;
 
@@ -28,59 +29,60 @@ const viz = {
     this.nodes = nodes;
     this.links = links;
 
-    this.simulate();
+    this.simulateForce();
     this.drawOnCanvas();
   },
 
-  simulate() {
-    this.simulation = this.simulateForce();
-  },
-
   simulateForce() {
-    let simulation;
-
     if (!this.simulation) {
-      simulation = d3.forceSimulation(this.nodes);
-      this.registerSimulationForces(simulation);
+      this.simulation = d3.forceSimulation(this.nodes);
+      this.registerSimulationForces();
     } else {
-      simulation = this.simulation;
-      simulation.nodes(this.nodes);
+      this.simulation.nodes(this.nodes);
     }
-    this.registerLinkForce(simulation);
-    this.manualTick(simulation);
-    return simulation;
+    this.registerLinkForce();
+    this.manualTick();
   },
 
-  manualTick(simulation) {
-    simulation.alphaTarget(0.1);
+  manualTick() {
+    this.simulation.alphaTarget(0.1);
     for (let i = 0; i < this.tickCount; i++) {
-      simulation.tick();
+      this.simulation.tick();
     }
-    simulation.alphaTarget(0);
-    simulation.stop();
+    this.stopSimulation();
   },
 
-  registerLinkForce(simulation) {
+  restartSimulation() {
+    this.simulation.alphaTarget(0.1);
+    this.simulation.restart();
+  },
+
+  stopSimulation() {
+    this.simulation.alphaTarget(0);
+    this.simulation.stop();
+  },
+
+  registerLinkForce() {
     const linkForce = d3.forceLink(this.links);
     linkForce.id((d) => d.hostname);
-    simulation.force('link', linkForce);
+    this.simulation.force('link', linkForce);
   },
 
-  registerSimulationForces(simulation) {
+  registerSimulationForces() {
     const centerForce = d3.forceCenter(this.width/2, this.height/2);
-    simulation.force('center', centerForce);
+    this.simulation.force('center', centerForce);
 
     const forceX = d3.forceX(this.width/2);
-    simulation.force('x', forceX);
+    this.simulation.force('x', forceX);
 
     const forceY = d3.forceY(this.height/2);
-    simulation.force('y', forceY);
+    this.simulation.force('y', forceY);
 
     const chargeForce = d3.forceManyBody();
-    simulation.force('charge', chargeForce);
+    this.simulation.force('charge', chargeForce);
 
     const collisionForce = d3.forceCollide(this.collisionRadius);
-    simulation.force('collide', collisionForce);
+    this.simulation.force('collide', collisionForce);
   },
 
   createCanvas() {
@@ -339,8 +341,7 @@ const viz = {
 
   dragStart() {
     if (!d3.event.active) {
-      this.simulation.alphaTarget(0.1);
-      this.simulation.restart();
+      this.restartSimulation();
     }
     d3.event.subject.shadow = true;
     d3.event.subject.fx = d3.event.subject.x;
@@ -357,8 +358,7 @@ const viz = {
 
   dragEnd() {
     if (!d3.event.active) {
-      this.simulation.alphaTarget(0);
-      this.simulation.stop();
+      this.stopSimulation();
     }
     d3.event.subject.fx = d3.event.x;
     d3.event.subject.fy = d3.event.y;
