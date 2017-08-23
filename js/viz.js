@@ -5,6 +5,8 @@ const viz = {
   resizeTimer: null,
   minZoom: 0.5,
   maxZoom: 1.5,
+  collisionRadius: 30,
+  tickCount: 30,
 
   init(nodes, links) {
     const { width, height } = this.getDimensions();
@@ -14,6 +16,7 @@ const viz = {
     this.context = context;
     this.tooltip = document.getElementById('tooltip');
     this.circleRadius = this.circleRadius * this.scalingFactor;
+    this.collisionRadius = this.collisionRadius * this.scalingFactor;
     this.scale = (window.devicePixelRatio || 1) * this.scalingFactor;
     this.transform = d3.zoomIdentity;
 
@@ -26,41 +29,60 @@ const viz = {
     this.nodes = nodes;
     this.links = links;
 
-    this.simulate();
+    this.simulateForce();
     this.drawOnCanvas();
   },
 
-  simulate() {
-    this.simulation = this.simulateForce();
-    this.simulation.tick();
+  simulateForce() {
+    if (!this.simulation) {
+      this.simulation = d3.forceSimulation(this.nodes);
+      this.registerSimulationForces();
+    } else {
+      this.simulation.nodes(this.nodes);
+    }
+    this.registerLinkForce();
+    this.manualTick();
   },
 
-  simulateForce() {
-    let simulation;
-
-    if (!this.simulation) {
-      simulation = d3.forceSimulation(this.nodes);
-    } else {
-      simulation = this.simulation;
-      simulation.nodes(this.nodes);
+  manualTick() {
+    this.simulation.alphaTarget(0.1);
+    for (let i = 0; i < this.tickCount; i++) {
+      this.simulation.tick();
     }
+    this.stopSimulation();
+  },
 
+  restartSimulation() {
+    this.simulation.alphaTarget(0.1);
+    this.simulation.restart();
+  },
+
+  stopSimulation() {
+    this.simulation.alphaTarget(0);
+    this.simulation.stop();
+  },
+
+  registerLinkForce() {
     const linkForce = d3.forceLink(this.links);
     linkForce.id((d) => d.hostname);
-    linkForce.distance(100);
-    simulation.force('link', linkForce);
+    this.simulation.force('link', linkForce);
+  },
 
+  registerSimulationForces() {
     const centerForce = d3.forceCenter(this.width/2, this.height/2);
-    centerForce.x(this.width/2);
-    centerForce.y(this.height/2);
-    simulation.force('center', centerForce);
+    this.simulation.force('center', centerForce);
 
-    simulation.force('charge', d3.forceManyBody());
-    simulation.force('collide', d3.forceCollide(50));
-    simulation.alphaTarget(1);
-    simulation.stop();
+    const forceX = d3.forceX(this.width/2);
+    this.simulation.force('x', forceX);
 
-    return simulation;
+    const forceY = d3.forceY(this.height/2);
+    this.simulation.force('y', forceY);
+
+    const chargeForce = d3.forceManyBody();
+    this.simulation.force('charge', chargeForce);
+
+    const collisionForce = d3.forceCollide(this.collisionRadius);
+    this.simulation.force('collide', collisionForce);
   },
 
   createCanvas() {
@@ -108,11 +130,13 @@ const viz = {
 
   drawNodes() {
     for (const node of this.nodes) {
+      const x = node.fx || node.x;
+      const y = node.fy || node.y;
       this.context.beginPath();
-      this.context.moveTo(node.x, node.y);
+      this.context.moveTo(x, y);
 
       if (node.shadow) {
-        this.drawShadow(node.x, node.y);
+        this.drawShadow(x, y);
       }
 
       if (node.firstParty) {
@@ -122,7 +146,7 @@ const viz = {
       }
 
       if (node.favicon) {
-        this.drawFavicon(node.favicon, node.x, node.y);
+        this.drawFavicon(node.favicon, x, y);
       }
 
       this.context.fillStyle = 'white';
@@ -218,8 +242,12 @@ const viz = {
   drawLinks() {
     this.context.beginPath();
     for (const d of this.links) {
-      this.context.moveTo(d.source.x, d.source.y);
-      this.context.lineTo(d.target.x, d.target.y);
+      const sx = d.source.fx || d.source.x;
+      const sy = d.source.fy || d.source.y;
+      const tx = d.target.fx || d.target.x;
+      const ty = d.target.fy || d.target.y;
+      this.context.moveTo(sx, sy);
+      this.context.lineTo(tx, ty);
     }
     this.context.closePath();
     this.context.strokeStyle = '#ccc';
@@ -312,26 +340,36 @@ const viz = {
   },
 
   dragStart() {
+    if (!d3.event.active) {
+      this.restartSimulation();
+    }
     d3.event.subject.shadow = true;
+    d3.event.subject.fx = d3.event.subject.x;
+    d3.event.subject.fy = d3.event.subject.y;
   },
 
   drag() {
-    d3.event.subject.x = d3.event.x;
-    d3.event.subject.y = d3.event.y;
+    d3.event.subject.fx = d3.event.x;
+    d3.event.subject.fy = d3.event.y;
 
     this.hideTooltip();
     this.drawOnCanvas();
   },
 
   dragEnd() {
+    if (!d3.event.active) {
+      this.stopSimulation();
+    }
+    d3.event.subject.x = d3.event.subject.fx;
+    d3.event.subject.y = d3.event.subject.fy;
+    d3.event.subject.fx = null;
+    d3.event.subject.fy = null;
     d3.event.subject.shadow = false;
-    this.endEvent();
   },
 
   addZoom() {
     const zoom = d3.zoom().scaleExtent([this.minZoom, this.maxZoom]);
     zoom.on('zoom', () => this.zoom());
-    zoom.on('end', () => this.endEvent());
 
     d3.select(this.canvas)
       .call(zoom);
@@ -340,9 +378,5 @@ const viz = {
   zoom() {
     this.transform = d3.event.transform;
     this.drawOnCanvas();
-  },
-
-  endEvent() {
-    this.draw(this.nodes, this.links);
   }
 };
