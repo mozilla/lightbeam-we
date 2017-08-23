@@ -9,7 +9,9 @@ const viz = {
   positionStrength: 0.3,
   collisionRadius: 30,
   collisionStrength: 0.4,
-  chargeStrength: -100,
+  chargeStrength: 10,
+  chargeDistanceMax: 100,
+  tickCount: 20,
 
   init(nodes, links) {
     const { width, height } = this.getDimensions();
@@ -44,28 +46,44 @@ const viz = {
 
     if (!this.simulation) {
       simulation = d3.forceSimulation(this.nodes);
+      // simulation.on('tick', () => this.drawOnCanvas());
+      this.registerSimulationForces(simulation);
     } else {
       simulation = this.simulation;
       simulation.nodes(this.nodes);
+      // simulation.alphaTarget(0.1);
+      // simulation.restart();
     }
-
-    this.registerSimulationForces(simulation);
-
-    simulation.alphaTarget(1);
-    for (let i = 0; i < 10; i++) {
-      simulation.tick();
-    }
-    simulation.stop();
-
+    this.registerLinkForce(simulation);
+    /* if (simulation.alphaTarget() === 0) {
+      console.log('alphaTarget is 0');
+      // this.registerSimulationForces(simulation);
+      simulation.alphaTarget(0.3);
+      simulation.restart();
+    } */
+    this.manualTick(simulation);
     return simulation;
   },
 
-  registerSimulationForces(simulation) {
+  manualTick(simulation) {
+    simulation.alphaTarget(0.1);
+    for (let i = 0; i < this.tickCount; i++) {
+      simulation.tick();
+      // this.drawOnCanvas();
+    }
+    simulation.alphaTarget(0);
+    simulation.stop();
+  },
+
+  registerLinkForce(simulation) {
     const linkForce = d3.forceLink(this.links);
     linkForce.id((d) => d.hostname);
-    linkForce.distance(this.linkDistance);
+    // linkForce.distance(this.linkDistance);
     simulation.force('link', linkForce);
+  },
 
+  registerSimulationForces(simulation) {
+    // const simulation = this.simulation;
     const centerForce = d3.forceCenter(this.width/2, this.height/2);
     centerForce.x(this.width/2);
     centerForce.y(this.height/2);
@@ -80,12 +98,13 @@ const viz = {
     simulation.force('y', forceY);
 
     const chargeForce = d3.forceManyBody();
-    chargeForce.strength(this.chargeStrength);
+    // chargeForce.strength(this.chargeStrength);
+    chargeForce.distanceMax(this.chargeDistanceMax);
     simulation.force('charge', chargeForce);
 
     const collisionForce = d3.forceCollide(this.collisionRadius);
-    collisionForce.radius(this.collisionRadius + this.collisionRadius);
-    collisionForce.strength(this.collisionStrength);
+    // collisionForce.radius(this.collisionRadius + this.collisionRadius);
+    // collisionForce.strength(this.collisionStrength);
     simulation.force('collide', collisionForce);
   },
 
@@ -130,15 +149,18 @@ const viz = {
     this.drawLinks();
     this.drawNodes();
     this.context.restore();
+    // this.simulation.alphaTarget(0);
   },
 
   drawNodes() {
     for (const node of this.nodes) {
+      const x = node.fx || node.x;
+      const y = node.fy || node.y;
       this.context.beginPath();
-      this.context.moveTo(node.x, node.y);
+      this.context.moveTo(x, y);
 
       if (node.shadow) {
-        this.drawShadow(node.x, node.y);
+        this.drawShadow(x, y);
       }
 
       if (node.firstParty) {
@@ -148,13 +170,14 @@ const viz = {
       }
 
       if (node.favicon) {
-        this.drawFavicon(node.favicon, node.x, node.y);
+        this.drawFavicon(node.favicon, x, y);
       }
 
       this.context.fillStyle = 'white';
       this.context.closePath();
       this.context.fill();
     }
+    // this.simulation.alphaTarget(0);
   },
 
   getSquare() {
@@ -244,8 +267,12 @@ const viz = {
   drawLinks() {
     this.context.beginPath();
     for (const d of this.links) {
-      this.context.moveTo(d.source.x, d.source.y);
-      this.context.lineTo(d.target.x, d.target.y);
+      const sx = d.source.fx || d.source.x;
+      const sy = d.source.fy || d.source.y;
+      const tx = d.target.fx || d.target.x;
+      const ty = d.target.fy || d.target.y;
+      this.context.moveTo(sx, sy);
+      this.context.lineTo(tx, ty);
     }
     this.context.closePath();
     this.context.strokeStyle = '#ccc';
@@ -338,18 +365,32 @@ const viz = {
   },
 
   dragStart() {
+    if (!d3.event.active) {
+      this.simulation.alphaTarget(0.1);
+      this.simulation.restart();
+      // this.manualTick(this.simulation);
+    }
     d3.event.subject.shadow = true;
+    d3.event.subject.fx = d3.event.subject.x;
+    d3.event.subject.fy = d3.event.subject.y;
   },
 
   drag() {
-    d3.event.subject.x = d3.event.x;
-    d3.event.subject.y = d3.event.y;
+    d3.event.subject.fx = d3.event.x;
+    d3.event.subject.fy = d3.event.y;
 
     this.hideTooltip();
     this.drawOnCanvas();
   },
 
   dragEnd() {
+    if (!d3.event.active) {
+      // this.simulation.alphaTarget(0);
+      // this.simulation.stop();
+      this.manualTick(this.simulation);
+    }
+    d3.event.subject.fx = d3.event.x;
+    d3.event.subject.fy = d3.event.y;
     d3.event.subject.shadow = false;
   },
 
