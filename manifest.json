@@ -1,10 +1,10 @@
 {
   "manifest_version": 2,
   "name": "Lightbeam",
-  "version": "1.0",
+  "version": "2.0.0",
 
   "description": "Lightbeam is a Firefox add-on that uses interactive visualizations to show you the relationships between third parties and the sites you visit.",
-  "homepage_url": "https://github.com/pauljt/lightbeam-we",
+  "homepage_url": "https://github.com/mozilla/lightbeam-we",
 
   "icons": {
     "48": "images/lightbeam-48.png",
@@ -24,9 +24,16 @@
     "default_title": "Lightbeam"
   },
 
+  "applications": {
+    "gecko": {
+      "id": "jid1-F9UJ2thwoAm5gQ@jetpack",
+      "strict_min_version": "52"
+    }
+  },
+
   "background": {
     "scripts": [
-      "node_modules/dexie/dist/dexie.js",
+      "ext-libs/dexie.js",
       "js/store.js",
       "js/capture.js",
       "js/background.js"
