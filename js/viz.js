@@ -360,8 +360,10 @@ const viz = {
     if (!d3.event.active) {
       this.stopSimulation();
     }
-    d3.event.subject.fx = d3.event.x;
-    d3.event.subject.fy = d3.event.y;
+    d3.event.subject.x = d3.event.subject.fx;
+    d3.event.subject.y = d3.event.subject.fy;
+    d3.event.subject.fx = null;
+    d3.event.subject.fy = null;
     d3.event.subject.shadow = false;
   },
 
