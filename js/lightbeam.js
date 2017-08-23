@@ -1,7 +1,7 @@
 const lightbeam = {
   websites: {},
   dataGatheredSince: '',
-  numSitesVisited: 0,
+  numFirstParties: 0,
   numThirdParties: 0,
 
   async init() {
@@ -25,47 +25,65 @@ const lightbeam = {
   },
 
   // Called from init() (isFirstParty = undefined)
-  // and redraw() (isFirstParty = 1 or 0).
+  // and redraw() (isFirstParty = true or false).
   async updateVars(isFirstParty) {
-    const numSitesVisited = document.getElementById('num-sites-visited');
+    const numFirstParties = document.getElementById('num-first-parties');
     const numThirdParties = document.getElementById('num-third-parties');
 
     // initialize dynamic vars from storage
     if (!this.dataGatheredSince) {
-      this.dataGatheredSince = await this.getDataGatheredSince();
+      const { dateStr, fullDateTime } = await this.getDataGatheredSince();
+      this.dataGatheredSince = dateStr;
       const dataGatheredSince = document.getElementById('data-gathered-since');
       dataGatheredSince.textContent = this.dataGatheredSince;
+      dataGatheredSince.setAttribute('datetime', fullDateTime);
     }
     if (isFirstParty === undefined) {
-      this.numSitesVisited = await this.getNumSitesVisited();
-      numSitesVisited.textContent = this.numSitesVisited;
+      this.numFirstParties = await this.getNumFirstParties();
+      numFirstParties.textContent
+        = (this.numFirstParties === 0) ? '' : `${this.numFirstParties} Sites`;
       this.numThirdParties = await this.getNumThirdParties();
-      numThirdParties.textContent = this.numThirdParties;
+      numThirdParties.textContent
+        = (this.numThirdParties === 0) ? ''
+          : `${this.numThirdParties} Third Party Sites`;
       return;
     }
 
     // update on redraw
     if (isFirstParty) {
-      this.numSitesVisited++;
-      numSitesVisited.textContent = this.numSitesVisited;
+      this.numFirstParties++;
+      numFirstParties.textContent
+        = (this.numFirstParties === 0) ? '' : `${this.numFirstParties} Sites`;
     } else {
       this.numThirdParties++;
-      numThirdParties.textContent = this.numThirdParties;
+      numThirdParties.textContent
+        = (this.numThirdParties === 0) ? ''
+          : `${this.numThirdParties} Third Party Sites`;
     }
   },
 
   async getDataGatheredSince() {
-    const oldestDateUnixTime = await storeChild.getOldestDate();
-    if (!oldestDateUnixTime) {
+    const firstRequestUnixTime = await storeChild.getFirstRequestTime();
+    if (!firstRequestUnixTime) {
       return '';
     }
     // reformat unix time
-    const fullDateTime = new Date(oldestDateUnixTime);
-    return fullDateTime.toDateString();
+    let fullDateTime = new Date(firstRequestUnixTime);
+    let dateStr = fullDateTime.toDateString();
+    // remove day of the week
+    const dateArr = dateStr.split(' ');
+    dateArr.shift();
+    dateStr = dateArr.join(' ');
+    // ISO string used for datetime attribute on <time>
+    fullDateTime = fullDateTime.toISOString();
+    return {
+      dateStr,
+      fullDateTime
+    };
   },
 
-  async getNumSitesVisited() {
-    return await storeChild.getNumSitesVisited();
+  async getNumFirstParties() {
+    return await storeChild.getNumFirstParties();
   },
 
   async getNumThirdParties() {

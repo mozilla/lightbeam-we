@@ -14,8 +14,8 @@ const store = {
     this.db = new Dexie('websites_database');
     this.db.version(1).stores({
       // store: 'primaryKey, index1, index2, ...'
-      websites: 'hostname, requestTime, isVisible, firstParty'
-      // websites is a table
+      websites:
+        'hostname, firstRequestTime, lastRequestTime, isVisible, firstParty'
     });
     this.db.open();
   },
@@ -122,8 +122,8 @@ const store = {
     const publicMethods = [
       'getAll',
       'reset',
-      'getOldestDate',
-      'getNumSitesVisited',
+      'getFirstRequestTime',
+      'getNumFirstParties',
       'getNumThirdParties'
     ];
 
@@ -210,7 +210,24 @@ const store = {
     }
 
     for (const key in data) {
-      website[key] = data[key];
+      // store first and last request times for clearing data every X days
+      if (key === 'requestTime') {
+        if (!('firstRequestTime' in data)) {
+          website['firstRequestTime'] = data[key];
+        } else {
+          website['lastRequestTime'] = data[key];
+        }
+      } else {
+        // IndexedDB does not accept boolean values; using 0/1 instead
+        if (data[key] === true) {
+          data[key] = 1;
+        }
+        if (data[key] === false) {
+          data[key] = 0;
+        }
+
+        website[key] = data[key];
+      }
     }
 
     await this._write(website);
@@ -301,10 +318,10 @@ const store = {
       if (!this.isVisibleThirdParty(thirdParty)) {
         if (this.onAllowList(origin, target)) {
           // hide third party
-          thirdParty['isVisible'] = 0;
+          thirdParty['isVisible'] = false;
         } else {
           // show third party; it either became visible or is brand new
-          thirdParty['isVisible'] = 1;
+          thirdParty['isVisible'] = true;
           isNewThirdParty = true;
           for (let i = 0; i < thirdParty['firstPartyHostnames'].length; i++) {
             const firstPartyHostname = thirdParty['firstPartyHostnames'][i];
@@ -321,7 +338,6 @@ const store = {
     }
 
     // merge data with thirdParty
-    // @todo restructure storage to use data from capture for graph filtering
     for (const key in data) {
       thirdParty[key] = data[key];
     }
@@ -365,23 +381,20 @@ const store = {
     return await this.db.websites.clear();
   },
 
-  async getOldestDate() {
-    const oldestSite = await this.db.websites.orderBy('requestTime').first();
+  async getFirstRequestTime() {
+    const oldestSite
+      = await this.db.websites.orderBy('firstRequestTime').first();
     if (!oldestSite) {
-      return '';
+      return false;
     }
-    return oldestSite.requestTime;
+    return oldestSite.firstRequestTime;
   },
 
-  async getNumSitesVisited() {
-    // Dexie does not accept boolean values; using 0/1 instead
-    // http://dexie.org/docs/WhereClause/WhereClause.equals().html
+  async getNumFirstParties() {
     return await this.db.websites.where('firstParty').equals(1).count();
   },
 
   async getNumThirdParties() {
-    // Dexie does not accept boolean values; using 0/1 instead
-    // http://dexie.org/docs/WhereClause/WhereClause.equals().html
     return await this.db.websites
       .where('firstParty').equals(0).and((website) => {
         return website.isVisible;
