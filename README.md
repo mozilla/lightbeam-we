@@ -3,6 +3,8 @@ This is the web extension version of the Mozilla Lightbeam add-on for visualizin
 
 The Mozilla Lightbeam extension is a key tool for Mozilla to educate the public about privacy
 
+---
+
 ## Quick Start
 
 ### Clone the repository
@@ -26,6 +28,8 @@ There are a couple ways to try out this web extension:
     - This will launch Firefox and install the extension automatically.
     - This tool gives you some additional development features such as [automatic reloading](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Getting_started_with_web-ext#Automatic_extension_reloading).
 
+---
+
 ## Development Guide
 
 ### Download dependencies
@@ -45,3 +49,5 @@ Run `npm run test` to check that everything is OK.
     * `npm run test:karma`
 
 Eslint is used for linting. Karma, Mocha & Chai are used for unit testing. Additionally the test suites are run on the Travis service providing continuous integration support.
+
+---
