@@ -51,16 +51,8 @@ const viz = {
     } else {
       simulation = this.simulation;
       simulation.nodes(this.nodes);
-      // simulation.alphaTarget(0.1);
-      // simulation.restart();
     }
     this.registerLinkForce(simulation);
-    /* if (simulation.alphaTarget() === 0) {
-      console.log('alphaTarget is 0');
-      // this.registerSimulationForces(simulation);
-      simulation.alphaTarget(0.3);
-      simulation.restart();
-    } */
     this.manualTick(simulation);
     return simulation;
   },
@@ -69,7 +61,6 @@ const viz = {
     simulation.alphaTarget(0.1);
     for (let i = 0; i < this.tickCount; i++) {
       simulation.tick();
-      // this.drawOnCanvas();
     }
     simulation.alphaTarget(0);
     simulation.stop();
@@ -78,12 +69,10 @@ const viz = {
   registerLinkForce(simulation) {
     const linkForce = d3.forceLink(this.links);
     linkForce.id((d) => d.hostname);
-    // linkForce.distance(this.linkDistance);
     simulation.force('link', linkForce);
   },
 
   registerSimulationForces(simulation) {
-    // const simulation = this.simulation;
     const centerForce = d3.forceCenter(this.width/2, this.height/2);
     centerForce.x(this.width/2);
     centerForce.y(this.height/2);
@@ -98,13 +87,10 @@ const viz = {
     simulation.force('y', forceY);
 
     const chargeForce = d3.forceManyBody();
-    // chargeForce.strength(this.chargeStrength);
     chargeForce.distanceMax(this.chargeDistanceMax);
     simulation.force('charge', chargeForce);
 
     const collisionForce = d3.forceCollide(this.collisionRadius);
-    // collisionForce.radius(this.collisionRadius + this.collisionRadius);
-    // collisionForce.strength(this.collisionStrength);
     simulation.force('collide', collisionForce);
   },
 
@@ -149,7 +135,6 @@ const viz = {
     this.drawLinks();
     this.drawNodes();
     this.context.restore();
-    // this.simulation.alphaTarget(0);
   },
 
   drawNodes() {
@@ -177,7 +162,6 @@ const viz = {
       this.context.closePath();
       this.context.fill();
     }
-    // this.simulation.alphaTarget(0);
   },
 
   getSquare() {
@@ -368,7 +352,6 @@ const viz = {
     if (!d3.event.active) {
       this.simulation.alphaTarget(0.1);
       this.simulation.restart();
-      // this.manualTick(this.simulation);
     }
     d3.event.subject.shadow = true;
     d3.event.subject.fx = d3.event.subject.x;
@@ -385,8 +368,6 @@ const viz = {
 
   dragEnd() {
     if (!d3.event.active) {
-      // this.simulation.alphaTarget(0);
-      // this.simulation.stop();
       this.manualTick(this.simulation);
     }
     d3.event.subject.fx = d3.event.x;
