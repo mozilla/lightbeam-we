@@ -220,7 +220,7 @@ main {
 }
 
 .toggle-switch {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: space-around;
   height: 30px;
@@ -228,26 +228,44 @@ main {
   margin-left: 10px;
   background-color: var(--secondary-color);
   border-radius: 2px;
+  position: relative;
 }
 
-input[type="checkbox"] {
-  -moz-appearance: none;
-  margin: 0;
+.toggle-switch input{
+  display: none;
 }
 
-.toggle {
+.toggle::before {
+  content: "";
   height: 20px;
   width: 30px;
   background-color: var(--primary-color);
   border-radius: 5px;
+  transition:all 0.4s;
+  position: absolute;
+  left:10%;
+  top:20%;
 }
 
-.toggle-status {
-  width: 40%;
+.toggle::after {
+  content: "OFF";
   font-size: .75em;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--primary-text-color);
+  position: absolute;
+  right: 10%;
+  top:30%;
+}
+
+input:checked + .toggle::before{
+ transform: translateX(25px);
+ right:10%;
+ background-color: var(--secondary-text-color);
+}
+input:checked + .toggle::after{
+ content: "ON";
+ left:10%;
 }
 
 /* ----------- UI - Graph ----------- */
