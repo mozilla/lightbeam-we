@@ -3,6 +3,7 @@ const viz = {
   scalingFactor: 2,
   circleRadius: 5,
   resizeTimer: null,
+  d3Timer: null,
   minZoom: 0.5,
   maxZoom: 1.5,
   collisionRadius: 30,
@@ -353,7 +354,7 @@ const viz = {
     d3.event.subject.fy = d3.event.y;
 
     this.hideTooltip();
-    this.drawOnCanvas();
+    this.d3Timer = d3.timer(() => this.drawOnCanvas());
   },
 
   dragEnd() {
@@ -365,6 +366,7 @@ const viz = {
     d3.event.subject.fx = null;
     d3.event.subject.fy = null;
     d3.event.subject.shadow = false;
+    this.d3Timer.stop();
   },
 
   addZoom() {
