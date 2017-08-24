@@ -296,7 +296,8 @@ const store = {
     // and the third party is visible (i.e. not allowlisted)
     if (!this.isFirstPartyLinkedToThirdParty(firstParty, target)) {
       if (!this.isVisibleThirdParty(thirdParty)) {
-        if (this.onAllowList(origin, target)) {
+        if (this.onAllowList(origin, target)
+          && !this.isAlsoAFirstParty(thirdParty)) {
           // hide third party
           thirdParty['isVisible'] = false;
         } else {
@@ -320,6 +321,10 @@ const store = {
     // merge data with thirdParty
     // @todo restructure storage to use data from capture for graph filtering
     for (const key in data) {
+      if (key ==='firstParty' && this.isAlsoAFirstParty(thirdParty)) {
+        // third parties that are already a first party stay a first party
+        data[key] = true;
+      }
       thirdParty[key] = data[key];
     }
 
@@ -343,6 +348,10 @@ const store = {
       return false;
     }
     return true;
+  },
+
+  isAlsoAFirstParty(thirdParty) {
+    return thirdParty.firstParty;
   },
 
   async addFirstPartyLink(firstPartyHostname, thirdPartyHostname) {
