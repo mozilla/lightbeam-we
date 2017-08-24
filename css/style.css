@@ -1,3 +1,4 @@
+
 /* ----------- VISUALIZATION ----------- */
 
 .links line {
@@ -11,6 +12,11 @@
 }
 
 /* ----------- UI - General ----------- */
+
+@font-face {
+  font-family: "Open Sans";
+  src: url("../fonts/OpenSans-Regular.ttf");
+}
 
 :root {
   --primary-color: #000;
