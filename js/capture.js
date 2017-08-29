@@ -151,7 +151,8 @@ const capture = {
     if (tab.status === 'complete' && await this.shouldStore(tab)) {
       const data = {
         faviconUrl: tab.favIconUrl,
-        firstParty: true
+        firstParty: true,
+        requestTime: Date.now()
       };
       await store.setFirstParty(documentUrl.hostname, data);
     }

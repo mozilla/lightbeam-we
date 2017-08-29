@@ -14,8 +14,8 @@ const store = {
     this.db = new Dexie('websites_database');
     this.db.version(1).stores({
       // store: 'primaryKey, index1, index2, ...'
-      websites: 'hostname, dateVisited, isVisible, firstParty'
-      // websites is a table
+      websites:
+        'hostname, firstRequestTime, lastRequestTime, isVisible, firstParty'
     });
     this.db.open();
   },
@@ -121,7 +121,10 @@ const store = {
 
     const publicMethods = [
       'getAll',
-      'reset'
+      'reset',
+      'getFirstRequestTime',
+      'getNumFirstParties',
+      'getNumThirdParties'
     ];
 
     if (publicMethods.includes(m['method'])) {
@@ -141,11 +144,11 @@ const store = {
       hostname: hostname,
       favicon: website.faviconUrl || '',
       firstPartyHostnames: website.firstPartyHostnames || false,
-      firstParty: false,
+      firstParty: 0,
       thirdParties: []
     };
     if (website.firstPartyHostnames === undefined) {
-      output.firstParty = true;
+      output.firstParty = 1;
       if ('thirdPartyHostnames' in website) {
         output.thirdParties = website.thirdPartyHostnames;
       } else {
@@ -207,7 +210,24 @@ const store = {
     }
 
     for (const key in data) {
-      website[key] = data[key];
+      // store first and last request times for clearing data every X days
+      if (key === 'requestTime') {
+        if (!('firstRequestTime' in data)) {
+          website['firstRequestTime'] = data[key];
+        } else {
+          website['lastRequestTime'] = data[key];
+        }
+      } else {
+        // IndexedDB does not accept boolean values; using 0/1 instead
+        if (data[key] === true) {
+          data[key] = 1;
+        }
+        if (data[key] === false) {
+          data[key] = 0;
+        }
+
+        website[key] = data[key];
+      }
     }
 
     await this._write(website);
@@ -318,7 +338,6 @@ const store = {
     }
 
     // merge data with thirdParty
-    // @todo restructure storage to use data from capture for graph filtering
     for (const key in data) {
       thirdParty[key] = data[key];
     }
@@ -360,6 +379,26 @@ const store = {
     // empty out request processing queue
     capture.queue = [];
     return await this.db.websites.clear();
+  },
+
+  async getFirstRequestTime() {
+    const oldestSite
+      = await this.db.websites.orderBy('firstRequestTime').first();
+    if (!oldestSite) {
+      return false;
+    }
+    return oldestSite.firstRequestTime;
+  },
+
+  async getNumFirstParties() {
+    return await this.db.websites.where('firstParty').equals(1).count();
+  },
+
+  async getNumThirdParties() {
+    return await this.db.websites
+      .where('firstParty').equals(0).and((website) => {
+        return website.isVisible;
+      }).count();
   }
 };
 
