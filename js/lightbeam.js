@@ -31,6 +31,9 @@ const lightbeam = {
     // initialize dynamic vars from storage
     if (!this.dataGatheredSince) {
       const { dateStr, fullDateTime } = await this.getDataGatheredSince();
+      if (!dateStr) {
+        return;
+      }
       this.dataGatheredSince = dateStr;
       const dataGatheredSinceElement
         = document.getElementById('data-gathered-since');
