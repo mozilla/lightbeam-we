@@ -69,13 +69,13 @@ const viz = {
   },
 
   registerSimulationForces() {
-    const centerForce = d3.forceCenter(this.width/2, this.height/2);
+    const centerForce = d3.forceCenter(this.width / 2, this.height / 2);
     this.simulation.force('center', centerForce);
 
-    const forceX = d3.forceX(this.width/2);
+    const forceX = d3.forceX(this.width / 2);
     this.simulation.force('x', forceX);
 
-    const forceY = d3.forceY(this.height/2);
+    const forceY = d3.forceY(this.height / 2);
     this.simulation.force('y', forceY);
 
     const chargeForce = d3.forceManyBody();
@@ -217,7 +217,7 @@ const viz = {
     if (x + tooltipWidth >= canvasRight) {
       left = x - tooltipWidth;
     } else {
-      left = x - (tooltipWidth/2);
+      left = x - (tooltipWidth / 2);
     }
 
     return {
@@ -257,10 +257,10 @@ const viz = {
   isPointInsideCircle(x, y, cx, cy) {
     const dx = Math.abs(x - cx);
     const dy = Math.abs(y - cy);
-    const d = dx*dx + dy*dy;
+    const d = dx * dx + dy * dy;
     const r = this.circleRadius;
 
-    return d <= r*r;
+    return d <= r * r;
   },
 
   getNodeAtCoordinates(x, y) {

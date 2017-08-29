@@ -26,6 +26,9 @@
     "rules": {
         "no-unsanitized/method": "error",
         "no-unsanitized/property": "error",
+        "space-infix-ops": [
+            "error"
+        ],
         "indent": [
             "error",
             2,

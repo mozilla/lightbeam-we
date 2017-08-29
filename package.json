@@ -18,14 +18,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/electrolyfish/lightbeam-we.git"
+    "url": "https://github.com/mozilla/lightbeam-we.git"
   },
   "author": "Mozilla",
   "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/electrolyfish/lightbeam-we/issues"
+    "url": "https://github.com/mozilla/lightbeam-we/issues"
   },
-  "homepage": "https://github.com/electrolyfish/lightbeam-we#readme",
+  "homepage": "https://github.com/mozilla/lightbeam-we/blob/master/README.md",
   "dependencies": {
     "d3": "4.9.1",
     "dexie": "^2.0.0-beta"
