@@ -79,7 +79,7 @@ const lightbeam = {
   async getDataGatheredSince() {
     const firstRequestUnixTime = await storeChild.getFirstRequestTime();
     if (!firstRequestUnixTime) {
-      return null;
+      return {};
     }
     // reformat unix time
     let fullDateTime = new Date(firstRequestUnixTime);
