@@ -189,7 +189,7 @@ const lightbeam = {
     let links = [];
     for (const website in this.websites) {
       const site = this.websites[website];
-      if (site.firstParty) {
+      if (site.thirdParties) {
         const thirdPartyLinks = site.thirdParties.map((thirdParty) => {
           return {
             source: website,
@@ -236,7 +236,7 @@ const lightbeam = {
       this.websites[data.hostname] = data;
       this.updateVars(data.firstParty);
     }
-    if (!data.firstParty) {
+    if (data.firstPartyHostnames) {
       // if we have the first parties make the link if they don't exist
       data.firstPartyHostnames.forEach((firstPartyHostname) => {
         if (this.websites[firstPartyHostname]) {

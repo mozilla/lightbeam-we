@@ -76,9 +76,12 @@ const capture = {
   // response (from setThirdParty) object
   async shouldStore(info) {
     const tabId = info.id || info.tabId;
-    let tab, documentUrl, privateBrowsing;
+    let documentUrl, privateBrowsing;
     if (this.isVisibleTab(tabId)) {
-      tab = await browser.tabs.get(tabId);
+      const tab = await this.getTab(tabId);
+      if (!tab) {
+        return;
+      }
       documentUrl = new URL(tab.url);
       privateBrowsing = tab.incognito;
     } else {
@@ -102,6 +105,17 @@ const capture = {
     return tabId !== browser.tabs.TAB_ID_NONE;
   },
 
+  async getTab(tabId) {
+    let tab;
+    try {
+      tab = await browser.tabs.get(tabId);
+    } catch (e) {
+      // Lets ignore tabs we can't get hold of (likely have closed)
+      return;
+    }
+    return tab;
+  },
+
   // capture third party requests
   async sendThirdParty(response) {
     if (!response.originUrl) {
@@ -116,7 +130,10 @@ const capture = {
     const targetUrl = new URL(response.url);
     let firstPartyUrl;
     if (this.isVisibleTab(response.tabId)) {
-      const tab = await browser.tabs.get(response.tabId);
+      const tab = await this.getTab(response.tabId);
+      if (!tab) {
+        return;
+      }
       firstPartyUrl = new URL(tab.url);
     } else {
       firstPartyUrl = new URL(response.originUrl);
@@ -124,13 +141,6 @@ const capture = {
 
     if (targetUrl.hostname !== firstPartyUrl.hostname
       && await this.shouldStore(response)) {
-      let firstPartyUrl;
-      if (this.isVisibleTab(response.tabId)) {
-        const tab = await browser.tabs.get(response.tabId);
-        firstPartyUrl = new URL(tab.url);
-      } else {
-        firstPartyUrl = new URL(response.originUrl);
-      }
       const data = {
         target: targetUrl.hostname,
         origin: originUrl.hostname,
