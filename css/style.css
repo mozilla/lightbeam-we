@@ -229,25 +229,31 @@ main {
   background-color: var(--secondary-color);
   border-radius: 5px;
   position: relative;
+  cursor: pointer;
 }
 
-.toggle-switch input{
-  display: none;
+.toggle-switch input {
+  -moz-appearance: none;
+  opacity: 0;
 }
 
-.toggle::before {
+.toggle-switch:active {
+  border:1px solid var(--button-active-border-color);
+}
+
+.toggle:before {
   content: "";
   height: 24px;
   width: 25px;
   background-color: var(--primary-color);
   border-radius: 5px;
-  transition:all 0.4s;
+  transition: all 0.4s;
   position: absolute;
-  left:5px;
-  top:10%;
+  left: 5px;
+  top: 10%;
 }
 
-.toggle::after {
+.toggle:after {
   content: "OFF";
   font-size: .75em;
   font-weight: 700;
@@ -255,17 +261,18 @@ main {
   color: var(--primary-text-color);
   position: absolute;
   right: 10%;
-  top:30%;
+  top: 30%;
 }
 
-input:checked + .toggle::before{
+.toggle-switch input:checked + .toggle:before {
  transform: translateX(20px);
- right:10%;
+ right: 10%;
  background-color: var(--secondary-text-color);
 }
-input:checked + .toggle::after{
+
+.toggle-switch input:checked + .toggle:after {
  content: "ON";
- left:10%;
+ left: 10%;
 }
 
 /* ----------- UI - Graph ----------- */
