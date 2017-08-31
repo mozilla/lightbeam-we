@@ -153,6 +153,9 @@ const store = {
   },
 
   async _write(website) {
+    for (const key in website) {
+      website[key] = this.mungeDataInbound(key, website[key]);
+    }
     return await this.db.websites.put(website);
   },
 
@@ -251,7 +254,7 @@ const store = {
     }
 
     for (const key in data) {
-      const value = this.mungeDataInbound(key, data[key]);
+      const value = data[key];
       switch (key) {
         case 'requestTime':
           // store first and last request times for clearing data every X days
@@ -264,6 +267,7 @@ const store = {
         case 'isVisible':
           if ('isVisible' in website
               && website.isVisible === true) {
+            // once a website is visible, it will always be visible
             break;
           }
           website.isVisible = value;
@@ -271,11 +275,12 @@ const store = {
         case 'firstParty':
           if ('firstParty' in website
               && website.firstParty === true) {
+            // once a website is a first party, it will always be drawn as one
             break;
           }
           website.firstParty = value;
           if (value) {
-            website.isVisible = true;
+            website.isVisible = value;
           }
           break;
         default:
@@ -285,6 +290,7 @@ const store = {
     }
 
     await this._write(website);
+
     return website;
   },
 
