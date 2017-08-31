@@ -146,7 +146,7 @@ const viz = {
       }
 
       if (node.favicon) {
-        this.drawFavicon(node.favicon, x, y);
+        this.drawFavicon(node, x, y);
       }
 
       this.context.fillStyle = 'white';
@@ -165,17 +165,38 @@ const viz = {
     };
   },
 
-  drawFavicon(favicon, x, y) {
+  async convertURIToImageData(URI) {
+    return new Promise((resolve, reject) => {
+      if (!URI) {
+        return reject();
+      }
+      const canvas = document.createElement('canvas'),
+          context = canvas.getContext('2d'),
+          image = new Image();
+          context.scale(this.scale, this.scale);
+      image.addEventListener('load', () => {
+        /*canvas.width = image.width;
+        canvas.height = image.height;*/
+        canvas.width = 16 * this.scale;
+        canvas.height = 16 * this.scale
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(context.getImageData(0, 0, canvas.width, canvas.height));
+      }, false);
+      image.src = URI;
+    });
+  },
+
+  async drawFavicon(node, x, y) {
     const { side, offset } = this.getSquare();
-    const img = new Image();
-    img.src = favicon;
-    img.onload = () => {
-      this.context.drawImage(img,
-        this.transform.applyX(x) - offset,
-        this.transform.applyY(y) - offset,
-        side,
-        side);
-    };
+    if (!node.image) {
+      node.image = await this.convertURIToImageData(node.favicon);
+    }
+    // Not sure why this is so off:
+    this.context.putImageData(
+      node.image,
+      this.transform.applyX(x) * this.scale,
+      this.transform.applyY(y) * this.scale
+    );
   },
 
   drawShadow(x, y) {
