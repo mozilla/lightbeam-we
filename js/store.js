@@ -10,6 +10,17 @@ const store = {
     await this.getAllowList();
   },
 
+  async isFirstRun() {
+    let isFirstRun = await browser.storage.local.get('isFirstRun');
+    if (! ('isFirstRun' in isFirstRun)) {
+      isFirstRun = true;
+    } else if (isFirstRun) {
+      isFirstRun = false;
+    }
+    await browser.storage.local.set({ isFirstRun });
+    return isFirstRun;
+  },
+
   indexes: [
     'hostname', // Primary key
     'firstRequestTime',
@@ -129,7 +140,8 @@ const store = {
       'reset',
       'getFirstRequestTime',
       'getNumFirstParties',
-      'getNumThirdParties'
+      'getNumThirdParties',
+      'isFirstRun'
     ];
 
     if (publicMethods.includes(m['method'])) {
