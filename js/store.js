@@ -10,13 +10,18 @@ const store = {
     await this.getAllowList();
   },
 
+  indexes: [
+    'hostname', // Primary key
+    'firstRequestTime',
+    'lastRequestTime',
+    'isVisible',
+    'firstParty'
+  ],
+
   makeNewDatabase() {
     this.db = new Dexie('websites_database');
-    this.db.version(1).stores({
-      // store: 'primaryKey, index1, index2, ...'
-      websites:
-        'hostname, firstRequestTime, lastRequestTime, isVisible, firstParty'
-    });
+    const websites = this.indexes.join(', ');
+    this.db.version(1).stores({websites});
     this.db.open();
   },
 
@@ -144,16 +149,11 @@ const store = {
       hostname: hostname,
       favicon: website.faviconUrl || '',
       firstPartyHostnames: website.firstPartyHostnames || false,
-      firstParty: 0,
+      firstParty: !!website.firstParty,
       thirdParties: []
     };
-    if (website.firstPartyHostnames === undefined) {
-      output.firstParty = 1;
-      if ('thirdPartyHostnames' in website) {
-        output.thirdParties = website.thirdPartyHostnames;
-      } else {
-        output.thirdParties = [];
-      }
+    if ('thirdPartyHostnames' in website) {
+      output.thirdParties = website.thirdPartyHostnames;
     }
     return output;
   },
@@ -195,14 +195,43 @@ const store = {
 
     const website = await this.db.websites.get(hostname);
     if (website) {
-      return website;
+      const websiteOutput = {};
+      Object.keys(website).forEach((key) => {
+        websiteOutput[key] = this.mungeDataOutbound(key, website[key]);
+      });
+      return websiteOutput;
     } else {
       return {};
     }
   },
 
-  async setWebsite(hostname, data) {
+  mungeDataInbound(key, value) {
+    if (this.indexes.includes(key)) {
+      // IndexedDB does not accept boolean values for indexes; using 0/1 instead
+      if (value === true) {
+        value = 1;
+      }
+      if (value === false) {
+        value = 0;
+      }
+    }
+    return value;
+  },
 
+  mungeDataOutbound(key, value) {
+    if (this.indexes.includes(key)) {
+      // IndexedDB does not accept boolean values for indexes; using 0/1 instead
+      if (value === 1) {
+        value = true;
+      }
+      if (value === 0) {
+        value = false;
+      }
+    }
+    return value;
+  },
+
+  async setWebsite(hostname, data) {
     const website = await this.getWebsite(hostname);
 
     if (!('hostname' in website)) {
@@ -210,27 +239,41 @@ const store = {
     }
 
     for (const key in data) {
-      // store first and last request times for clearing data every X days
-      if (key === 'requestTime') {
-        if (!('firstRequestTime' in data)) {
-          website['firstRequestTime'] = data[key];
-        } else {
-          website['lastRequestTime'] = data[key];
-        }
-      } else {
-        // IndexedDB does not accept boolean values; using 0/1 instead
-        if (data[key] === true) {
-          data[key] = 1;
-        }
-        if (data[key] === false) {
-          data[key] = 0;
-        }
-
-        website[key] = data[key];
+      const value = this.mungeDataInbound(key, data[key]);
+      switch (key) {
+        case 'requestTime':
+          // store first and last request times for clearing data every X days
+          if (!('firstRequestTime' in website)) {
+            website.firstRequestTime = value;
+          } else {
+            website.lastRequestTime = value;
+          }
+          break;
+        case 'isVisible':
+          if ('isVisible' in website
+              && website.isVisible === true) {
+            break;
+          }
+          website.isVisible = value;
+          break;
+        case 'firstParty':
+          if ('firstParty' in website
+              && website.firstParty === true) {
+            break;
+          }
+          website.firstParty = value;
+          if (value) {
+            website.isVisible = true;
+          }
+          break;
+        default:
+          website[key] = value;
+          break;
       }
     }
 
     await this._write(website);
+    return website;
   },
 
 
@@ -286,10 +329,10 @@ const store = {
 
     const isNewWebsite = await this.isNewWebsite(hostname);
 
-    await this.setWebsite(hostname, data);
+    const responseData = await this.setWebsite(hostname, data);
 
     if (isNewWebsite) {
-      this.updateChild(this.outputWebsite(hostname, data));
+      this.updateChild(this.outputWebsite(hostname, responseData));
     }
   },
 
@@ -342,10 +385,10 @@ const store = {
       thirdParty[key] = data[key];
     }
 
-    await this.setWebsite(target, thirdParty);
+    const responseData = await this.setWebsite(target, thirdParty);
 
     if (shouldUpdate) {
-      this.updateChild(this.outputWebsite(target, thirdParty));
+      this.updateChild(this.outputWebsite(target, responseData));
     }
   },
 
@@ -366,6 +409,10 @@ const store = {
 
   async addFirstPartyLink(firstPartyHostname, thirdPartyHostname) {
     const firstParty = await this.getWebsite(firstPartyHostname);
+    // We are likely storing the tp first, lets account for that
+    if (!('firstParty' in firstParty)) {
+      firstParty.firstParty = true;
+    }
     if (!('thirdPartyHostnames' in firstParty)) {
       firstParty['thirdPartyHostnames'] = [];
     }
