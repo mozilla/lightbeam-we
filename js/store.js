@@ -341,7 +341,6 @@ const store = {
       throw new Error('setThirdParty requires a valid origin argument');
     }
 
-    let isNewThirdParty = false;
     let shouldUpdate = false;
 
     const firstParty = await this.getWebsite(origin);
@@ -355,29 +354,23 @@ const store = {
       thirdParty['firstPartyHostnames'].push(origin);
     }
 
-    // add link in first party if it doesn't exist yet
-    // and the third party is visible (i.e. not allowlisted)
-    if (!this.isFirstPartyLinkedToThirdParty(firstParty, target)) {
-      if (!this.isVisibleThirdParty(thirdParty)) {
-        if (this.onAllowList(origin, target)) {
-          // hide third party
-          thirdParty['isVisible'] = false;
-        } else {
-          // show third party; it either became visible or is brand new
-          thirdParty['isVisible'] = true;
-          isNewThirdParty = true;
-          for (let i = 0; i < thirdParty['firstPartyHostnames'].length; i++) {
-            const firstPartyHostname = thirdParty['firstPartyHostnames'][i];
-            await this.addFirstPartyLink(firstPartyHostname, target);
-          }
-          shouldUpdate = true;
-        }
+    // isVisible only exists on an allowlisted
+    // or previously allowlisted third party
+    if (!thirdParty['isVisible'] && !this.onAllowList(origin, target)) {
+      thirdParty['isVisible'] = true;
+
+      for (let i = 0; i < thirdParty['firstPartyHostnames'].length; i++) {
+        const firstPartyHostname = thirdParty['firstPartyHostnames'][i];
+        await this.addFirstPartyLink(firstPartyHostname, target);
       }
-      if (this.isVisibleThirdParty(thirdParty) && !isNewThirdParty) {
-        // an existing visible third party links to a new first party
-        await this.addFirstPartyLink(origin, target);
-        shouldUpdate = true;
-      }
+      shouldUpdate = true;
+    }
+
+    if (thirdParty['isVisible']
+      && !this.isFirstPartyLinkedToThirdParty(firstParty, target)) {
+      // an existing visible third party links to a new first party
+      await this.addFirstPartyLink(origin, target);
+      shouldUpdate = true;
     }
 
     // merge data with thirdParty
