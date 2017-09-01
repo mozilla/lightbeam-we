@@ -6,9 +6,31 @@ const lightbeam = {
 
   async init() {
     this.websites = await storeChild.getAll();
+    this.initTPToggle();
     this.renderGraph();
     this.addListeners();
     this.updateVars();
+  },
+
+  async initTPToggle() {
+    const toggleCheckbox
+      = document.getElementById('tracking-protection-control');
+    // Do we support setting TP
+    if ('trackingProtectionMode' in browser.privacy.websites) {
+      const trackingProtection
+        = await browser.privacy.websites.trackingProtectionMode.get({});
+      let value = true;
+      if (trackingProtection.value !== 'always') {
+        value = false;
+      }
+      toggleCheckbox.checked = value;
+      toggleCheckbox.addEventListener('change', () => {
+        const value = toggleCheckbox.checked ? 'always' : 'private_browsing';
+        browser.privacy.websites.trackingProtectionMode.set({ value });
+      });
+    } else {
+      document.getElementById('tracking-protection').hidden = true;
+    }
   },
 
   renderGraph() {
