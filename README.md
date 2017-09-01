@@ -1,7 +1,7 @@
-# lightbeam-we
-This is the web extension version of the Mozilla Lightbeam add-on for visualizing HTTP requests between websites in real time.
+# Firefox Lightbeam
+This is the web extension version of the Firefox Lightbeam add-on for visualizing HTTP requests between websites in real time.
 
-The Mozilla Lightbeam extension is a key tool for Mozilla to educate the public about privacy
+The Firefox Lightbeam extension by Mozilla is a key tool for Mozilla to educate the public about privacy
 
 ## Quick Start
 

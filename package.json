@@ -1,7 +1,7 @@
 {
   "name": "lightbeam-we",
   "version": "2.0.0",
-  "description": "Lightbeam web extension",
+  "description": "Firefox Lightbeam web extension",
   "main": "background.js",
   "scripts": {
     "build": "npm install && npm run updatesubmodule && npm run createlib && web-ext build --overwrite-dest",
