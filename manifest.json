@@ -16,7 +16,8 @@
     "<all_urls>",
     "tabs",
     "storage",
-    "downloads"
+    "downloads",
+    "privacy"
   ],
 
   "browser_action": {

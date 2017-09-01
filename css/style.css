@@ -271,14 +271,14 @@ main {
 }
 
 .toggle-switch input:checked + .toggle:before {
- transform: translateX(20px);
- right: 10%;
- background-color: var(--secondary-text-color);
+  transform: translateX(20px);
+  right: 10%;
+  background-color: var(--secondary-text-color);
 }
 
 .toggle-switch input:checked + .toggle:after {
- content: "ON";
- left: 10%;
+  content: "ON";
+  left: 10%;
 }
 
 /* ----------- UI - Graph ----------- */
