@@ -142,11 +142,12 @@ const lightbeam = {
   resetData() {
     const resetData = document.getElementById('reset-data-button');
     resetData.addEventListener('click', async () => {
-      var confirmation = confirm('Pressing OK will delete all'
+      const confirmation = confirm('Pressing OK will delete all'
        + ' Lightbeam information. Are you sure?');
-      if (confirmation == true)
+      if (confirmation) {
         await storeChild.reset();
-      window.location.reload();
+        window.location.reload();
+      }
     });
   },
 
