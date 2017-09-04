@@ -142,8 +142,9 @@ const lightbeam = {
   resetData() {
     const resetData = document.getElementById('reset-data-button');
     resetData.addEventListener('click', async () => {
-      const confirmation = confirm('Pressing OK will delete all'
-       + ' Lightbeam information. Are you sure?');
+      const msgBegin = 'Pressing OK will delete all Lightbeam data. ';
+      const msgEnd = 'Are you sure?';
+      const confirmation = confirm(`${msgBegin + msgEnd}`);
       if (confirmation) {
         await storeChild.reset();
         window.location.reload();
