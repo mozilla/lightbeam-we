@@ -210,7 +210,7 @@ const viz = {
     this.context.lineWidth = 2;
     this.context.shadowColor = this.canvasColor;
     this.context.strokeStyle = 'rgba(0, 0, 0, 1)';
-    this.context.shadowBlur = 10;
+    this.context.shadowBlur = 15;
     this.context.shadowOffsetX = 0;
     this.context.shadowOffsetY = 0;
     this.context.arc(x, y, this.circleRadius + 5, 0, 2 * Math.PI);
