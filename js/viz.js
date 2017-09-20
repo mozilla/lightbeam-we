@@ -7,6 +7,7 @@ const viz = {
   maxZoom: 1.5,
   collisionRadius: 30,
   tickCount: 30,
+  canvasColor: 'white',
 
   init(nodes, links) {
     const { width, height } = this.getDimensions();
@@ -140,18 +141,18 @@ const viz = {
       }
 
       if (node.firstParty) {
-        this.drawFirstParty(node);
+        this.drawFirstParty(x, y);
       } else {
-        this.drawThirdParty(node);
+        this.drawThirdParty(x, y);
       }
 
-      if (node.favicon) {
-        this.drawFavicon(node.favicon, x, y);
-      }
-
-      this.context.fillStyle = 'white';
+      this.context.fillStyle = this.canvasColor;
       this.context.closePath();
       this.context.fill();
+
+      if (node.favicon) {
+        this.drawFavicon(node, x, y);
+      }
     }
   },
 
@@ -165,24 +166,50 @@ const viz = {
     };
   },
 
-  drawFavicon(favicon, x, y) {
-    const { side, offset } = this.getSquare();
-    const img = new Image();
-    img.src = favicon;
-    img.onload = () => {
-      this.context.drawImage(img,
-        this.transform.applyX(x) - offset,
-        this.transform.applyY(y) - offset,
-        side,
-        side);
-    };
+  convertURIToImageData(URI) {
+    return new Promise((resolve, reject) => {
+      if (!URI) {
+        return reject();
+      }
+
+      const canvas = document.createElement('canvas'),
+        context = canvas.getContext('2d'),
+        side = this.getSquare().side,
+        image = new Image();
+
+      canvas.width = side * this.scale;
+      canvas.height = side * this.scale;
+      context.fillStyle = this.canvasColor;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      image.onload = () => {
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        return resolve(context.getImageData(0, 0, canvas.width, canvas.height));
+      };
+      image.src = URI;
+    });
+  },
+
+  async drawFavicon(node, x, y) {
+    const offset = this.getSquare().offset,
+      tx = this.transform.applyX(x) - offset,
+      ty = this.transform.applyY(y) - offset;
+
+    if (!node.image) {
+      node.image = await this.convertURIToImageData(node.favicon);
+    }
+
+    this.context.putImageData(node.image,
+      tx * this.scale,
+      ty * this.scale
+    );
   },
 
   drawShadow(x, y) {
     this.context.beginPath();
-    this.context.lineWidth = 6;
-    this.context.shadowColor = 'white';
-    this.context.strokeStyle = 'rgba(0,0,0,1)';
+    this.context.lineWidth = 2;
+    this.context.shadowColor = this.canvasColor;
+    this.context.strokeStyle = 'rgba(0, 0, 0, 1)';
     this.context.shadowBlur = 15;
     this.context.shadowOffsetX = 0;
     this.context.shadowOffsetY = 0;
@@ -191,17 +218,17 @@ const viz = {
     this.context.closePath();
   },
 
-  drawFirstParty(node) {
-    this.context.arc(node.x, node.y, this.circleRadius, 0, 2 * Math.PI);
+  drawFirstParty(x, y) {
+    this.context.arc(x, y, this.circleRadius, 0, 2 * Math.PI);
   },
 
-  drawThirdParty(node) {
+  drawThirdParty(x, y) {
     const deltaY = this.circleRadius / 2;
     const deltaX = deltaY * Math.sqrt(3);
 
-    this.context.moveTo(node.x - deltaX, node.y + deltaY);
-    this.context.lineTo(node.x, node.y - this.circleRadius);
-    this.context.lineTo(node.x + deltaX, node.y + deltaY);
+    this.context.moveTo(x - deltaX, y + deltaY);
+    this.context.lineTo(x, y - this.circleRadius);
+    this.context.lineTo(x + deltaX, y + deltaY);
   },
 
   getTooltipPosition(x, y) {
@@ -334,9 +361,7 @@ const viz = {
   dragSubject() {
     const x = this.transform.invertX(d3.event.x);
     const y = this.transform.invertY(d3.event.y);
-    const node = this.getNodeAtCoordinates(x, y);
-
-    return node;
+    return this.getNodeAtCoordinates(x, y);
   },
 
   dragStart() {
