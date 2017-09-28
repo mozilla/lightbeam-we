@@ -47,23 +47,28 @@ const capture = {
       return;
     }
     if (this.queue.length >= 1) {
-      const nextEvent = this.queue.shift();
-      this.processingQueue = true;
-      switch (nextEvent.type) {
-        case 'sendFirstParty':
-          await this.sendFirstParty(
-            nextEvent.data.tabId,
-            nextEvent.data.changeInfo,
-            nextEvent.data.tab
-          );
-          break;
-        case 'sendThirdParty':
-          await this.sendThirdParty(nextEvent.data);
-          break;
-        default:
-          throw new Error(
-            'An event must be of type sendFirstParty or sendThirdParty.'
-          );
+      try {
+        const nextEvent = this.queue.shift();
+        this.processingQueue = true;
+        switch (nextEvent.type) {
+          case 'sendFirstParty':
+            await this.sendFirstParty(
+              nextEvent.data.tabId,
+              nextEvent.data.changeInfo,
+              nextEvent.data.tab
+            );
+            break;
+          case 'sendThirdParty':
+            await this.sendThirdParty(nextEvent.data);
+            break;
+          default:
+            throw new Error(
+              'An event must be of type sendFirstParty or sendThirdParty.'
+            );
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('Exception found in queue process', e);
       }
       this.processNextEvent(true);
     } else {
@@ -139,7 +144,8 @@ const capture = {
       firstPartyUrl = new URL(response.originUrl);
     }
 
-    if (targetUrl.hostname !== firstPartyUrl.hostname
+    if (firstPartyUrl.hostname
+      && targetUrl.hostname !== firstPartyUrl.hostname
       && await this.shouldStore(response)) {
       const data = {
         target: targetUrl.hostname,
@@ -158,7 +164,8 @@ const capture = {
   // capture first party requests
   async sendFirstParty(tabId, changeInfo, tab) {
     const documentUrl = new URL(tab.url);
-    if (tab.status === 'complete' && await this.shouldStore(tab)) {
+    if (documentUrl.hostname
+        && tab.status === 'complete' && await this.shouldStore(tab)) {
       const data = {
         faviconUrl: tab.favIconUrl,
         firstParty: true,
