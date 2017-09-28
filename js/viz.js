@@ -67,8 +67,6 @@ const viz = {
   registerLinkForce() {
     const linkForce = d3.forceLink(this.links);
     linkForce.id((d) => d.hostname);
-    // linkForce.distance(100);
-    // linkForce.strength(0.6);
     this.simulation.force('link', linkForce);
   },
 
@@ -137,17 +135,22 @@ const viz = {
     for (const node of this.nodes) {
       const x = node.fx || node.x;
       const y = node.fy || node.y;
+      let radius = this.circleRadius;
+
       this.context.beginPath();
       this.context.moveTo(x, y);
 
-      if (node.shadow) {
-        this.drawShadow(x, y);
-      }
-
       if (node.firstParty) {
-        this.drawFirstParty(x, y);
+        if (node.thirdParties.length > 0) {
+          radius = this.circleRadius + node.thirdParties.length;
+        }
+        this.drawFirstParty(x, y, radius);
       } else {
         this.drawThirdParty(x, y);
+      }
+
+      if (node.shadow) {
+        this.drawShadow(x, y, radius);
       }
 
       this.context.fillStyle = this.canvasColor;
@@ -209,7 +212,7 @@ const viz = {
     );
   },
 
-  drawShadow(x, y) {
+  drawShadow(x, y, radius) {
     this.context.beginPath();
     this.context.lineWidth = 2;
     this.context.shadowColor = this.canvasColor;
@@ -217,13 +220,13 @@ const viz = {
     this.context.shadowBlur = 15;
     this.context.shadowOffsetX = 0;
     this.context.shadowOffsetY = 0;
-    this.context.arc(x, y, this.circleRadius + 5, 0, 2 * Math.PI);
+    this.context.arc(x, y, radius + 5, 0, 2 * Math.PI);
     this.context.stroke();
     this.context.closePath();
   },
 
-  drawFirstParty(x, y) {
-    this.context.arc(x, y, this.circleRadius, 0, 2 * Math.PI);
+  drawFirstParty(x, y, radius) {
+    this.context.arc(x, y, radius, 0, 2 * Math.PI);
   },
 
   drawThirdParty(x, y) {
