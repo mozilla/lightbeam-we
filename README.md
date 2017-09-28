@@ -1,7 +1,9 @@
 # Firefox Lightbeam
 This is the web extension version of the Firefox Lightbeam add-on for visualizing HTTP requests between websites in real time.
 
-The Firefox Lightbeam extension by Mozilla is a key tool for Mozilla to educate the public about privacy
+The Firefox Lightbeam extension by Mozilla is a key tool for Mozilla to educate the public about privacy.
+
+![lightbeam-screenshot](/docs/images/lightbeam.png)
 
 ## Quick Start
 
@@ -18,9 +20,6 @@ There are a couple ways to try out this web extension:
     - Click the [Load Temporary Add-on](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Temporary_Installation_in_Firefox) button and select the `manifest.json` file within the directory of this repository.
     - You should now see the Lightbeam icon on the top right bar of the browser.
     - Click the Lightbeam icon to launch the web extension.
-    - Here is the screenshot:
-
-    ![lightbeam-screenshot](/docs/images/lightbeam-launch.gif)
 
 2. Install the [web-ext](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Getting_started_with_web-ext) tool, change into the directory of this repository, and type `web-ext run`.
     - This will launch Firefox and install the extension automatically.
