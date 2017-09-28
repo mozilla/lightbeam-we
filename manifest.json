@@ -15,6 +15,7 @@
     "webRequest",
     "<all_urls>",
     "tabs",
+    "cookies",
     "storage",
     "downloads",
     "privacy"
