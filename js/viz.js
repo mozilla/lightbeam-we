@@ -133,19 +133,28 @@ const viz = {
     this.context.restore();
   },
 
+  getRadius(thirdPartyLength) {
+    if (thirdPartyLength > 0) {
+      if (thirdPartyLength > this.collisionRadius) {
+        return this.circleRadius + this.collisionRadius;
+      } else {
+        return this.circleRadius + thirdPartyLength;
+      }
+    }
+    return this.circleRadius;
+  },
+
   drawNodes() {
     for (const node of this.nodes) {
       const x = node.fx || node.x;
       const y = node.fy || node.y;
-      let radius = this.circleRadius;
+      let radius;
 
       this.context.beginPath();
       this.context.moveTo(x, y);
 
       if (node.firstParty) {
-        if (node.thirdParties.length > 0) {
-          radius = this.circleRadius + node.thirdParties.length;
-        }
+        radius = this.getRadius(node.thirdParties.length);
         this.drawFirstParty(x, y, radius);
       } else {
         this.drawThirdParty(x, y);
