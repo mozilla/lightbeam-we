@@ -5,7 +5,7 @@ const viz = {
   resizeTimer: null,
   minZoom: 0.5,
   maxZoom: 1.5,
-  collisionRadius: 30,
+  collisionRadius: 10,
   tickCount: 100,
   canvasColor: 'white',
 
@@ -67,6 +67,8 @@ const viz = {
   registerLinkForce() {
     const linkForce = d3.forceLink(this.links);
     linkForce.id((d) => d.hostname);
+    // linkForce.distance(100);
+    // linkForce.strength(0.6);
     this.simulation.force('link', linkForce);
   },
 
@@ -81,6 +83,7 @@ const viz = {
     this.simulation.force('y', forceY);
 
     const chargeForce = d3.forceManyBody();
+    chargeForce.strength(-100);
     this.simulation.force('charge', chargeForce);
 
     const collisionForce = d3.forceCollide(this.collisionRadius);
