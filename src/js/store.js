@@ -1,5 +1,5 @@
 const store = {
-  ALLOWLIST_URL: '/shavar-prod-lists/disconnect-entitylist.json',
+  ALLOWLIST_URL: '/ext-libs/disconnect-entitylist.json',
   db: null,
 
   async init() {
