@@ -5,9 +5,12 @@ const viz = {
   resizeTimer: null,
   minZoom: 0.5,
   maxZoom: 1.5,
-  collisionRadius: 30,
-  tickCount: 30,
+  collisionRadius: 10,
+  chargeStrength: -100,
+  tickCount: 100,
   canvasColor: 'white',
+  alphaTargetStart: 0.1,
+  alphaTargetStop: 0,
 
   init(nodes, links) {
     const { width, height } = this.getDimensions();
@@ -37,6 +40,7 @@ const viz = {
   simulateForce() {
     if (!this.simulation) {
       this.simulation = d3.forceSimulation(this.nodes);
+      this.simulation.on('tick', () => this.drawOnCanvas());
       this.registerSimulationForces();
     } else {
       this.simulation.nodes(this.nodes);
@@ -46,7 +50,7 @@ const viz = {
   },
 
   manualTick() {
-    this.simulation.alphaTarget(0.1);
+    this.simulation.alphaTarget(this.alphaTargetStart);
     for (let i = 0; i < this.tickCount; i++) {
       this.simulation.tick();
     }
@@ -54,13 +58,12 @@ const viz = {
   },
 
   restartSimulation() {
-    this.simulation.alphaTarget(0.1);
+    this.simulation.alphaTarget(this.alphaTargetStart);
     this.simulation.restart();
   },
 
   stopSimulation() {
-    this.simulation.alphaTarget(0);
-    this.simulation.stop();
+    this.simulation.alphaTarget(this.alphaTargetStop);
   },
 
   registerLinkForce() {
@@ -80,6 +83,7 @@ const viz = {
     this.simulation.force('y', forceY);
 
     const chargeForce = d3.forceManyBody();
+    chargeForce.strength(this.chargeStrength);
     this.simulation.force('charge', chargeForce);
 
     const collisionForce = d3.forceCollide(this.collisionRadius);
@@ -129,21 +133,35 @@ const viz = {
     this.context.restore();
   },
 
+  getRadius(thirdPartyLength) {
+    if (thirdPartyLength > 0) {
+      if (thirdPartyLength > this.collisionRadius) {
+        return this.circleRadius + this.collisionRadius;
+      } else {
+        return this.circleRadius + thirdPartyLength;
+      }
+    }
+    return this.circleRadius;
+  },
+
   drawNodes() {
     for (const node of this.nodes) {
       const x = node.fx || node.x;
       const y = node.fy || node.y;
+      let radius;
+
       this.context.beginPath();
       this.context.moveTo(x, y);
 
-      if (node.shadow) {
-        this.drawShadow(x, y);
-      }
-
       if (node.firstParty) {
-        this.drawFirstParty(x, y);
+        radius = this.getRadius(node.thirdParties.length);
+        this.drawFirstParty(x, y, radius);
       } else {
         this.drawThirdParty(x, y);
+      }
+
+      if (node.shadow) {
+        this.drawShadow(x, y, radius);
       }
 
       this.context.fillStyle = this.canvasColor;
@@ -205,21 +223,24 @@ const viz = {
     );
   },
 
-  drawShadow(x, y) {
+  drawShadow(x, y, radius) {
+    const lineWidth = 2,
+      shadowBlur = 15,
+      shadowRadius = 5;
     this.context.beginPath();
-    this.context.lineWidth = 2;
+    this.context.lineWidth = lineWidth;
     this.context.shadowColor = this.canvasColor;
     this.context.strokeStyle = 'rgba(0, 0, 0, 1)';
-    this.context.shadowBlur = 15;
+    this.context.shadowBlur = shadowBlur;
     this.context.shadowOffsetX = 0;
     this.context.shadowOffsetY = 0;
-    this.context.arc(x, y, this.circleRadius + 5, 0, 2 * Math.PI);
+    this.context.arc(x, y, radius + shadowRadius, 0, 2 * Math.PI);
     this.context.stroke();
     this.context.closePath();
   },
 
-  drawFirstParty(x, y) {
-    this.context.arc(x, y, this.circleRadius, 0, 2 * Math.PI);
+  drawFirstParty(x, y, radius) {
+    this.context.arc(x, y, radius, 0, 2 * Math.PI);
   },
 
   drawThirdParty(x, y) {
@@ -378,7 +399,6 @@ const viz = {
     d3.event.subject.fy = d3.event.y;
 
     this.hideTooltip();
-    this.drawOnCanvas();
   },
 
   dragEnd() {
