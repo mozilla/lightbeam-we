@@ -6,7 +6,7 @@ const viz = {
   minZoom: 0.5,
   maxZoom: 1.5,
   collisionRadius: 30,
-  tickCount: 30,
+  tickCount: 100,
   canvasColor: 'white',
 
   init(nodes, links) {
@@ -37,6 +37,7 @@ const viz = {
   simulateForce() {
     if (!this.simulation) {
       this.simulation = d3.forceSimulation(this.nodes);
+      this.simulation.on('tick', () => this.drawOnCanvas());
       this.registerSimulationForces();
     } else {
       this.simulation.nodes(this.nodes);
@@ -60,7 +61,7 @@ const viz = {
 
   stopSimulation() {
     this.simulation.alphaTarget(0);
-    this.simulation.stop();
+    // this.simulation.stop();
   },
 
   registerLinkForce() {
@@ -378,7 +379,6 @@ const viz = {
     d3.event.subject.fy = d3.event.y;
 
     this.hideTooltip();
-    this.drawOnCanvas();
   },
 
   dragEnd() {
