@@ -9,6 +9,8 @@ const viz = {
   chargeStrength: -100,
   tickCount: 100,
   canvasColor: 'white',
+  alphaTargetStart: 0.1,
+  alphaTargetStop: 0,
 
   init(nodes, links) {
     const { width, height } = this.getDimensions();
@@ -48,7 +50,7 @@ const viz = {
   },
 
   manualTick() {
-    this.simulation.alphaTarget(0.1);
+    this.simulation.alphaTarget(this.alphaTargetStart);
     for (let i = 0; i < this.tickCount; i++) {
       this.simulation.tick();
     }
@@ -56,12 +58,12 @@ const viz = {
   },
 
   restartSimulation() {
-    this.simulation.alphaTarget(0.1);
+    this.simulation.alphaTarget(this.alphaTargetStart);
     this.simulation.restart();
   },
 
   stopSimulation() {
-    this.simulation.alphaTarget(0);
+    this.simulation.alphaTarget(this.alphaTargetStop);
   },
 
   registerLinkForce() {
@@ -213,14 +215,17 @@ const viz = {
   },
 
   drawShadow(x, y, radius) {
+    const lineWidth = 2,
+      shadowBlur = 15,
+      shadowRadius = 5;
     this.context.beginPath();
-    this.context.lineWidth = 2;
+    this.context.lineWidth = lineWidth;
     this.context.shadowColor = this.canvasColor;
     this.context.strokeStyle = 'rgba(0, 0, 0, 1)';
-    this.context.shadowBlur = 15;
+    this.context.shadowBlur = shadowBlur;
     this.context.shadowOffsetX = 0;
     this.context.shadowOffsetY = 0;
-    this.context.arc(x, y, radius + 5, 0, 2 * Math.PI);
+    this.context.arc(x, y, radius + shadowRadius, 0, 2 * Math.PI);
     this.context.stroke();
     this.context.closePath();
   },
