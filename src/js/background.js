@@ -1,9 +1,11 @@
 'use strict';
 
 async function checkFirstRun() {
+/*
   if (await store.isFirstRun()) {
     browser.tabs.create({ url: 'first-run.html' });
   }
+  */
 }
 
 checkFirstRun();
