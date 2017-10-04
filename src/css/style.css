@@ -18,6 +18,10 @@
   src: url("../fonts/OpenSans-Regular.ttf");
 }
 
+[hidden] {
+  display: none !important;
+}
+
 :root {
   --primary-color: #000;
   --secondary-color: #404850;
@@ -223,6 +227,17 @@ main {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+}
+
+#tracking-protection-disabled > div {
+  display: inline-block;
+  width: 140px;
+  margin-inline-start: 10px;
+}
+
+#tracking-protection-disabled > div > a {
+  font-size: 1rem;
+  text-decoration: none;
 }
 
 .toggle-switch {

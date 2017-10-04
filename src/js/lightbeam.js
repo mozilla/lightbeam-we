@@ -15,8 +15,14 @@ const lightbeam = {
   async initTPToggle() {
     const toggleCheckbox
       = document.getElementById('tracking-protection-control');
+    const trackingProtection = document.getElementById('tracking-protection');
+    const trackingProtectionDisabled
+      = document.getElementById('tracking-protection-disabled');
     // Do we support setting TP
     if ('trackingProtectionMode' in browser.privacy.websites) {
+      trackingProtection.hidden = false;
+      trackingProtectionDisabled.hidden = true;
+
       const trackingProtection
         = await browser.privacy.websites.trackingProtectionMode.get({});
       let value = true;
@@ -29,7 +35,8 @@ const lightbeam = {
         browser.privacy.websites.trackingProtectionMode.set({ value });
       });
     } else {
-      document.getElementById('tracking-protection').hidden = true;
+      trackingProtection.hidden = true;
+      trackingProtectionDisabled.hidden = false;
     }
   },
 
