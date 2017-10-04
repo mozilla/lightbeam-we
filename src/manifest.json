@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Firefox Lightbeam",
-  "version": "2.0.1",
+  "version": "2.0.2",
 
   "description": "Firefox Lightbeam is a Firefox browser extension that uses interactive visualizations to show you the relationships between third parties and the sites you visit.",
   "homepage_url": "https://github.com/mozilla/lightbeam-we",
