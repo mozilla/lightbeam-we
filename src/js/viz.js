@@ -23,7 +23,8 @@ const viz = {
     this.collisionRadius = this.collisionRadius * this.scalingFactor;
     this.scale = (window.devicePixelRatio || 1) * this.scalingFactor;
     this.transform = d3.zoomIdentity;
-    this.defaultIcon = this.convertURIToImageData('images/defaultFavicon.svg');
+    this.defaultIcon = this.convertURIToImageData('images/defaultFavicon.svg',
+      this.circleRadius);
 
     this.updateCanvas(width, height);
     this.draw(nodes, links);
@@ -170,13 +171,17 @@ const viz = {
       this.context.fill();
 
       if (node.favicon) {
-        this.drawFavicon(node, x, y);
+        if (node.firstParty) {
+          this.drawFavicon(node, x, y, radius);
+        } else {
+          this.drawFavicon(node, x, y, this.circleRadius);
+        }
       }
     }
   },
 
-  getSquare() {
-    const side = Math.sqrt(this.circleRadius * this.circleRadius * 2);
+  getSquare(radius) {
+    const side = Math.sqrt(radius * radius * 1.5);
     const offset = side * 0.5;
 
     return {
@@ -185,7 +190,7 @@ const viz = {
     };
   },
 
-  convertURIToImageData(URI) {
+  convertURIToImageData(URI, radius) {
     return new Promise((resolve, reject) => {
       if (!URI) {
         return reject();
@@ -193,7 +198,7 @@ const viz = {
 
       const canvas = document.createElement('canvas'),
         context = canvas.getContext('2d'),
-        side = this.getSquare().side,
+        side = this.getSquare(radius).side,
         image = new Image();
 
       canvas.width = side * this.scale;
@@ -212,13 +217,13 @@ const viz = {
     });
   },
 
-  async drawFavicon(node, x, y) {
-    const offset = this.getSquare().offset,
+  async drawFavicon(node, x, y, radius) {
+    const offset = this.getSquare(radius).offset,
       tx = this.transform.applyX(x) - offset,
       ty = this.transform.applyY(y) - offset;
 
     if (!node.image) {
-      node.image = await this.convertURIToImageData(node.favicon);
+      node.image = await this.convertURIToImageData(node.favicon, radius);
     }
 
     this.context.putImageData(node.image,
