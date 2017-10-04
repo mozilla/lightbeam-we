@@ -23,6 +23,7 @@ const viz = {
     this.collisionRadius = this.collisionRadius * this.scalingFactor;
     this.scale = (window.devicePixelRatio || 1) * this.scalingFactor;
     this.transform = d3.zoomIdentity;
+    this.defaultIcon = this.convertURIToImageData('images/defaultFavicon.svg');
 
     this.updateCanvas(width, height);
     this.draw(nodes, links);
@@ -203,6 +204,9 @@ const viz = {
       image.onload = () => {
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         return resolve(context.getImageData(0, 0, canvas.width, canvas.height));
+      };
+      image.onerror = () => {
+        return resolve(this.defaultIcon);
       };
       image.src = URI;
     });
