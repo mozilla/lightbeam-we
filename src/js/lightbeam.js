@@ -254,14 +254,26 @@ const lightbeam = {
 
   resetData() {
     const resetData = document.getElementById('reset-data-button');
-    resetData.addEventListener('click', async () => {
-      const msgBegin = 'Pressing OK will delete all Lightbeam data. ';
-      const msgEnd = 'Are you sure?';
-      const confirmation = confirm(`${msgBegin + msgEnd}`);
-      if (confirmation) {
+    const dialog = document.getElementById('reset-data-dialog');
+    window.dialogPolyfill && window.dialogPolyfill.registerDialog(dialog);
+
+    resetData.addEventListener('click', () => {
+      dialog.showModal();
+    });
+
+    dialog.addEventListener('cancel', () => {
+      delete dialog.returnValue;
+    });
+
+    dialog.addEventListener('close', async () => {
+      if (dialog.returnValue === 'confirm') {
         await storeChild.reset();
         window.location.reload();
       }
+
+      // This is a little naive, because the dialog might not have been
+      // triggered by the reset button. But it's better than nothing.
+      resetData.focus();
     });
   },
 
