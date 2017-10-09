@@ -32,6 +32,8 @@
   --button-active-border-color: #6fc3e5;
   --primary-text-color: #eaeaea;
   --secondary-text-color: #73a4b8;
+  --dialog-header-color: #4cc7e6;
+  --dialog-button-color: #4cc7e6;
 }
 
 *::before, *::after, * {
@@ -105,6 +107,133 @@ button::before, a.thumbs-up::before {
   height: 15px;
   background-size: contain;
   margin-right: 10px;
+}
+
+dialog {
+  display: block;
+  position: fixed;
+  transform: translate(0, -50%);
+  top: 50%;
+  left: 2em;
+  right: 2em;
+  width: -moz-fit-content;
+  width: -webkit-fit-content;
+  width: fit-content;
+  max-width: 40em;
+  height: -moz-fit-content;
+  height: -webkit-fit-content;
+  height: fit-content;
+  margin: auto;
+  padding: 1em;
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 0.5em;
+  box-shadow: 0.5em 0.5em 0 rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+dialog:not([open]) {
+  display: none;
+}
+
+dialog::backdrop, dialog + .backdrop {
+  background: rgba(0,0,0,0.25);
+}
+
+dialog + .backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+dialog .dialog-wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 10px;
+  grid-auto-rows: auto;
+}
+
+dialog .dialog-title {
+  background: var(--dialog-header-color);
+  color: #FFF;
+  margin: -1em -1em 0;
+  padding: 1em;
+  font-size: 1em;
+  text-transform: uppercase;
+  grid-column: 1 / 5;
+  grid-row: 1;
+}
+
+dialog .dialog-icon {
+  grid-column: 1;
+  grid-row: 2;
+  width: 100%;
+  display: block;
+}
+
+dialog .dialog-content {
+  grid-column: 1 / 5;
+  grid-row: 2;
+}
+
+dialog .dialog-icon + .dialog-content {
+  grid-column: 2 / 5;
+}
+
+dialog .dialog-options {
+  text-align: right;
+  display: block;
+  margin: 0;
+  padding: 0;
+  grid-column: 1 / 5;
+  grid-row: 3;
+}
+
+dialog .dialog-options button {
+  background: var(--dialog-button-color);
+  display: inline-block;
+  width: auto;
+  min-width: 6em;
+  box-shadow: none;
+  margin: 0;
+  padding: 0.5em 1em;
+  font-size: inherit;
+  text-align: center;
+}
+
+dialog .dialog-options button::before {
+  display: none;
+}
+
+dialog .dialog-options button::-moz-focus-inner {
+  padding: 0;
+  border: none;
+}
+
+dialog .dialog-options button:focus {
+  outline: dotted 1px grey;
+}
+
+@media (max-width: 44em) {
+  dialog .dialog-icon {
+    display: none;
+  }
+
+  dialog .dialog-content,
+  dialog .dialog-icon + .dialog-content {
+    grid-column: 1 / 5;
+  }
+}
+
+._dialog_overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 
 .active {
