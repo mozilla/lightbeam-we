@@ -1,6 +1,6 @@
 {
   "name": "lightbeam-we",
-  "version": "2.0.1",
+  "version": "2.0.4",
   "description": "Firefox Lightbeam web extension",
   "main": "background.js",
   "scripts": {
