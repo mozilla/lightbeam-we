@@ -23,10 +23,10 @@ const lightbeam = {
       trackingProtection.hidden = false;
       trackingProtectionDisabled.hidden = true;
 
-      const trackingProtection
+      const trackingProtectionState
         = await browser.privacy.websites.trackingProtectionMode.get({});
       let value = true;
-      if (trackingProtection.value !== 'always') {
+      if (trackingProtectionState.value !== 'always') {
         value = false;
       }
       toggleCheckbox.checked = value;
