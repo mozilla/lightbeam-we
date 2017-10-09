@@ -15,11 +15,11 @@ h1 {
 }
 
 .center { text-align: center; }
-img.center, button.center { display: block; margin: 0 auto; }
+img.center, button.center, a.center { display: block; margin: 0 auto; }
 
 img#lightbeam-logo { margin-bottom:-18px; }
 
-body > ol, body > ul { width: 578px; margin: 0 auto; }
+body > ol, body > ul, body > #start { width: 578px; margin: 0 auto; }
 
 ol#steps {
   /* unset default styles */
@@ -67,4 +67,26 @@ ul li {
 
 ul li:last-child {
   padding-bottom: 0;
+}
+
+div#start {
+  background: white;
+  border-radius: 0.5em;
+  transition: all 0.3s;
+}
+#start a {
+  text-decoration: none;
+  padding: 10px;
+  color: #5D667A;
+  font-weight: bold;
+  outline: none;
+  transition: all 0.3s;
+}
+
+#start:hover {
+  box-shadow: 5px 5px 5px #111111;
+  background: #4BC599;
+}
+#start a:hover {
+  color: white;
 }
