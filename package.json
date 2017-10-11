@@ -1,6 +1,6 @@
 {
   "name": "lightbeam-we",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Firefox Lightbeam web extension",
   "main": "background.js",
   "scripts": {
@@ -28,8 +28,8 @@
   },
   "homepage": "https://github.com/mozilla/lightbeam-we/blob/master/README.md",
   "dependencies": {
-    "d3": "4.9.1",
-    "dexie": "^2.0.0-beta",
+    "d3": "^4.9.1",
+    "dexie": "^2.0.1",
     "dialog-polyfill": "^0.4.9"
   },
   "devDependencies": {
