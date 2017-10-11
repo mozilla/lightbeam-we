@@ -3,7 +3,7 @@ This is the web extension version of the Firefox Lightbeam add-on for visualizin
 
 The Firefox Lightbeam extension by Mozilla is a key tool for Mozilla to educate the public about privacy.
 
-![lightbeam-screenshot](/docs/images/lightbeam.png)
+![lightbeam-screenshot](/docs/images/lightbeam.gif)
 
 ## Quick Start
 
