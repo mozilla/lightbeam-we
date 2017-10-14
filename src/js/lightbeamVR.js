@@ -53,12 +53,11 @@ const lightbeamVR = {
   },
 
   async runLightbeam() {
-    // Checks to see if Lightbeam is already open.
+    // Checks to see if LightbeamVR is already open.
     // Returns true if it is, false if not.
-    let fullUrl = null;
+    const fullUrl = 'http://localhost:3000/';
     async function isOpen() {
       const tabs = await browser.tabs.query({});
-      fullUrl = browser.extension.getURL('http://localhost:3000');
       const lightbeamTabs = tabs.filter((tab) => {
         return (tab.url === fullUrl);
       });
@@ -66,11 +65,12 @@ const lightbeamVR = {
     }
 
     const lightbeamTab = await isOpen();
-    if (!lightbeamTab && fullUrl) {
+    if (!lightbeamTab) {
       // only open a new LightbeamVR instance if one isn't already open.
-      browser.tabs.create({ url: fullUrl });
+      browser.tabs.create({ url: fullUrl});
     } else if (!lightbeamTab.active) {
        // re-focus LightbeamVR if it is already open but lost focus
+      browser.tabs.reload(lightbeamTab.id);
       browser.tabs.update(lightbeamTab.id, {active: true});
     }
   }
