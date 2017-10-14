@@ -45,7 +45,7 @@ const lightbeamVR = {
     const url = window.URL.createObjectURL(blob);
     const downloading = browser.downloads.download({
       url : url,
-      filename : 'lightbeamVRData.json',
+      filename : 'data.json',
       conflictAction : 'overwrite',
       saveAs: true
     });
