@@ -41,7 +41,9 @@ const viz = {
   simulateForce() {
     if (!this.simulation) {
       this.simulation = d3.forceSimulation(this.nodes);
-      this.simulation.on('tick', () => this.drawOnCanvas());
+      this.simulation.on('tick', () => {
+        return this.drawOnCanvas();
+      });
       this.registerSimulationForces();
     } else {
       this.simulation.nodes(this.nodes);
@@ -69,7 +71,9 @@ const viz = {
 
   registerLinkForce() {
     const linkForce = d3.forceLink(this.links);
-    linkForce.id((d) => d.hostname);
+    linkForce.id((d) => {
+      return d.hostname;
+    });
     this.simulation.force('link', linkForce);
   },
 
@@ -374,10 +378,18 @@ const viz = {
 
   addDrag() {
     const drag = d3.drag();
-    drag.subject(() => this.dragSubject());
-    drag.on('start', () => this.dragStart());
-    drag.on('drag', () => this.drag());
-    drag.on('end', () => this.dragEnd());
+    drag.subject(() => {
+      return this.dragSubject();
+    });
+    drag.on('start', () => {
+      return this.dragStart();
+    });
+    drag.on('drag', () => {
+      return this.drag();
+    });
+    drag.on('end', () => {
+      return this.dragEnd();
+    });
 
     d3.select(this.canvas)
       .call(drag);
@@ -418,7 +430,9 @@ const viz = {
 
   addZoom() {
     const zoom = d3.zoom().scaleExtent([this.minZoom, this.maxZoom]);
-    zoom.on('zoom', () => this.zoom());
+    zoom.on('zoom', () => {
+      return this.zoom();
+    });
 
     d3.select(this.canvas)
       .call(zoom);
