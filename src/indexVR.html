@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Lighbteam in A-Frame</title>
+    <meta name="description" content="Lighbeam in A-Frame">
+    <script src="js/storeChild.js"></script>
+    <script src="js/aframe/aframeHelper.js"></script>
+    <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
+    <script src="js/aframe/aframeForcegraph.js"></script>
+  </head>
+  <body>
+    <a-scene stats>
+      <a-camera wasd-controls="fly: true; acceleration: 600">
+        <a-cursor color="lavender" opacity="0.5"></a-cursor>
+      </a-camera>
+      <a-sky color="#002"></a-sky>
+      <a-entity forcegraph></a-entity>
+    </a-scene>
+  </body>
+</html>

@@ -7,55 +7,14 @@ const lightbeamVR = {
   loadLightbeamVR() {
     const vrView = document.getElementById('vr-view-button');
     vrView.addEventListener('click', async () => {
-      await this.getData();
       await this.runLightbeam();
     });
-  },
-
-  transformData(data) {
-    const nodes = [];
-    let links = [];
-    for (const website in data) {
-      const site = data[website];
-      data[website].id = site.hostname;
-      data[website].name = site.hostname;
-      if (site.thirdParties) {
-        const thirdPartyLinks = site.thirdParties.map((thirdParty) => {
-          return {
-            source: website,
-            target: thirdParty
-          };
-        });
-        links = links.concat(thirdPartyLinks);
-      }
-      nodes.push(data[website]);
-    }
-
-    return {
-      nodes,
-      links
-    };
-  },
-
-  async getData() {
-    const data = await storeChild.getAll();
-    const transformedData = this.transformData(data);
-    const blob = new Blob([JSON.stringify(transformedData ,' ' , 2)],
-      {type : 'application/json'});
-    const url = window.URL.createObjectURL(blob);
-    const downloading = browser.downloads.download({
-      url : url,
-      filename : 'data.json',
-      conflictAction : 'overwrite',
-      saveAs: true
-    });
-    await downloading;
   },
 
   async runLightbeam() {
     // Checks to see if LightbeamVR is already open.
     // Returns true if it is, false if not.
-    const fullUrl = 'http://localhost:3000/';
+    const fullUrl = browser.extension.getURL('indexVR.html');
     async function isOpen() {
       const tabs = await browser.tabs.query({});
       const lightbeamTabs = tabs.filter((tab) => {
