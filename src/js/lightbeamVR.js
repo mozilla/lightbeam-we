@@ -26,7 +26,7 @@ const lightbeamVR = {
     const lightbeamTab = await isOpen();
     if (!lightbeamTab) {
       // only open a new LightbeamVR instance if one isn't already open.
-      browser.tabs.create({ url: fullUrl});
+      browser.tabs.create({ url: fullUrl });
     } else if (!lightbeamTab.active) {
        // re-focus LightbeamVR if it is already open but lost focus
       browser.tabs.reload(lightbeamTab.id);
