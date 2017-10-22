@@ -139,7 +139,7 @@
 	      });
 	    } */
 			// Auto add color to uncolored nodes
-			const { nodes, links } = await aframeHelper.getData();
+			const { nodes, links } = await forcegraphData.getData();
 			elData.nodes = nodes;
 			elData.links = links;
 	    autoColorNodes(elData.nodes, elData.autoColorBy, elData.colorField);

@@ -1,16 +1,8 @@
-const aframeHelper = {
-  async init() {
-    await this.getData();
-  },
-
+// eslint-disable-next-line no-unused-vars
+const forcegraphData = {
   async getData() {
     const data = await storeChild.getAll();
-    const { nodes, links } = this.transformData(data);
-
-    return {
-      nodes,
-      links
-    };
+    return this.transformData(data);
   },
 
   transformData(data) {
@@ -38,5 +30,3 @@ const aframeHelper = {
     };
   }
 };
-
-aframeHelper.init();
