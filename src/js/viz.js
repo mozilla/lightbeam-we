@@ -23,7 +23,7 @@ const viz = {
     this.collisionRadius = this.collisionRadius * this.scalingFactor;
     this.scale = (window.devicePixelRatio || 1) * this.scalingFactor;
     this.transform = d3.zoomIdentity;
-    this.defaultIcon = this.convertURIToImageData('images/defaultFavicon.svg');
+    this.defaultIcon = this.loadImage('images/defaultFavicon.svg');
 
     this.updateCanvas(width, height);
     this.draw(nodes, links);
@@ -171,12 +171,14 @@ const viz = {
 
       if (node.favicon) {
         this.drawFavicon(node, x, y, radius);
+      } else {
+        this.drawFavicon(node, x, y, this.circleRadius);
       }
     }
   },
 
   getSquare(radius) {
-    const side = Math.sqrt(radius * radius * 1.5);
+    const side = Math.sqrt(radius * radius * 2);
     const offset = side * 0.5;
 
     return {
@@ -185,20 +187,16 @@ const viz = {
     };
   },
 
-  convertURIToImageData(URI) {
+  loadImage(URI) {
     return new Promise((resolve, reject) => {
       if (!URI) {
         return reject();
       }
 
-      const canvas = document.createElement('canvas'),
-        image = new Image();
+      const image = new Image();
 
       image.onload = () => {
-        return resolve({
-          canvas,
-          image,
-        });
+        return resolve(image);
       };
       image.onerror = () => {
         return resolve(this.defaultIcon);
@@ -207,28 +205,37 @@ const viz = {
     });
   },
 
+  scaleFavicon(image, side) {
+    const canvas = document.createElement('canvas'),
+      context = canvas.getContext('2d');
+
+    canvas.width = side * this.scale;
+    canvas.height = side * this.scale;
+    context.fillStyle = this.canvasColor;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    context.drawImage(
+      image,
+      0,
+      0,
+      side * this.scale,
+      side * this.scale);
+
+    return context.getImageData(0, 0, canvas.width, canvas.height);
+  },
+
   async drawFavicon(node, x, y, radius) {
     const offset = this.getSquare(radius).offset,
+      side = this.getSquare(radius).side,
       tx = this.transform.applyX(x) - offset,
       ty = this.transform.applyY(y) - offset;
 
     if (!node.image) {
-      const data = await this.convertURIToImageData(node.favicon);
-
-      node.imageCanvas = data.canvas;
-      node.image = data.image;
+      node.image = await this.loadImage(node.favicon);
     }
 
-    const imageContext = node.imageCanvas.getContext('2d');
-    const side = this.getSquare(radius).side * this.scale;
-
-    node.imageCanvas.width = side;
-    node.imageCanvas.height = side;
-    imageContext.fillStyle = this.canvasColor;
-    imageContext.fillRect(0, 0, side, side);
-    imageContext.drawImage(node.image, 0, 0, side, side);
-
-    this.context.putImageData(imageContext.getImageData(0, 0, side, side),
+    this.context.putImageData(
+      this.scaleFavicon(node.image, side),
       tx * this.scale,
       ty * this.scale
     );
