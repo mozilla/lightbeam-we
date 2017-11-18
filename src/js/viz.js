@@ -26,69 +26,47 @@ const viz = {
     this.defaultIcon = this.convertURIToImageData('images/defaultFavicon.svg');
 
     this.updateCanvas(width, height);
-    this.draw(nodes, links);
+    this.nodes = nodes;
+    this.links = links;
+    this.width = width;
+    this.height = height;
     this.addListeners();
+    this.webWorker(nodes, links, width, height);
+  },
+
+  webWorker(nodes, links, width, height) {
+    this.worker = new Worker('moz-extension://dd1e07f4-7724-154c-80da-f501acf9262c/js/vizWorker.js');
+
+    this.worker.postMessage({
+      nodes,
+      links,
+      width,
+      height
+    });
+
+    this.worker.onmessage = (event) => {
+      switch (event.data.type) {
+        case 'tick': return this.ticked(event.data);
+        case 'end': return this.draw(event.data.nodes, event.data.links);
+      }
+    };
+  },
+
+  ticked(data) {
+    var progress = 100 * data.progress;
+    var meter = document.querySelector('#progress');
+    meter.style.width = `${progress}%`;
   },
 
   draw(nodes, links) {
     this.nodes = nodes;
     this.links = links;
 
-    this.simulateForce();
+    if (this.animationFrame) {
+      window.cancelAnimationFrame(this.animationFrame);
+    }
+
     this.drawOnCanvas();
-  },
-
-  simulateForce() {
-    if (!this.simulation) {
-      this.simulation = d3.forceSimulation(this.nodes);
-      this.simulation.on('tick', () => this.drawOnCanvas());
-      this.registerSimulationForces();
-    } else {
-      this.simulation.nodes(this.nodes);
-    }
-    this.registerLinkForce();
-    this.manualTick();
-  },
-
-  manualTick() {
-    this.simulation.alphaTarget(this.alphaTargetStart);
-    for (let i = 0; i < this.tickCount; i++) {
-      this.simulation.tick();
-    }
-    this.stopSimulation();
-  },
-
-  restartSimulation() {
-    this.simulation.alphaTarget(this.alphaTargetStart);
-    this.simulation.restart();
-  },
-
-  stopSimulation() {
-    this.simulation.alphaTarget(this.alphaTargetStop);
-  },
-
-  registerLinkForce() {
-    const linkForce = d3.forceLink(this.links);
-    linkForce.id((d) => d.hostname);
-    this.simulation.force('link', linkForce);
-  },
-
-  registerSimulationForces() {
-    const centerForce = d3.forceCenter(this.width / 2, this.height / 2);
-    this.simulation.force('center', centerForce);
-
-    const forceX = d3.forceX(this.width / 2);
-    this.simulation.force('x', forceX);
-
-    const forceY = d3.forceY(this.height / 2);
-    this.simulation.force('y', forceY);
-
-    const chargeForce = d3.forceManyBody();
-    chargeForce.strength(this.chargeStrength);
-    this.simulation.force('charge', chargeForce);
-
-    const collisionForce = d3.forceCollide(this.collisionRadius);
-    this.simulation.force('collide', collisionForce);
   },
 
   createCanvas() {
@@ -134,6 +112,46 @@ const viz = {
     this.context.restore();
   },
 
+  drawAnimation(node) {
+    this.context.clearRect(0, 0, this.width, this.height);
+    this.context.save();
+    this.context.translate(this.transform.x, this.transform.y);
+    this.context.scale(this.transform.k, this.transform.k);
+    // this.drawAnimatedLinks(subject);
+    this.drawNodes();
+    this.drawAnimatedNode(node);
+    this.context.restore();
+    this.animationFrame = window.requestAnimationFrame(
+      () => this.drawAnimation(node));
+  },
+
+  drawAnimatedNode(node) {
+    if (!node) {
+      return;
+    }
+    const x = node.xArr.pop() || node.x;
+    const y = node.yArr.pop() || node.y;
+    let radius;
+
+    this.context.beginPath();
+    this.context.moveTo(x, y);
+
+    if (node.firstParty) {
+      radius = this.getRadius(node.thirdParties.length);
+      this.drawFirstParty(x, y, radius);
+    } else {
+      this.drawThirdParty(x, y);
+    }
+
+    if (node.shadow) {
+      // this.drawShadow(x, y, radius);
+    }
+
+    this.context.fillStyle = this.canvasColor;
+    this.context.closePath();
+    this.context.fill();
+  },
+
   getRadius(thirdPartyLength) {
     if (thirdPartyLength > 0) {
       if (thirdPartyLength > this.collisionRadius) {
@@ -147,6 +165,10 @@ const viz = {
 
   drawNodes() {
     for (const node of this.nodes) {
+      if (node.fx) {
+        continue;
+      }
+
       const x = node.fx || node.x;
       const y = node.fy || node.y;
       let radius;
@@ -170,7 +192,7 @@ const viz = {
       this.context.fill();
 
       if (node.favicon) {
-        this.drawFavicon(node, x, y);
+        // this.drawFavicon(node, x, y);
       }
     }
   },
@@ -390,30 +412,34 @@ const viz = {
   },
 
   dragStart() {
-    if (!d3.event.active) {
-      this.restartSimulation();
-    }
     d3.event.subject.shadow = true;
     d3.event.subject.fx = d3.event.subject.x;
     d3.event.subject.fy = d3.event.subject.y;
+    d3.event.subject.xArr = [];
+    d3.event.subject.yArr = [];
   },
 
   drag() {
     d3.event.subject.fx = d3.event.x;
     d3.event.subject.fy = d3.event.y;
-
+    d3.event.subject.xArr.push(d3.event.x);
+    d3.event.subject.yArr.push(d3.event.y);
+    this.drawOnCanvas();
     this.hideTooltip();
   },
 
   dragEnd() {
-    if (!d3.event.active) {
-      this.stopSimulation();
-    }
-    d3.event.subject.x = d3.event.subject.fx;
-    d3.event.subject.y = d3.event.subject.fy;
-    d3.event.subject.fx = null;
-    d3.event.subject.fy = null;
     d3.event.subject.shadow = false;
+
+    this.drawAnimation(d3.event.subject);
+
+    this.worker.postMessage({
+      nodes: this.nodes,
+      links: this.links,
+      width: this.width,
+      height: this.height,
+      subject: d3.event.subject
+    });
   },
 
   addZoom() {
