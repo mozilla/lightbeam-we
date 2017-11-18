@@ -6,7 +6,9 @@ const store = {
     if (!this.db) {
       this.makeNewDatabase();
     }
-    browser.runtime.onMessage.addListener((m) => store.messageHandler(m));
+    browser.runtime.onMessage.addListener((m) => {
+      return store.messageHandler(m);
+    });
     await this.getAllowList();
   },
 
