@@ -9,6 +9,7 @@ const viz = {
   chargeStrength: -100,
   tickCount: 100,
   canvasColor: 'white',
+  alphaStart: 1,
   alphaTargetStart: 0.1,
   alphaTargetStop: 0,
 
@@ -47,26 +48,31 @@ const viz = {
       this.registerSimulationForces();
     } else {
       this.simulation.nodes(this.nodes);
+      this.resetAlpha();
     }
     this.registerLinkForce();
-    this.manualTick();
   },
 
-  manualTick() {
-    this.simulation.alphaTarget(this.alphaTargetStart);
-    for (let i = 0; i < this.tickCount; i++) {
-      this.simulation.tick();
+  resetAlpha() {
+    const alpha = this.simulation.alpha();
+    const alphaRounded =  Math.round((1 - alpha) * 100);
+    if (alphaRounded === 100) {
+      this.simulation.alpha(this.alphaStart);
+      this.restartSimulation();
     }
-    this.stopSimulation();
+  },
+
+  resetAlphaTarget() {
+    this.simulation.alphaTarget(this.alphaTargetStart);
+    this.restartSimulation();
+  },
+
+  stopAlphaTarget() {
+    this.simulation.alphaTarget(this.alphaTargetStop);
   },
 
   restartSimulation() {
-    this.simulation.alphaTarget(this.alphaTargetStart);
     this.simulation.restart();
-  },
-
-  stopSimulation() {
-    this.simulation.alphaTarget(this.alphaTargetStop);
   },
 
   registerLinkForce() {
@@ -403,7 +409,7 @@ const viz = {
 
   dragStart() {
     if (!d3.event.active) {
-      this.restartSimulation();
+      this.resetAlphaTarget();
     }
     d3.event.subject.shadow = true;
     d3.event.subject.fx = d3.event.subject.x;
@@ -419,7 +425,7 @@ const viz = {
 
   dragEnd() {
     if (!d3.event.active) {
-      this.stopSimulation();
+      this.stopAlphaTarget();
     }
     d3.event.subject.x = d3.event.subject.fx;
     d3.event.subject.y = d3.event.subject.fy;
