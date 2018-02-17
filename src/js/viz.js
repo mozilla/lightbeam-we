@@ -24,7 +24,7 @@ const viz = {
     this.collisionRadius = this.collisionRadius * this.scalingFactor;
     this.scale = (window.devicePixelRatio || 1) * this.scalingFactor;
     this.transform = d3.zoomIdentity;
-    this.defaultIcon = this.convertURIToImageData('images/defaultFavicon.svg');
+    this.defaultIcon = this.loadImage('images/defaultFavicon.svg');
 
     this.updateCanvas(width, height);
     this.draw(nodes, links);
@@ -180,13 +180,15 @@ const viz = {
       this.context.fill();
 
       if (node.favicon) {
-        this.drawFavicon(node, x, y);
+        this.drawFavicon(node, x, y, radius);
+      } else {
+        this.drawFavicon(node, x, y, this.circleRadius);
       }
     }
   },
 
-  getSquare() {
-    const side = Math.sqrt(this.circleRadius * this.circleRadius * 2);
+  getSquare(radius) {
+    const side = Math.sqrt(radius * radius * 2);
     const offset = side * 0.5;
 
     return {
@@ -195,25 +197,16 @@ const viz = {
     };
   },
 
-  convertURIToImageData(URI) {
+  loadImage(URI) {
     return new Promise((resolve, reject) => {
       if (!URI) {
         return reject();
       }
 
-      const canvas = document.createElement('canvas'),
-        context = canvas.getContext('2d'),
-        side = this.getSquare().side,
-        image = new Image();
-
-      canvas.width = side * this.scale;
-      canvas.height = side * this.scale;
-      context.fillStyle = this.canvasColor;
-      context.fillRect(0, 0, canvas.width, canvas.height);
+      const image = new Image();
 
       image.onload = () => {
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        return resolve(context.getImageData(0, 0, canvas.width, canvas.height));
+        return resolve(image);
       };
       image.onerror = () => {
         return resolve(this.defaultIcon);
@@ -222,16 +215,37 @@ const viz = {
     });
   },
 
-  async drawFavicon(node, x, y) {
-    const offset = this.getSquare().offset,
+  scaleFavicon(image, side) {
+    const canvas = document.createElement('canvas'),
+      context = canvas.getContext('2d');
+
+    canvas.width = side * this.scale;
+    canvas.height = side * this.scale;
+    context.fillStyle = this.canvasColor;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    context.drawImage(
+      image,
+      0,
+      0,
+      side * this.scale,
+      side * this.scale);
+
+    return context.getImageData(0, 0, canvas.width, canvas.height);
+  },
+
+  async drawFavicon(node, x, y, radius) {
+    const offset = this.getSquare(radius).offset,
+      side = this.getSquare(radius).side,
       tx = this.transform.applyX(x) - offset,
       ty = this.transform.applyY(y) - offset;
 
     if (!node.image) {
-      node.image = await this.convertURIToImageData(node.favicon);
+      node.image = await this.loadImage(node.favicon);
     }
 
-    this.context.putImageData(node.image,
+    this.context.putImageData(
+      this.scaleFavicon(node.image, side),
       tx * this.scale,
       ty * this.scale
     );
