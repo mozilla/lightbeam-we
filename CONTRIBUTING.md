@@ -12,7 +12,7 @@ Check first if the bug might already exist: [Existing issues](https://github.com
 
 [Open an issue](https://github.com/mozilla/lightbeam-we/issues/new)
 
-1. Visit about:support
+1. Visit `about:support`
 2. Click "Copy raw data to clipboard" and paste into the bug. Alternatively copy the following sections into the issue:
     - Application Basics
     - Nightly Features (if you are in Nightly)
