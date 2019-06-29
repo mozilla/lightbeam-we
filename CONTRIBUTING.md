@@ -14,10 +14,10 @@ Check first if the bug might already exist: [Existing issues](https://github.com
 
 1. Visit about:support
 2. Click "Copy raw data to clipboard" and paste into the bug. Alternatively copy the following sections into the issue:
-  - Application Basics
-  - Nightly Features (if you are in Nightly)
-  - Extensions
-  - Experimental Features
+    - Application Basics
+    - Nightly Features (if you are in Nightly)
+    - Extensions
+    - Experimental Features
 3. Include clear steps to reproduce the issue you have experienced.
 4. Include screenshots if possible.
 
