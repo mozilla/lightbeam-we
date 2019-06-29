@@ -240,9 +240,9 @@ const viz = {
             tx = this.transform.applyX(x) - offset,
             ty = this.transform.applyY(y) - offset;
 
-        //   if (!node.image) {
-        node.image = await this.loadImage(node.favicon);
-        // }
+        if (!node.image) {
+            node.image = await this.loadImage(node.favicon);
+        }
 
         this.context.putImageData(
             this.scaleFavicon(node.image, side),
