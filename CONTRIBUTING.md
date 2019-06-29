@@ -6,14 +6,14 @@ Everyone is welcome to contribute to Lightbeam. Reach out to team members if you
 
 ## Filing bugs
 
-If you find a bug with Lightbeam, please file a issue.
+If you find a bug with Lightbeam, please file an issue.
 
 Check first if the bug might already exist: [Existing issues](https://github.com/mozilla/lightbeam-we/issues)
 
 [Open an issue](https://github.com/mozilla/lightbeam-we/issues/new)
 
 1. Visit `about:support`
-2. Click "Copy raw data to clipboard" and paste into the bug. Alternatively copy the following sections into the issue:
+2. Click "Copy raw data to clipboard" and paste into the bug. Alternatively, copy the following sections into the issue:
     - Application Basics
     - Nightly Features (if you are in Nightly)
     - Extensions
