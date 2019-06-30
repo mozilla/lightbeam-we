@@ -9,11 +9,12 @@
     <link rel="shortcut icon" href="images/lightbeam-48.png" type="image/x-icon">
     <link rel="icon" href="images/lightbeam-48.png" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css" type="text/css">
-    <script src="js/storeChild.js" type="text/javascript"></script>
+    <script src="js/storeChild.js"></script>
     <script src="ext-libs/d3.min.js"></script>
     <script src="ext-libs/dialog-polyfill.js"></script>
-    <script src="js/viz.js" type="text/javascript"></script>
-    <script src="js/lightbeam.js" type="text/javascript"></script>
+    <script src="js/viz.js"></script>
+    <script src="js/lightbeam.js"></script>
+    <script src="js/lightbeamVR.js"></script>
   </head>
   <body>
     <aside class="max-graph">
@@ -25,6 +26,7 @@
       <div class="toggle-menu">
         <!-- @todo add click to toggle view between graph and list, highlighting active view -->
         <button class="active graph">Graph</button>
+        <button class="active graph" id="vr-view-button">VR</button>
         <button class="list unimplemented">List</button>
       </div>
       <h2>Data</h2>

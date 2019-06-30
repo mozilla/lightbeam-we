@@ -304,4 +304,6 @@ const lightbeam = {
 
 window.onload = () => {
   lightbeam.init();
+  // eslint-disable-next-line no-undef
+  lightbeamVR.init();
 };

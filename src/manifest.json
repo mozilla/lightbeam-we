@@ -40,5 +40,7 @@
       "js/capture.js",
       "js/background.js"
     ]
-  }
+  },
+
+  "content_security_policy": "script-src 'self' 'unsafe-eval' https://aframe.io/releases/0.5.0/aframe.min.js; object-src 'self';"
 }
