@@ -262,9 +262,8 @@ const store = {
           // store first and last request times for clearing data every X days
           if (!('firstRequestTime' in website)) {
             website.firstRequestTime = value;
-          } else {
-            website.lastRequestTime = value;
           }
+          website.lastRequestTime = value;
           break;
         case 'isVisible':
           if ('isVisible' in website
